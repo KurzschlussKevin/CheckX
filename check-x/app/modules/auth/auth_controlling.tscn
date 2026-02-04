@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://bwwweux6swy72"]
+
+[ext_resource type="Script" uid="uid://datykxr57fxxd" path="res://app/modules/auth/auth_controlling.gd" id="1_4vfy6"]
+
+[node name="AuthRoot" type="Control" unique_id=1163195579]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4vfy6")
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1240343201]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Card" type="PanelContainer" parent="Center" unique_id=1214111866]
+custom_minimum_size = Vector2(520, 360)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center/Card" unique_id=699084870]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="Center/Card/VBox" unique_id=997143473]
+layout_mode = 2
+text = "Anviro 2.0 – Login"
+
+[node name="User" type="LineEdit" parent="Center/Card/VBox" unique_id=1168785762]
+layout_mode = 2
+placeholder_text = "Benutzername"
+
+[node name="Pass" type="LineEdit" parent="Center/Card/VBox" unique_id=1520674897]
+layout_mode = 2
+placeholder_text = "Passwort"
+secret = true
+
+[node name="Msg" type="Label" parent="Center/Card/VBox" unique_id=682180953]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="LoginBtn" type="Button" parent="Center/Card/VBox" unique_id=377133003]
+layout_mode = 2
+text = "Anmelden"

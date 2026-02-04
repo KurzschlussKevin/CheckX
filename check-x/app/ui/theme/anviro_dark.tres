@@ -1,0 +1,56 @@
+[gd_resource type="Theme" load_steps=2 format=3]
+
+[resource]
+default_font_size = 20
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color(0.10, 0.11, 0.13, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.20, 0.24, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+content_margin_left = 12
+content_margin_top = 10
+content_margin_right = 12
+content_margin_bottom = 10
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color(0.16, 0.18, 0.22, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.28, 0.34, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 14
+content_margin_top = 12
+content_margin_right = 14
+content_margin_bottom = 12
+
+[resource]
+# Default style: Panels
+styles/Panel = SubResource( "2" )
+styles/PanelContainer = SubResource( "2" )
+
+# Buttons
+styles/Button/normal = SubResource( "1" )
+styles/Button/hover = SubResource( "2" )
+styles/Button/pressed = SubResource( "2" )
+
+# LineEdit
+styles/LineEdit/normal = SubResource( "1" )
+styles/LineEdit/focus = SubResource( "2" )
+
+# Colors
+colors/font_color = Color(0.90, 0.92, 0.96, 1)
+colors/font_focus_color = Color(1, 1, 1, 1)
+colors/caret_color = Color(0.95, 0.95, 0.95, 1)
+colors/selection_color = Color(0.30, 0.55, 0.95, 0.35)

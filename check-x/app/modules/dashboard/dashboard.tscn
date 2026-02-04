@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://app/modules/dashboard/Dashboard.gd" id=1]
+[ext_resource type="PackedScene" path="res://app/ui/components/stat_card/StatCard.tscn" id=2]
+
+[node name="Dashboard" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Margin/VBox"]
+text = "Dashboard"
+
+[node name="Grid" type="GridContainer" parent="Margin/VBox"]
+columns = 3
+theme_override_constants/v_separation = 12
+theme_override_constants/h_separation = 12
+
+[node name="CardWork" parent="Margin/VBox/Grid" instance=ExtResource("2")]
+[node name="CardOrders" parent="Margin/VBox/Grid" instance=ExtResource("2")]
+[node name="CardDue" parent="Margin/VBox/Grid" instance=ExtResource("2")]

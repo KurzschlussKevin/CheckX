@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://app/ui/components/stat_card/StatCard.gd" id=1]
+
+[node name="StatCard" type="PanelContainer"]
+script = ExtResource("1")
+custom_minimum_size = Vector2(320, 140)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="VBox"]
+text = "Title"
+[node name="Value" type="Label" parent="VBox"]
+text = "0"
+[node name="Hint" type="Label" parent="VBox"]
+text = ""
