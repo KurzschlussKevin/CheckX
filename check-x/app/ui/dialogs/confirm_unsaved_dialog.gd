@@ -5,16 +5,21 @@ var _on_save: Callable
 var _on_discard: Callable
 var _on_cancel: Callable
 
+# Wir nutzen hier @onready, um sicherzustellen, dass die Nodes geladen sind
+@onready var save_btn: Button = $HBox/SaveBtn
+@onready var discard_btn: Button = $HBox/DiscardBtn
+@onready var cancel_btn: Button = $HBox/CancelBtn
+
 func _ready() -> void:
-	%SaveBtn.pressed.connect(func():
+	save_btn.pressed.connect(func():
 		hide()
 		if _on_save: _on_save.call()
 	)
-	%DiscardBtn.pressed.connect(func():
+	discard_btn.pressed.connect(func():
 		hide()
 		if _on_discard: _on_discard.call()
 	)
-	%CancelBtn.pressed.connect(func():
+	cancel_btn.pressed.connect(func():
 		hide()
 		if _on_cancel: _on_cancel.call()
 	)

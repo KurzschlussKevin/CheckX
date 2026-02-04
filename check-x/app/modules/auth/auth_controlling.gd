@@ -16,8 +16,8 @@ func _on_login() -> void:
 	Authservice.login(user.text, passw.text)
 
 func _on_success(_u: Dictionary) -> void:
-	# Wechsel zur MainTemplate
-	get_tree().change_scene_to_file("res://app/modules/main/MainTemplate.tscn")
+	# Achte auf exakte Kleinschreibung des Dateinamens!
+	get_tree().change_scene_to_file("res://app/modules/main/maintemplate.tscn")
 
 func _on_failed(reason: String) -> void:
 	msg.text = reason

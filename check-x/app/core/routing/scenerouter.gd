@@ -16,6 +16,7 @@ func goto(route_key: String) -> void:
 	if route_key == current_route:
 		return
 
+	# Prüfung durch den UnsavedGuard vor dem Wechsel
 	if not Unsavedguard.request_route_change(route_key):
 		return
 
@@ -28,14 +29,16 @@ func _force_goto(route_key: String) -> void:
 
 	current_route = route_key
 
-	# HIER: AppRoutes statt Routes
-	var path: String = AppRoutes.MAP.get(route_key, "")
+	# Nutzt das Autoload 'Approutes' (wie in project.godot definiert)
+	var path: String = Approutes.MAP.get(route_key, "")
 	if path == "":
 		push_error("Unknown route: " + route_key)
 		return
 
 	var ps := load(path) as PackedScene
-	current_module = ps.instantiate()
-	_container.add_child(current_module)
-
-	emit_signal("route_changed", route_key)
+	if ps:
+		current_module = ps.instantiate()
+		_container.add_child(current_module)
+		emit_signal("route_changed", route_key)
+	else:
+		push_error("Could not load scene: " + path)

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://co4a4sdypflv3"]
 
 [ext_resource type="PackedScene" path="res://app/ui/components/sidebar/Sidebar.tscn" id="1"]
-[ext_resource type="Script" path="res://app/modules/main/MainTemplate.gd" id="2"]
+[ext_resource type="Script" path="res://app/modules/main/main_template.gd" id="2"]
 [ext_resource type="Theme" path="res://app/ui/theme/anviro_dark.tres" id="3"]
 
 [node name="MainRoot" type="Control"]
