@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://do6dxgewst8ke"]
+
+[ext_resource type="Script" uid="uid://dalp85ylds52l" path="res://app/modules/auth/auth.gd" id="1_7vtpd"]
+
+[node name="Auth" type="Control" unique_id=1416776250]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7vtpd")
+
+[node name="Background" type="ColorRect" parent="." unique_id=842633087]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.14, 0.18, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=400682071]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoginPanel" type="PanelContainer" parent="CenterContainer" unique_id=1681093628]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/LoginPanel" unique_id=2127505033]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer" unique_id=776073899]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1621131442]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Login"
+horizontal_alignment = 1
+
+[node name="EmailBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=990055396]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=509390205]
+layout_mode = 2
+text = "Email"
+
+[node name="EmailInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=1252077410]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "user@example.com"
+
+[node name="PasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=463144796]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=1161131106]
+layout_mode = 2
+text = "Passwort"
+
+[node name="PasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=548849638]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "••••••••"
+secret = true
+
+[node name="ConfirmPasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1098680080]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=1261182956]
+layout_mode = 2
+text = "Passwort bestätigen"
+
+[node name="ConfirmPasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=765332562]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "••••••••"
+secret = true
+
+[node name="StatusLabel" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=686123579]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SubmitButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=907730560]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+text = "Anmelden"
+
+[node name="SwitchModeButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1782295460]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Noch kein Konto? Registrieren"
+flat = true
+
+[connection signal="pressed" from="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/SubmitButton" to="." method="_on_submit_pressed"]
+[connection signal="pressed" from="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/SwitchModeButton" to="." method="_on_switch_mode_pressed"]
