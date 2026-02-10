@@ -1,8 +1,0 @@
-Godot Engine v4.6.stable.steam.89cea1439 - https://godotengine.org
-D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
-
-SCRIPT ERROR: Invalid operands 'Vector2i' and 'Vector2' in operator '-'.
-   at: _adjust_window_to_content (res://app/modules/auth/auth.gd:42)
-   GDScript backtrace (most recent call first):
-       [0] _adjust_window_to_content (res://app/modules/auth/auth.gd:42)
-       [1] _update_ui_mode (res://app/modules/auth/auth.gd:61)
