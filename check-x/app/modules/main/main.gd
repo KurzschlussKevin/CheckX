@@ -1,56 +1,74 @@
 extends Control
 
-# Wir nutzen % für Unique Names, da dies am sichersten gegen Verschachtelungs-Fehler ist
-@onready var card_grid = get_node_or_null("%CardGrid")
-@onready var search_field = get_node_or_null("%SearchField")
+# Direkte Pfade statt Unique Names für maximale Stabilität
+@onready var main_layout = $MainLayout
+@onready var module_container = $MainLayout/ContentLayout/ModuleContainer
+@onready var page_title = $MainLayout/ContentLayout/TopBar/Margin/HBox/PageTitle
+# Pfad zur Sidebar-VBox, wo die Buttons landen sollen
+@onready var nav_container = $MainLayout/Sidebar/Margin/VBox/NavButtons
 
-var card_scene = preload("res://app/modules/employees/employee_card.tscn")
+# Vorlage für die Buttons laden
+var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
 
-var employee_data = [
-	{"name": "Max Mustermann", "role": "Administrator", "status": "Anwesend"},
-	{"name": "Erika Musterfrau", "role": "Projektleiterin", "status": "Abwesend"},
-	{"name": "Kevin Kurzschluss", "role": "IT-Support", "status": "Im Meeting"},
-	{"name": "Sarah Sonnenschein", "role": "Marketing", "status": "Anwesend"}
-]
+# Liste der Module und ihrer Pfade
+var modules = {
+	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
+	"Zeiterfassung": "res://app/modules/time/time_tracking.tscn",
+	"Mitarbeiter": "res://app/modules/employees/employees.tscn",
+	"Einstellungen": "res://app/modules/settings/settings.tscn"
+}
 
 func _ready() -> void:
-	# Fehler abfangen, falls Nodes im Editor nicht als "Unique Name" markiert wurden
-	if card_grid == null or search_field == null:
-		printerr("KRITISCH: Nodes nicht gefunden! Rechtsklick auf 'CardGrid' und 'SearchField' -> 'Access as Unique Name' aktivieren!")
+	# 1. FENSTER MAXIMIEREN
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
+	
+	# Sicherheits-Check: Existiert der Container für die Buttons?
+	if nav_container == null:
+		printerr("Fehler: NavButtons Container wurde nicht gefunden! Prüfe den Pfad in main.gd.")
 		return
 	
-	_render_cards(employee_data)
-	search_field.text_changed.connect(_on_search_text_changed)
-
-func _render_cards(data_to_show: Array) -> void:
-	if not card_grid: return
+	# 2. Sidebar mit Buttons füllen
+	_setup_sidebar()
 	
-	for child in card_grid.get_children():
+	# 3. Das Dashboard als Startseite laden
+	load_module(modules["Dashboard"], "Dashboard")
+	
+	# 4. Sanftes Einblenden der UI
+	main_layout.modulate.a = 0
+	var tween = create_tween()
+	tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
+
+func _setup_sidebar() -> void:
+	# Alle alten Kinder im Container löschen
+	for child in nav_container.get_children():
 		child.queue_free()
 	
-	for emp in data_to_show:
-		var card = card_scene.instantiate()
-		card_grid.add_child(card)
+	# Für jeden Eintrag in 'modules' einen Button erstellen
+	for module_name in modules:
+		var btn = nav_button_scene.instantiate()
+		btn.text = "  " + module_name
 		
-		card.get_node("%Name").text = emp["name"]
-		card.get_node("%Role").text = emp["role"]
+		# Verbindet den Klick auf den Button mit der Lade-Funktion
+		btn.pressed.connect(func(): load_module(modules[module_name], module_name))
 		
-		var badge = card.get_node("%StatusBadge")
-		badge.text = emp["status"].to_upper()
-		
-		match emp["status"]:
-			"Anwesend": badge.add_theme_color_override("font_color", Color.PALE_GREEN)
-			"Abwesend": badge.add_theme_color_override("font_color", Color.INDIAN_RED)
-			"Im Meeting": badge.add_theme_color_override("font_color", Color.LIGHT_SKY_BLUE)
-		
-		card.modulate.a = 0
-		var tween = create_tween()
-		tween.tween_property(card, "modulate:a", 1.0, 0.3).set_delay(card_grid.get_child_count() * 0.05)
+		nav_container.add_child(btn)
 
-func _on_search_text_changed(new_text: String) -> void:
-	var filtered_data = employee_data.filter(func(emp): 
-		return new_text.is_empty() or \
-		new_text.to_lower() in emp["name"].to_lower() or \
-		new_text.to_lower() in emp["role"].to_lower()
-	)
-	_render_cards(filtered_data)
+func load_module(path: String, title: String = "") -> void:
+	if title != "" and page_title:
+		page_title.text = title.to_upper()
+	
+	if not module_container: return
+	
+	for child in module_container.get_children():
+		child.queue_free()
+	
+	if ResourceLoader.exists(path):
+		var scene = load(path)
+		var instance = scene.instantiate()
+		module_container.add_child(instance)
+		
+		instance.modulate.a = 0
+		var t = create_tween()
+		t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+	else:
+		print("Hinweis: Szene existiert noch nicht: ", path)

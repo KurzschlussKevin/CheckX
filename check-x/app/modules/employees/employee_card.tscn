@@ -1,0 +1,69 @@
+[gd_scene format=3 uid="uid://dpx1m4q8j5p2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_high_end"]
+bg_color = Color(0.1, 0.1, 0.12, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.05)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 15
+
+[node name="EmployeeCard" type="PanelContainer" unique_id=102380046]
+modulate = Color(1, 1, 1, 0.03)
+custom_minimum_size = Vector2(280, 160)
+offset_right = 280.0
+offset_bottom = 160.0
+pivot_offset = Vector2(140, 80)
+theme_override_styles/panel = SubResource("StyleBoxFlat_high_end")
+
+[node name="BorderGlow" type="ReferenceRect" parent="." unique_id=1973216749]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+border_color = Color(0, 0.8, 1, 0)
+border_width = 2.0
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=990787324]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 25
+
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=277557174]
+layout_mode = 2
+alignment = 1
+
+[node name="Name" type="Label" parent="Margin/VBox" unique_id=271639061]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Name"
+
+[node name="Role" type="Label" parent="Margin/VBox" unique_id=1433900914]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
+text = "Rolle"
+
+[node name="ExtraDetails" type="VBoxContainer" parent="Margin/VBox" unique_id=966247187]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Margin/VBox/ExtraDetails" unique_id=382958660]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Mail" type="Label" parent="Margin/VBox/ExtraDetails" unique_id=1646970210]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "E-Mail"

@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7y4n2v6r3x1p"]
+
+[ext_resource type="Script" path="res://app/modules/employees/employees.gd" id="1_emp_script"]
+
+[node name="Employees" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_emp_script")
+
+[node name="OuterMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+# Wichtig: Hier wird der Platz für das Hover-Scaling reserviert
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBox" type="VBoxContainer" parent="OuterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="SearchField" type="LineEdit" parent="OuterMargin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+placeholder_text = "Mitarbeiter suchen..."
+
+[node name="Scroll" type="ScrollContainer" parent="OuterMargin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+# Verhindert das Abschneiden der Karten-Schatten
+clip_contents = false
+
+[node name="CardGrid" type="HFlowContainer" parent="OuterMargin/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 40 # Mehr Platz zwischen den Karten
+theme_override_constants/v_separation = 40
