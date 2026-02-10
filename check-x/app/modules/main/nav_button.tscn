@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://2so4uafyqnyb"]
+
+[node name="NavButton" type="Button" unique_id=194408513]
+custom_minimum_size = Vector2(0, 45)
+offset_right = 240.0
+offset_bottom = 45.0
+focus_mode = 0
+theme_override_constants/h_separation = 15
+text = " Menüpunkt"
+alignment = 0
