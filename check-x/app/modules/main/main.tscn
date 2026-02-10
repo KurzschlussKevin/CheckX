@@ -1,0 +1,151 @@
+[gd_scene load_steps=6 format=3 uid="uid://cm3j8p7w4k2u"]
+
+[ext_resource type="Script" path="res://app/modules/main/main.gd" id="1_main_script"]
+
+[sub_resource type="Gradient" id="Gradient_main"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.07, 0.07, 0.08, 1, 0.15, 0.2, 0.25, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
+gradient = SubResource("Gradient_main")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidebar"]
+bg_color = Color(0.0941176, 0.0941176, 0.117647, 0.6)
+border_width_right = 1
+border_color = Color(0.2, 0.23, 0.28, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.12, 0.12, 0.15, 0.7)
+border_width_bottom = 2
+border_color = Color(0.2, 0.23, 0.28, 1)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_bg")
+expand_mode = 1
+
+[node name="MainLayout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+# --- SIDEBAR ---
+[node name="Sidebar" type="PanelContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sidebar")
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/Sidebar"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MainLayout/Sidebar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Logo" type="Label" parent="MainLayout/Sidebar/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "CHECKX"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MainLayout/Sidebar/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="NavButtons" type="VBoxContainer" parent="MainLayout/Sidebar/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+# Hier kommen später Buttons wie "Dashboard", "Inventar" etc. rein
+
+# --- RECHTER BEREICH (TopBar + Content) ---
+[node name="ContentLayout" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="TopBar" type="PanelContainer" parent="MainLayout/ContentLayout"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/ContentLayout/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_right = 30
+
+[node name="HBox" type="HBoxContainer" parent="MainLayout/ContentLayout/TopBar/Margin"]
+layout_mode = 2
+
+[node name="PageTitle" type="Label" parent="MainLayout/ContentLayout/TopBar/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "DASHBOARD"
+
+[node name="Spacer" type="Control" parent="MainLayout/ContentLayout/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UserName" type="Label" parent="MainLayout/ContentLayout/TopBar/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Administrator"
+
+[node name="ModuleContainer" type="Control" parent="MainLayout/ContentLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+# --- TOAST / NOTIFICATION LAYER ---
+[node name="NotificationPos" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -250.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="ToastContainer" type="VBoxContainer" parent="NotificationPos"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2

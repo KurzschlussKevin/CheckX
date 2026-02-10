@@ -1,0 +1,96 @@
+[gd_scene load_steps=6 format=3 uid="uid://b8y4n2v6r3x1p"]
+
+[ext_resource type="Script" path="res://app/modules/loadingscreen/loadingscreen.gd" id="1_script"]
+
+[sub_resource type="Gradient" id="Gradient_stream"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.2, 0.6, 1, 0, 0.2, 0.6, 1, 1, 0.2, 0.6, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_stream"]
+gradient = SubResource("Gradient_stream")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_data"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(960, 1, 1)
+direction = Vector3(0, 1, 0)
+spread = 0.0
+initial_velocity_min = 100.0
+initial_velocity_max = 250.0
+gravity = Vector3(0, 0, 0)
+scale_min = 2.0
+scale_max = 5.0
+color_ramp = SubResource("GradientTexture1D_stream")
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="DataParticles" type="GPUParticles2D" parent="."]
+position = Vector2(960, 0)
+amount = 80
+process_material = SubResource("ParticleProcessMaterial_data")
+lifetime = 4.0
+preprocess = 2.0
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_constants/separation = 35
+
+[node name="TitleBox" type="VBoxContainer" parent="Center/Content"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="LoadingLabel" type="Label" parent="Center/Content/TitleBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "SYSTEM INITIALISIERUNG"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Center/Content/TitleBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.55, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "VERBINDUNG ZU KERNSYSTEMEN..."
+horizontal_alignment = 1
+
+[node name="BarContainer" type="VBoxContainer" parent="Center/Content"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="Center/Content/BarContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+show_percentage = false
+
+[node name="PercentLabel" type="Label" parent="Center/Content/BarContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0%"
+horizontal_alignment = 2

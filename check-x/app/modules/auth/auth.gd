@@ -33,61 +33,58 @@ func _ready() -> void:
 	var tween = create_tween()
 	tween.tween_property(login_panel, "modulate:a", 1.0, 0.4)
 	
-	# FENSTER-ANPASSUNG: Sofort beim Start ausführen
+	# Fenster beim Start sofort physisch anpassen
 	_force_window_resize(true)
 
 ## KERN-LOGIK: Passt das physikalische Betriebssystem-Fenster an
 func _force_window_resize(instant: bool = false) -> void:
-	# Wir warten 2 Frames, damit Godot die neue Größe der UI berechnet hat
+	# Wir warten Frames, damit Godot die neue Mindestgröße der UI berechnet hat
 	await get_tree().process_frame
 	await get_tree().process_frame
 	
-	# Messen, wie viel Platz das Panel plus Puffer benötigt
 	var node_size = login_panel.get_combined_minimum_size()
 	var padding = Vector2(60, 60) 
 	var target_size = node_size + padding
 	
 	var win = get_window()
-	win.mode = Window.MODE_WINDOWED # Sicherstellen, dass kein Fullscreen aktiv ist
+	win.mode = Window.MODE_WINDOWED
 	
 	if instant:
-		# Harte Anpassung ohne Animation
+		# Sofortige Anpassung ohne Animation
 		win.size = Vector2i(target_size)
 		win.content_scale_size = Vector2i(target_size)
 		win.move_to_center()
 	else:
-		# Smoothe Fenster-Anpassung per Tween
+		# Smoothe Fenster-Anpassung per Tween (Morphing)
 		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		# Fenstergröße physikalisch ändern
 		tween.tween_property(win, "size", Vector2i(target_size), 0.3)
-		# Interne Skalierung synchronisieren (verhindert schwarze Ränder)
 		tween.tween_property(win, "content_scale_size", Vector2i(target_size), 0.3)
 		
-		# Das Fenster auf dem Monitor zentriert halten, während es die Größe ändert
+		# Das Fenster auf dem Monitor zentriert halten während der Skalierung
 		var screen_rect = DisplayServer.screen_get_usable_rect(win.current_screen)
 		var center_pos = Vector2(screen_rect.position) + (Vector2(screen_rect.size) / 2.0) - (target_size / 2.0)
 		tween.tween_property(win, "position", Vector2i(center_pos), 0.3)
 
-	# Container im neuen kleinen Fenster wieder vollflächig ausrichten
+	# Container im neuen Fenster-Bereich ausrichten
 	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 
-## MODUS-WECHSEL: Mit weichem Cross-Fade und Fenster-Animation
+## MODUS-WECHSEL: Mit weichem Cross-Fade und Fenster-Anpassung
 func _on_switch_mode_pressed() -> void:
 	if is_loading: return
 	is_register_mode = !is_register_mode
 	
-	# 1. Inhalt kurz ausfaden (sieht sauberer aus)
+	# 1. Inhalt kurz ausfaden
 	var fade_out = create_tween()
 	fade_out.tween_property(login_panel, "modulate:a", 0.0, 0.1)
 	await fade_out.finished
 	
-	# 2. UI-Texte und Felder im Hintergrund umschalten
+	# 2. UI-Elemente im Hintergrund umschalten
 	_apply_ui_state()
 	
-	# 3. Das Fenster physikalisch an die neue Höhe anpassen
+	# 3. Fenster-Resize an die neuen Felder (z.B. Namen) anpassen
 	_force_window_resize(false)
 	
-	# 4. Inhalt wieder sanft einfaden
+	# 4. Inhalt sanft wieder einfaden
 	var fade_in = create_tween()
 	fade_in.tween_property(login_panel, "modulate:a", 1.0, 0.2)
 
@@ -104,23 +101,23 @@ func _apply_ui_state() -> void:
 func _on_submit_pressed() -> void:
 	if is_loading: return
 	
-	# Validierung für Registrierung (Namen prüfen)
+	# Validierung für Namen bei Registrierung
 	if is_register_mode:
 		if first_name_input.text.is_empty() or last_name_input.text.is_empty():
 			_perform_error_shake("Vor- und Nachname erforderlich!")
 			return
 		if password_input.text != confirm_input.text:
-			_perform_error_shake("Passwörter stimmen nicht überein!")
+			_perform_error_shake("Passwörter ungleich!")
 			return
 			
-	# Allgemeine Validierung (Email/Passwort)
+	# Allgemeine Validierung
 	if email_input.text.is_empty() or password_input.text.is_empty():
 		_perform_error_shake("Bitte alle Felder ausfüllen!")
 		return
 
 	_start_auth_process()
 
-## Optisches Feedback bei Fehlern (Wackeln des Panels)
+## Feedback bei Fehlern (Wackeln)
 func _perform_error_shake(msg: String) -> void:
 	_show_status(msg, true)
 	var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_IN_OUT)
@@ -129,18 +126,20 @@ func _perform_error_shake(msg: String) -> void:
 	tween.tween_property(login_panel, "position:x", pos.x - 8, 0.05)
 	tween.tween_property(login_panel, "position:x", pos.x, 0.05)
 
+## Platzhalter für den eigentlichen Server-Login
 func _start_auth_process() -> void:
 	is_loading = true
 	submit_button.disabled = true
-	submit_button.text = "Lade..."
-	_show_status("Verbindung wird hergestellt...", false)
+	_show_status("Authentifizierung...", false)
 	
-	# Simulierter Ladevorgang
-	await get_tree().create_timer(1.2).timeout
+	# Simulierter Ladevorgang (Hier kommt später die Server-Anfrage hin)
+	await get_tree().create_timer(1.5).timeout
 	
 	_show_status("Erfolgreich!", false)
-	submit_button.disabled = false
-	submit_button.text = "Anmelden"
+	
+	# WECHSEL ZUM LOADINGSCREEN
+	# Dieser übernimmt das Fenster-Morphing zurück auf 1920x1080
+	get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
 
 func _show_status(msg: String, is_error: bool) -> void:
 	status_label.text = msg
