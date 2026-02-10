@@ -2,7 +2,15 @@
 
 [ext_resource type="Script" uid="uid://dalp85ylds52l" path="res://app/modules/auth/auth.gd" id="1_7vtpd"]
 
-[node name="Auth" type="Control" unique_id=1416776250]
+[sub_resource type="Gradient" id="Gradient_bg"]
+colors = PackedColorArray(0.0705882, 0.0705882, 0.0784314, 1, 0.172549, 0.243137, 0.313726, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
+gradient = SubResource("Gradient_bg")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[node name="Auth" type="Control" unique_id=1314314534]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,16 +19,17 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_7vtpd")
 
-[node name="Background" type="ColorRect" parent="." unique_id=842633087]
+[node name="Background" type="TextureRect" parent="." unique_id=120681507]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.14, 0.18, 1)
+texture = SubResource("GradientTexture2D_bg")
+expand_mode = 1
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=400682071]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=380704593]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,87 +37,116 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LoginPanel" type="PanelContainer" parent="CenterContainer" unique_id=1681093628]
+[node name="LoginPanel" type="PanelContainer" parent="CenterContainer" unique_id=635595035]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/LoginPanel" unique_id=2127505033]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/LoginPanel" unique_id=2022179036]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer" unique_id=776073899]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer" unique_id=706815550]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1621131442]
+[node name="Title" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1945544437]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 32
 text = "Login"
 horizontal_alignment = 1
 
-[node name="EmailBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=990055396]
+[node name="RegisterFields" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=437410090]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FirstNameBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields" unique_id=1586823008]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=509390205]
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields/FirstNameBox" unique_id=1055906048]
+layout_mode = 2
+text = "Vorname"
+
+[node name="FirstNameInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields/FirstNameBox" unique_id=1565801340]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Vorname eingeben..."
+
+[node name="LastNameBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields" unique_id=166358260]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields/LastNameBox" unique_id=1426015296]
+layout_mode = 2
+text = "Nachname"
+
+[node name="LastNameInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/RegisterFields/LastNameBox" unique_id=1901688949]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Nachname eingeben..."
+
+[node name="EmailBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1013997461]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=1101771891]
 layout_mode = 2
 text = "Email"
 
-[node name="EmailInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=1252077410]
+[node name="EmailInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/EmailBox" unique_id=1612383950]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "user@example.com"
 
-[node name="PasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=463144796]
+[node name="PasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=2123485094]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=1161131106]
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=1040144629]
 layout_mode = 2
 text = "Passwort"
 
-[node name="PasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=548849638]
+[node name="PasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/PasswordBox" unique_id=1587004821]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "••••••••"
 secret = true
 
-[node name="ConfirmPasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1098680080]
+[node name="ConfirmPasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1615618612]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=1261182956]
+[node name="Label" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=1878181709]
 layout_mode = 2
 text = "Passwort bestätigen"
 
-[node name="ConfirmPasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=765332562]
+[node name="ConfirmPasswordInput" type="LineEdit" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/ConfirmPasswordBox" unique_id=342106705]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "••••••••"
 secret = true
 
-[node name="StatusLabel" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=686123579]
+[node name="StatusLabel" type="Label" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1926885026]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="SubmitButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=907730560]
+[node name="SubmitButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=313875707]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 45)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 text = "Anmelden"
 
-[node name="SwitchModeButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=1782295460]
+[node name="SwitchModeButton" type="Button" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer" unique_id=2064674532]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 text = "Noch kein Konto? Registrieren"
 flat = true
-
-[connection signal="pressed" from="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/SubmitButton" to="." method="_on_submit_pressed"]
-[connection signal="pressed" from="CenterContainer/LoginPanel/MarginContainer/VBoxContainer/SwitchModeButton" to="." method="_on_switch_mode_pressed"]
