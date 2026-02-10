@@ -1,5 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7y4n2v6r3x1p"]
+[gd_scene load_steps=3 format=3 uid="uid://b7y4n2v6r3x1p"]
+
 [ext_resource type="Script" path="res://app/modules/employees/employees.gd" id="1_emp_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_green"]
+content_margin_left = 15.0
+content_margin_top = 10.0
+content_margin_right = 15.0
+content_margin_bottom = 10.0
+bg_color = Color(0.2, 0.6, 0.3, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="Employees" type="Control"]
 layout_mode = 3
@@ -41,6 +53,15 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="AddButton" type="Button" parent="OuterMargin/VBox/HeaderBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 45)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_green")
+text = "+ Neuer Mitarbeiter"
+
 [node name="Scroll" type="ScrollContainer" parent="OuterMargin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -66,7 +87,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.75)
 
 [node name="EditPanel" type="PanelContainer" parent="QuickEditOverlay"]
-custom_minimum_size = Vector2(450, 450)
+custom_minimum_size = Vector2(450, 480)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -81,6 +102,7 @@ layout_mode = 2
 theme_override_constants/separation = 15
 
 [node name="EditTitle" type="Label" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "MITARBEITER BEARBEITEN"
@@ -94,7 +116,7 @@ placeholder_text = "Vollständiger Name"
 [node name="EditMail" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "E-Mail"
+placeholder_text = "E-Mail Adresse"
 
 [node name="EditPhone" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
 unique_name_in_owner = true
@@ -113,7 +135,7 @@ layout_mode = 2
 [node name="EditDept" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "Abteilung"
+placeholder_text = "Abteilung (Kürzel)"
 
 [node name="EditSkills" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
 unique_name_in_owner = true

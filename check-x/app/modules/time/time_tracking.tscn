@@ -1,0 +1,225 @@
+[gd_scene format=3 uid="uid://dqbhsvjsgpnhi"]
+
+[ext_resource type="Script" uid="uid://cv78uobw1lcrg" path="res://app/modules/time/time_tracking.gd" id="1_time_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.12, 0.14, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+
+[node name="TimeTracking" type="Control" unique_id=323855066]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_time_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=580369533]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBox" type="HBoxContainer" parent="Margin" unique_id=1577661500]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="LeftPanel" type="VBoxContainer" parent="Margin/HBox" unique_id=368851698]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ActionCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=700970320]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Center" type="CenterContainer" parent="Margin/HBox/LeftPanel/ActionCard" unique_id=1170216778]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/Center" unique_id=2057959533]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="TimerLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=49312827]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "00:00:00"
+horizontal_alignment = 1
+
+[node name="ProjectInput" type="LineEdit" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1062197216]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 45)
+layout_mode = 2
+placeholder_text = "Projekt / Tätigkeit..."
+alignment = 1
+
+[node name="ToggleTimerBtn" type="Button" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1201130971]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "STARTEN"
+
+[node name="StatusLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1029815069]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+text = "Bereit"
+horizontal_alignment = 1
+
+[node name="SummaryCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=1253878768]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="M" type="MarginContainer" parent="Margin/HBox/LeftPanel/SummaryCard" unique_id=1115943425]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Margin/HBox/LeftPanel/SummaryCard/M" unique_id=94833527]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=187183128]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "MONATSSUMME"
+
+[node name="TotalTimeLabel" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=507902304]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "0 Std. 0 Min."
+
+[node name="RightPanel" type="PanelContainer" parent="Margin/HBox" unique_id=1712991850]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="M" type="MarginContainer" parent="Margin/HBox/RightPanel" unique_id=1156699643]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Margin/HBox/RightPanel/M" unique_id=28615028]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="H" type="HBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=1862681412]
+layout_mode = 2
+alignment = 1
+
+[node name="MonthLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/H" unique_id=851770130]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "KALENDER"
+
+[node name="CalendarGrid" type="GridContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=865817066]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+columns = 7
+
+[node name="DetailBox" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=1733978606]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HSeparator" type="HSeparator" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=1295724415]
+layout_mode = 2
+
+[node name="SelectedDateLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=306172872]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Datum"
+
+[node name="EntryList" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=334718326]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddManualBtn" type="Button" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=2140404581]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "+ Zeit manuell nachtragen"
+
+[node name="EntryPopup#Panel" type="PanelContainer" parent="." unique_id=197725561]
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EntryPopup_Panel#V" type="VBoxContainer" parent="." unique_id=890851097]
+layout_mode = 0
+theme_override_constants/separation = 15
+
+[node name="EntryPopup_Panel_V#PopupTitle" type="Label" parent="." unique_id=1641684154]
+unique_name_in_owner = true
+layout_mode = 0
+text = "ZEIT NACHTRAGEN"
+horizontal_alignment = 1
+
+[node name="EntryPopup_Panel_V#PopupInput1" type="LineEdit" parent="." unique_id=1973209253]
+unique_name_in_owner = true
+layout_mode = 0
+placeholder_text = "Projekt / Tätigkeit"
+
+[node name="EntryPopup_Panel_V#PopupInput2" type="SpinBox" parent="." unique_id=766655276]
+unique_name_in_owner = true
+layout_mode = 0
+max_value = 1440.0
+prefix = "Minuten:"
+
+[node name="EntryPopup_Panel_V#PopupInfo" type="Label" parent="." unique_id=1227231923]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+text = "Achtung: Tag ist gesperrt!"
+
+[node name="EntryPopup_Panel_V#H" type="HBoxContainer" parent="." unique_id=1013984876]
+layout_mode = 0
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="EntryPopup_Panel_V_H#PopupSaveBtn" type="Button" parent="." unique_id=1152288938]
+unique_name_in_owner = true
+layout_mode = 0
+text = "Speichern"
+
+[node name="EntryPopup_Panel_V_H#PopupCancelBtn" type="Button" parent="." unique_id=905770023]
+unique_name_in_owner = true
+layout_mode = 0
+text = "Abbrechen"

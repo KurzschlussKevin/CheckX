@@ -6,21 +6,24 @@ extends Control
 var stat_card_scene = preload("res://app/modules/dashboard/stat_card.tscn")
 
 func _ready() -> void:
+	# --- ECHTE DATEN ---
+	var emp_count = str(Store.get_employee_count())
+	
 	# Hier fügen wir die gewünschten Business-Kacheln hinzu
 	_add_stat("KUNDEN GESAMT", "842", "+ 5% diese Woche", Color.SKY_BLUE)
 	_add_stat("UMSATZ (MONAT)", "42.150 €", "+ 18.4%", Color.PALE_GREEN)
-	_add_stat("MITARBEITER", "24", "Alle aktiv", Color.WHITE)
+	
+	# DYNAMISCH: Mitarbeiterzahl kommt aus dem Store
+	_add_stat("MITARBEITER", emp_count, "Alle aktiv", Color.WHITE)
+	
 	_add_stat("OFFENE TASKS", "12", "3 mit hoher Prio", Color.INDIAN_RED)
 	_add_stat("SYSTEMSTATUS", "Online", "Latenz: 24ms", Color.LIGHT_SEA_GREEN)
 	_add_stat("LETZTES BACKUP", "Vor 2 Std.", "Erfolgreich", Color.LIGHT_SLATE_GRAY)
-		# --- NEU: Dokumenten-Status (Admin) ---
 	_add_stat("OFFENE SIGNATUREN", "7", "Warten auf Partner", Color.LIGHT_STEEL_BLUE)
-	# --- NEU: Krankenstand / Abwesenheit ---
 	_add_stat("KRANKENSTAND", "3.2 %", "- 0.5% Trend", Color.SALMON)
-# --- NEU: Arbeitszeit-Kachel ---
 	_add_stat("AKTUELLE ARBEITSZEIT", "06:42 Std.", "Beginn: 08:00 Uhr", Color.TURQUOISE)
-	# --- NEU: Eigene Benutzer-Kachel ---
 	_add_stat("AKTUELLER BENUTZER", "Administrator", "Letzter Login: Heute, 08:30", Color.MEDIUM_ORCHID)
+
 ## Hilfsfunktion um eine Kachel mit Daten zu füllen
 func _add_stat(title: String, value: String, trend: String, color: Color):
 	var card = stat_card_scene.instantiate()
