@@ -1,5 +1,4 @@
 [gd_scene load_steps=2 format=3 uid="uid://b7y4n2v6r3x1p"]
-
 [ext_resource type="Script" path="res://app/modules/employees/employees.gd" id="1_emp_script"]
 
 [node name="Employees" type="Control"]
@@ -18,7 +17,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-# Wichtig: Hier wird der Platz für das Hover-Scaling reserviert
 theme_override_constants/margin_left = 60
 theme_override_constants/margin_top = 40
 theme_override_constants/margin_right = 40
@@ -26,18 +24,26 @@ theme_override_constants/margin_bottom = 40
 
 [node name="VBox" type="VBoxContainer" parent="OuterMargin"]
 layout_mode = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 20
 
-[node name="SearchField" type="LineEdit" parent="OuterMargin/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 45)
+[node name="HeaderBox" type="HBoxContainer" parent="OuterMargin/VBox"]
 layout_mode = 2
-placeholder_text = "Mitarbeiter suchen..."
+theme_override_constants/separation = 20
+
+[node name="SearchField" type="LineEdit" parent="OuterMargin/VBox/HeaderBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+placeholder_text = "Name suchen..."
+
+[node name="FilterBar" type="HBoxContainer" parent="OuterMargin/VBox/HeaderBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="Scroll" type="ScrollContainer" parent="OuterMargin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-# Verhindert das Abschneiden der Karten-Schatten
 clip_contents = false
 
 [node name="CardGrid" type="HFlowContainer" parent="OuterMargin/VBox/Scroll"]
@@ -45,5 +51,88 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 40 # Mehr Platz zwischen den Karten
-theme_override_constants/v_separation = 40
+theme_override_constants/h_separation = 45
+theme_override_constants/v_separation = 45
+
+[node name="QuickEditOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="EditPanel" type="PanelContainer" parent="QuickEditOverlay"]
+custom_minimum_size = Vector2(450, 450)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="V" type="VBoxContainer" parent="QuickEditOverlay/EditPanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="EditTitle" type="Label" parent="QuickEditOverlay/EditPanel/V"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "MITARBEITER BEARBEITEN"
+horizontal_alignment = 1
+
+[node name="EditName" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Vollständiger Name"
+
+[node name="EditMail" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "E-Mail"
+
+[node name="EditPhone" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Telefonnummer"
+
+[node name="EditPersonalID" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Personalnummer"
+
+[node name="EditRole" type="OptionButton" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EditDept" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Abteilung"
+
+[node name="EditSkills" type="LineEdit" parent="QuickEditOverlay/EditPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Skills (Komma getrennt)"
+
+[node name="Buttons" type="HBoxContainer" parent="QuickEditOverlay/EditPanel/V"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="SaveEdit" type="Button" parent="QuickEditOverlay/EditPanel/V/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Speichern"
+
+[node name="CancelEdit" type="Button" parent="QuickEditOverlay/EditPanel/V/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Abbrechen"

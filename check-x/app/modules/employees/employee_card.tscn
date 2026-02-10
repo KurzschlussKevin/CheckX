@@ -1,69 +1,124 @@
 [gd_scene format=3 uid="uid://dpx1m4q8j5p2"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_high_end"]
-bg_color = Color(0.1, 0.1, 0.12, 0.5)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.12, 0.12, 0.14, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.05)
+border_color = Color(1, 1, 1, 0.1)
 corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 15
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 12
 
-[node name="EmployeeCard" type="PanelContainer" unique_id=102380046]
-modulate = Color(1, 1, 1, 0.03)
-custom_minimum_size = Vector2(280, 160)
-offset_right = 280.0
-offset_bottom = 160.0
-pivot_offset = Vector2(140, 80)
-theme_override_styles/panel = SubResource("StyleBoxFlat_high_end")
+[node name="EmployeeCard" type="PanelContainer" unique_id=1224794746]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 180)
+offset_right = 320.0
+offset_bottom = 180.0
+pivot_offset = Vector2(160, 90)
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="BorderGlow" type="ReferenceRect" parent="." unique_id=1973216749]
+[node name="ParallaxBG" type="Label" parent="." unique_id=1662395690]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.05)
+layout_mode = 2
+theme_override_font_sizes/font_size = 70
+text = "DEPT"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="BirthdayOverlay" type="Label" parent="." unique_id=1020285278]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 35
+text = "🎂 "
+
+[node name="BorderGlow" type="ReferenceRect" parent="." unique_id=1165651587]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-border_color = Color(0, 0.8, 1, 0)
-border_width = 2.0
+border_color = Color(1, 1, 1, 0)
+border_width = 2.5
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=990787324]
+[node name="Margin" type="MarginContainer" parent="." unique_id=1742636214]
 layout_mode = 2
-theme_override_constants/margin_left = 25
-theme_override_constants/margin_top = 25
-theme_override_constants/margin_right = 25
-theme_override_constants/margin_bottom = 25
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=277557174]
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=56407962]
 layout_mode = 2
-alignment = 1
+mouse_filter = 2
+theme_override_constants/separation = 8
 
-[node name="Name" type="Label" parent="Margin/VBox" unique_id=271639061]
+[node name="Header" type="HBoxContainer" parent="Margin/VBox" unique_id=654486632]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Name" type="Label" parent="Margin/VBox/Header" unique_id=2122304587]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "Name"
 
-[node name="Role" type="Label" parent="Margin/VBox" unique_id=1433900914]
+[node name="EditButton" type="Button" parent="Margin/VBox/Header" unique_id=900121758]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "✎"
+flat = true
+
+[node name="Role" type="Label" parent="Margin/VBox" unique_id=1611838763]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
 text = "Rolle"
 
-[node name="ExtraDetails" type="VBoxContainer" parent="Margin/VBox" unique_id=966247187]
+[node name="SkillContainer" type="HFlowContainer" parent="Margin/VBox" unique_id=394275578]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 5
+
+[node name="ExtraDetails" type="VBoxContainer" parent="Margin/VBox" unique_id=1499883322]
 unique_name_in_owner = true
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
+mouse_filter = 2
 
-[node name="HSeparator" type="HSeparator" parent="Margin/VBox/ExtraDetails" unique_id=382958660]
+[node name="HSeparator" type="HSeparator" parent="Margin/VBox/ExtraDetails" unique_id=1983828939]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 15
 
-[node name="Mail" type="Label" parent="Margin/VBox/ExtraDetails" unique_id=1646970210]
+[node name="Mail" type="Label" parent="Margin/VBox/ExtraDetails" unique_id=719404262]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
-text = "E-Mail"
+text = "mail@example.com"
+
+[node name="Phone" type="Label" parent="Margin/VBox/ExtraDetails" unique_id=1718700933]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "+49 000 00000"
+
+[node name="IDLabel" type="Label" parent="Margin/VBox/ExtraDetails" unique_id=784395327]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 11
+text = "ID: 0000"
