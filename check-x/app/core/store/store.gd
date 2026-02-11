@@ -1,6 +1,6 @@
 extends Node
 
-# Dies ist dein lokaler Cache. Später wird dieser beim Start aus der DB befüllt.
+# Dies ist dein lokaler Cache.
 var employees = [
 	{
 		"name": "Max Admin", "role": "Admin", "dept": "SYS", 
@@ -21,79 +21,58 @@ var employees = [
 
 # --- API FÜR DEINE UI ---
 
-# Gibt alle Mitarbeiter zurück
 func get_all_employees() -> Array:
 	return employees
 
-# Fügt einen neuen hinzu (Später: DB INSERT)
 func add_employee(data: Dictionary) -> void:
 	employees.append(data)
-	# Todo: Hier später: Database.insert_user(data)
 
-# Aktualisiert einen bestehenden (Später: DB UPDATE)
 func update_employee(original_ref: Dictionary, new_data: Dictionary) -> void:
 	original_ref.merge(new_data, true)
-	# Todo: Hier später: Database.update_user(original_ref.id, new_data)
 
-# Liefert die Anzahl für das Dashboard
 func get_employee_count() -> int:
 	return employees.size()
 
 
 # --- ZEITERFASSUNG ---
 
-# Neuer Aufbau eines Eintrags:
-# { 
-#   "id": "...", "emp_id": "...", 
-#   "date": "2023-10-27", "start": 123456, "end": 123456, "duration": 3600, 
-#   "project": "...", 
-#   "status": "open",       # "open", "locked" (Admin genehmigt), "request_change"
-#   "change_reason": ""     # Begründung für den Antrag
-# }
 var time_entries = []
 var active_sessions = {} 
-
-# --- API ---
 
 func start_timer(emp_id: String) -> void:
 	active_sessions[emp_id] = Time.get_unix_time_from_system()
 
-func stop_timer(emp_id: String, project: String) -> void:
+# KORRIGIERT: Nimmt jetzt 3 Argumente (Notes)
+func stop_timer(emp_id: String, project: String, notes: String = "") -> void:
 	if not active_sessions.has(emp_id): return
 	var start = active_sessions[emp_id]
 	var end = Time.get_unix_time_from_system()
 	
-	# Automatische Einträge sind erstmal "open"
-	var entry = _create_entry_struct(emp_id, start, end, project, "open")
+	var entry = _create_entry_struct(emp_id, start, end, project, "open", notes)
 	time_entries.append(entry)
 	active_sessions.erase(emp_id)
 
-# Manuelles Nachtragen
-func add_manual_entry(emp_id: String, date_str: String, duration_min: int, project: String) -> void:
-	# Wir simulieren start/end für die Dauer
+# KORRIGIERT: Nimmt jetzt Notes entgegen
+func add_manual_entry(emp_id: String, date_str: String, duration_min: int, project: String, notes: String = "") -> void:
 	var now = Time.get_unix_time_from_system()
-	var entry = _create_entry_struct(emp_id, now, now + (duration_min * 60), project, "open")
-	# Datum überschreiben wir manuell mit dem gewählten Kalendertag
+	var entry = _create_entry_struct(emp_id, now, now + (duration_min * 60), project, "open", notes)
 	entry["date"] = date_str 
 	time_entries.append(entry)
 
-# Antrag auf Änderung stellen
 func request_change(entry_id: String, reason: String) -> void:
 	for e in time_entries:
 		if e.id == entry_id:
 			e.status = "request_change"
 			e.change_reason = reason
-			# In einer echten App würde hier eine Mail an den Admin gehen
 
-# Admin-Simulation: Eintrag sperren/genehmigen
 func admin_approve_entry(entry_id: String) -> void:
 	for e in time_entries:
 		if e.id == entry_id:
 			e.status = "locked"
 			e.change_reason = ""
 
-# Hilfsfunktion
-func _create_entry_struct(emp_id, start, end, proj, status) -> Dictionary:
+# Hilfsfunktion mit Notes-Support
+func _create_entry_struct(emp_id, start, end, proj, status, notes = "") -> Dictionary:
 	return {
 		"id": str(randi()),
 		"emp_id": emp_id,
@@ -101,16 +80,15 @@ func _create_entry_struct(emp_id, start, end, proj, status) -> Dictionary:
 		"end": end,
 		"duration": end - start,
 		"project": proj,
+		"notes": notes, # Das neue Feld
 		"date": Time.get_date_string_from_system(),
 		"status": status,
 		"change_reason": ""
 	}
 
-# Filtert Einträge für einen bestimmten Tag (String "YYYY-MM-DD")
 func get_entries_for_date(emp_id: String, date_str: String) -> Array:
 	return time_entries.filter(func(e): return e.emp_id == emp_id and e.date == date_str)
 
-# ... (Rest wie is_timer_running etc. bleibt) ...
 func is_timer_running(emp_id: String) -> bool: return active_sessions.has(emp_id)
 func get_timer_start(emp_id: String) -> float: return active_sessions.get(emp_id, 0.0)
 func get_entries_by_employee(emp_id: String) -> Array: return time_entries.filter(func(e): return e.emp_id == emp_id)

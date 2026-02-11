@@ -2,16 +2,45 @@
 
 [ext_resource type="Script" uid="uid://cv78uobw1lcrg" path="res://app/modules/time/time_tracking.gd" id="1_time_script"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.12, 0.12, 0.14, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.2)
-shadow_size = 8
+[sub_resource type="Gradient" id="Gradient_particles"]
+colors = PackedColorArray(1, 1, 1, 0.1, 1, 1, 1, 0)
 
-[node name="TimeTracking" type="Control" unique_id=323855066]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
+bg_color = Color(0.08, 0.08, 0.1, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg"]
+bg_color = Color(0.2, 0.2, 0.23, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_fill"]
+bg_color = Color(0.3, 0.6, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pulse"]
+bg_color = Color(0.2, 0.8, 0.4, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="TimeTracking" type="Control" unique_id=601973243]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +49,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_time_script")
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=580369533]
+[node name="BgParticles" type="CPUParticles2D" parent="." unique_id=113951870]
+position = Vector2(960, 540)
+amount = 40
+lifetime = 10.0
+preprocess = 5.0
+emission_shape = 3
+emission_rect_extents = Vector2(960, 540)
+gravity = Vector2(0, -2)
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color_ramp = SubResource("Gradient_particles")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1629110489]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,145 +69,355 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 40
-theme_override_constants/margin_top = 40
+theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 40
 
-[node name="HBox" type="HBoxContainer" parent="Margin" unique_id=1577661500]
+[node name="HBox" type="HBoxContainer" parent="Margin" unique_id=749770622]
 layout_mode = 2
-theme_override_constants/separation = 40
+theme_override_constants/separation = 30
 
-[node name="LeftPanel" type="VBoxContainer" parent="Margin/HBox" unique_id=368851698]
+[node name="LeftPanel" type="VBoxContainer" parent="Margin/HBox" unique_id=670962828]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.8
+size_flags_stretch_ratio = 0.9
 theme_override_constants/separation = 20
-alignment = 1
 
-[node name="ActionCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=700970320]
-custom_minimum_size = Vector2(0, 320)
+[node name="Header" type="HBoxContainer" parent="Margin/HBox/LeftPanel" unique_id=190392412]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+theme_override_constants/separation = 15
 
-[node name="Center" type="CenterContainer" parent="Margin/HBox/LeftPanel/ActionCard" unique_id=1170216778]
+[node name="AvatarPlaceholder" type="Panel" parent="Margin/HBox/LeftPanel/Header" unique_id=1088283403]
+custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="VBox" type="VBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/Center" unique_id=2057959533]
-layout_mode = 2
-theme_override_constants/separation = 25
-
-[node name="TimerLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=49312827]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 64
-text = "00:00:00"
+[node name="AvatarLabel" type="Label" parent="Margin/HBox/LeftPanel/Header/AvatarPlaceholder" unique_id=2132626394]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "👤"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ProjectInput" type="LineEdit" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1062197216]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 45)
+[node name="V" type="VBoxContainer" parent="Margin/HBox/LeftPanel/Header" unique_id=630998427]
 layout_mode = 2
-placeholder_text = "Projekt / Tätigkeit..."
 alignment = 1
 
-[node name="ToggleTimerBtn" type="Button" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1201130971]
+[node name="GreetingLabel" type="Label" parent="Margin/HBox/LeftPanel/Header/V" unique_id=182469763]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "STARTEN"
+text = "Hallo, User"
 
-[node name="StatusLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/Center/VBox" unique_id=1029815069]
+[node name="DateDisplayLabel" type="Label" parent="Margin/HBox/LeftPanel/Header/V" unique_id=1982492686]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Datum"
+
+[node name="Spacer" type="Control" parent="Margin/HBox/LeftPanel/Header" unique_id=1881586044]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VacationWidget" type="PanelContainer" parent="Margin/HBox/LeftPanel/Header" unique_id=15601664]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="M" type="MarginContainer" parent="Margin/HBox/LeftPanel/Header/VacationWidget" unique_id=772864273]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="VacationLabel" type="Label" parent="Margin/HBox/LeftPanel/Header/VacationWidget/M" unique_id=1458092261]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+text = "🏖️ Urlaub in 14 Tagen"
+vertical_alignment = 1
+
+[node name="ActionCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=280575439]
+custom_minimum_size = Vector2(0, 420)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="M" type="MarginContainer" parent="Margin/HBox/LeftPanel/ActionCard" unique_id=1995297827]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="V" type="VBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/M" unique_id=452030705]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TimerBox" type="HBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=1946068011]
+layout_mode = 2
+alignment = 1
+
+[node name="TimerLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/M/V/TimerBox" unique_id=351405728]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 72
+text = "00:00:00"
+
+[node name="MascotIcon" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/M/V/TimerBox" unique_id=389097840]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "⚙️"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DailyProgressBar" type="ProgressBar" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=1867018210]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill")
+max_value = 1.0
+value = 0.5
+show_percentage = false
+
+[node name="ProjectInput" type="LineEdit" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=1967662626]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Woran arbeitest du gerade?"
+alignment = 1
+
+[node name="NotesInput" type="TextEdit" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=1281452805]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+placeholder_text = "Optionale Notizen zum Eintrag..."
+wrap_mode = 1
+
+[node name="ActionButtons" type="HBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=2074450825]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="ToggleTimerBtn" type="Button" parent="Margin/HBox/LeftPanel/ActionCard/M/V/ActionButtons" unique_id=541529395]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 55)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "▶ STARTEN"
+
+[node name="PauseBtn" type="Button" parent="Margin/HBox/LeftPanel/ActionCard/M/V/ActionButtons" unique_id=1320778080]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 55)
+layout_mode = 2
+tooltip_text = "Pause starten"
+text = "☕"
+
+[node name="StatusBox" type="HBoxContainer" parent="Margin/HBox/LeftPanel/ActionCard/M/V" unique_id=1115357862]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PulseDot" type="Panel" parent="Margin/HBox/LeftPanel/ActionCard/M/V/StatusBox" unique_id=146514610]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_pulse")
+
+[node name="StatusLabel" type="Label" parent="Margin/HBox/LeftPanel/ActionCard/M/V/StatusBox" unique_id=529001966]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "Bereit"
-horizontal_alignment = 1
 
-[node name="SummaryCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=1253878768]
+[node name="SummaryCard" type="PanelContainer" parent="Margin/HBox/LeftPanel" unique_id=63864902]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="M" type="MarginContainer" parent="Margin/HBox/LeftPanel/SummaryCard" unique_id=1115943425]
+[node name="M" type="MarginContainer" parent="Margin/HBox/LeftPanel/SummaryCard" unique_id=1486009949]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Margin/HBox/LeftPanel/SummaryCard/M" unique_id=94833527]
+[node name="V" type="VBoxContainer" parent="Margin/HBox/LeftPanel/SummaryCard/M" unique_id=2091592139]
 layout_mode = 2
-alignment = 1
 
-[node name="Label" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=187183128]
+[node name="H" type="HBoxContainer" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=439680825]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V/H" unique_id=215606786]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-text = "MONATSSUMME"
+text = "WOCHENÜBERSICHT"
 
-[node name="TotalTimeLabel" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=507902304]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "0 Std. 0 Min."
-
-[node name="RightPanel" type="PanelContainer" parent="Margin/HBox" unique_id=1712991850]
+[node name="Spacer" type="Control" parent="Margin/HBox/LeftPanel/SummaryCard/M/V/H" unique_id=719644651]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="M" type="MarginContainer" parent="Margin/HBox/RightPanel" unique_id=1156699643]
+[node name="TotalTimeLabel" type="Label" parent="Margin/HBox/LeftPanel/SummaryCard/M/V/H" unique_id=288766531]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.9, 1)
+text = "0h 0m"
+
+[node name="WeeklyGraph" type="HBoxContainer" parent="Margin/HBox/LeftPanel/SummaryCard/M/V" unique_id=914766407]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="RightPanel" type="PanelContainer" parent="Margin/HBox" unique_id=527020595]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="M" type="MarginContainer" parent="Margin/HBox/RightPanel" unique_id=826269609]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Margin/HBox/RightPanel/M" unique_id=28615028]
+[node name="V" type="VBoxContainer" parent="Margin/HBox/RightPanel/M" unique_id=1729394566]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="H" type="HBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=1862681412]
+[node name="TeamStatusBox" type="HBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=2062990873]
 layout_mode = 2
-alignment = 1
+theme_override_constants/separation = 15
 
-[node name="MonthLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/H" unique_id=851770130]
+[node name="V1" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox" unique_id=1440991100]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox/V1" unique_id=1379158338]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "IM BÜRO"
+
+[node name="TeamOfficeLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox/V1" unique_id=37396578]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 0.5, 1)
 theme_override_font_sizes/font_size = 18
-text = "KALENDER"
+text = "12"
 
-[node name="CalendarGrid" type="GridContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=865817066]
+[node name="V2" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox" unique_id=1131337452]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox/V2" unique_id=1966284271]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "IM URLAUB"
+
+[node name="TeamVacationLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/TeamStatusBox/V2" unique_id=145470602]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "3"
+
+[node name="HSeparator" type="HSeparator" parent="Margin/HBox/RightPanel/M/V" unique_id=753839164]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CalNav" type="HBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=1373936960]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PrevMonthBtn" type="Button" parent="Margin/HBox/RightPanel/M/V/CalNav" unique_id=640702199]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "◀"
+flat = true
+
+[node name="MonthLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/CalNav" unique_id=634030047]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "JANUAR 2024"
+horizontal_alignment = 1
+
+[node name="NextMonthBtn" type="Button" parent="Margin/HBox/RightPanel/M/V/CalNav" unique_id=1728073557]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "▶"
+flat = true
+
+[node name="CalendarGrid" type="GridContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=772419468]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 columns = 7
 
-[node name="DetailBox" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=1733978606]
+[node name="RecentHistoryBox" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=2133280781]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Margin/HBox/RightPanel/M/V/RecentHistoryBox" unique_id=1791705988]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "LETZTE AKTIVITÄTEN"
+
+[node name="HistoryList" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/RecentHistoryBox" unique_id=959736964]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DetailBox" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V" unique_id=818634886]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="HSeparator" type="HSeparator" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=1295724415]
+[node name="HSeparator2" type="HSeparator" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=947807241]
 layout_mode = 2
 
-[node name="SelectedDateLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=306172872]
+[node name="SelectedDateLabel" type="Label" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=1409473537]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Datum"
 
-[node name="EntryList" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=334718326]
+[node name="EntryList" type="VBoxContainer" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=66375321]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="AddManualBtn" type="Button" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=2140404581]
+[node name="AddManualBtn" type="Button" parent="Margin/HBox/RightPanel/M/V/DetailBox" unique_id=1266649219]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "+ Zeit manuell nachtragen"
 
-[node name="EntryPopup#Panel" type="PanelContainer" parent="." unique_id=197725561]
+[node name="EntryPopup" type="ColorRect" parent="." unique_id=1687082629]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="Panel" type="PanelContainer" parent="EntryPopup" unique_id=1088517302]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 1
 anchors_preset = 8
@@ -181,45 +432,45 @@ offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="EntryPopup_Panel#V" type="VBoxContainer" parent="." unique_id=890851097]
-layout_mode = 0
+[node name="V" type="VBoxContainer" parent="EntryPopup/Panel" unique_id=533724282]
+layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="EntryPopup_Panel_V#PopupTitle" type="Label" parent="." unique_id=1641684154]
+[node name="PopupTitle" type="Label" parent="EntryPopup/Panel/V" unique_id=561089798]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 2
 text = "ZEIT NACHTRAGEN"
 horizontal_alignment = 1
 
-[node name="EntryPopup_Panel_V#PopupInput1" type="LineEdit" parent="." unique_id=1973209253]
+[node name="PopupInput1" type="LineEdit" parent="EntryPopup/Panel/V" unique_id=1832111651]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 2
 placeholder_text = "Projekt / Tätigkeit"
 
-[node name="EntryPopup_Panel_V#PopupInput2" type="SpinBox" parent="." unique_id=766655276]
+[node name="PopupInput2" type="SpinBox" parent="EntryPopup/Panel/V" unique_id=1688108291]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 2
 max_value = 1440.0
 prefix = "Minuten:"
 
-[node name="EntryPopup_Panel_V#PopupInfo" type="Label" parent="." unique_id=1227231923]
+[node name="PopupInfo" type="Label" parent="EntryPopup/Panel/V" unique_id=540770612]
 unique_name_in_owner = true
 visible = false
-layout_mode = 0
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 text = "Achtung: Tag ist gesperrt!"
 
-[node name="EntryPopup_Panel_V#H" type="HBoxContainer" parent="." unique_id=1013984876]
-layout_mode = 0
+[node name="H" type="HBoxContainer" parent="EntryPopup/Panel/V" unique_id=1435704495]
+layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="EntryPopup_Panel_V_H#PopupSaveBtn" type="Button" parent="." unique_id=1152288938]
+[node name="PopupSaveBtn" type="Button" parent="EntryPopup/Panel/V/H" unique_id=1446888927]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 2
 text = "Speichern"
 
-[node name="EntryPopup_Panel_V_H#PopupCancelBtn" type="Button" parent="." unique_id=905770023]
+[node name="PopupCancelBtn" type="Button" parent="EntryPopup/Panel/V/H" unique_id=1143725668]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 2
 text = "Abbrechen"
