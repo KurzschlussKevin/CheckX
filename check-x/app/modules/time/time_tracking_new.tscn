@@ -1,0 +1,159 @@
+[gd_scene format=3 uid="uid://ciejnv0y8iuci"]
+
+[ext_resource type="Script" uid="uid://djkc7epm5bhmg" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass_new"]
+bg_color = Color(0.08, 0.08, 0.1, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg_new"]
+bg_color = Color(0.2, 0.2, 0.23, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_fill_new"]
+bg_color = Color(0.3, 0.6, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="TimeTracking" type="Control" unique_id=878363627]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script_new")
+
+[node name="Background" type="ColorRect" parent="." unique_id=560273226]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.08, 1)
+
+[node name="MainLayout" type="MarginContainer" parent="." unique_id=780377817]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="ContentSplit" type="HBoxContainer" parent="MainLayout" unique_id=1162362816]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLayout/ContentSplit" unique_id=30467580]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="HeaderRow" type="HBoxContainer" parent="MainLayout/ContentSplit/LeftPanel" unique_id=60729245]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="InfoBox" type="VBoxContainer" parent="MainLayout/ContentSplit/LeftPanel/HeaderRow" unique_id=1318266243]
+layout_mode = 2
+
+[node name="DateLabel" type="Label" parent="MainLayout/ContentSplit/LeftPanel/HeaderRow/InfoBox" unique_id=263357983]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Datum heute"
+
+[node name="Spacer" type="Control" parent="MainLayout/ContentSplit/LeftPanel/HeaderRow" unique_id=1409217222]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PdfBtn" type="Button" parent="MainLayout/ContentSplit/LeftPanel/HeaderRow" unique_id=642720208]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "📄"
+
+[node name="VacBtn" type="Button" parent="MainLayout/ContentSplit/LeftPanel/HeaderRow" unique_id=374103217]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Urlaub"
+
+[node name="TimerCard" type="PanelContainer" parent="MainLayout/ContentSplit/LeftPanel" unique_id=1182024464]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_new")
+
+[node name="CardMargin" type="MarginContainer" parent="MainLayout/ContentSplit/LeftPanel/TimerCard" unique_id=1559863127]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="CardContent" type="VBoxContainer" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin" unique_id=156103993]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TimerLabel" type="Label" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=1727072640]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 60
+text = "00:00:00"
+horizontal_alignment = 1
+
+[node name="Bar" type="ProgressBar" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=54826395]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg_new")
+theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill_new")
+max_value = 1.0
+show_percentage = false
+
+[node name="ProjectInput" type="LineEdit" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=1401363771]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Projekt eingeben..."
+
+[node name="NotesInput" type="TextEdit" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=867045274]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+placeholder_text = "Notizen..."
+
+[node name="StartBtn" type="Button" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=1178550243]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "START"
+
+[node name="RightPanel" type="PanelContainer" parent="MainLayout/ContentSplit" unique_id=331472304]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_new")
+
+[node name="RightMargin" type="MarginContainer" parent="MainLayout/ContentSplit/RightPanel" unique_id=888591369]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="RightContent" type="VBoxContainer" parent="MainLayout/ContentSplit/RightPanel/RightMargin" unique_id=423969603]
+layout_mode = 2
+
+[node name="CalendarLabel" type="Label" parent="MainLayout/ContentSplit/RightPanel/RightMargin/RightContent" unique_id=703202344]
+layout_mode = 2
+text = "Kalender Bereich"
