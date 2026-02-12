@@ -13,7 +13,7 @@ var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
 # Liste der Module und ihrer Pfade
 var modules = {
 	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
-	"Zeiterfassung": "res://app/modules/time/time_tracking.tscn",
+	"Zeiterfassung": "res://app/modules/time/time_tracking_new.tscn",
 	"Mitarbeiter": "res://app/modules/employees/employees.tscn",
 	"Einstellungen": "res://app/modules/settings/settings.tscn"
 }

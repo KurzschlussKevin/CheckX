@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://calendar_panel_v2"]
+[gd_scene format=3 uid="uid://dqb17e6f7kvtn"]
 
-[ext_resource type="Script" path="res://app/modules/time/calendar_panel.gd" id="1_logic"]
+[ext_resource type="Script" uid="uid://buvhmrkyylbrv" path="res://app/modules/time/calendar_panel.gd" id="1_logic"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
 bg_color = Color(0.08, 0.08, 0.1, 0.5)
@@ -9,81 +9,82 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[node name="CalendarPanel" type="PanelContainer"]
+[node name="CalendarPanel" type="PanelContainer" unique_id=336842756]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 script = ExtResource("1_logic")
 
-[node name="M" type="MarginContainer" parent="."]
+[node name="M" type="MarginContainer" parent="." unique_id=1528348758]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="M"]
+[node name="VBox" type="VBoxContainer" parent="M" unique_id=684763374]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Nav" type="HBoxContainer" parent="M/VBox"]
+[node name="Nav" type="HBoxContainer" parent="M/VBox" unique_id=1631519237]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 10
+alignment = 1
 
-[node name="PrevBtn" type="Button" parent="M/VBox/Nav"]
+[node name="PrevBtn" type="Button" parent="M/VBox/Nav" unique_id=1638999617]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = "<"
 
-[node name="MonthLabel" type="Label" parent="M/VBox/Nav"]
+[node name="MonthLabel" type="Label" parent="M/VBox/Nav" unique_id=342419896]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 text = "MONAT"
 horizontal_alignment = 1
 
-[node name="NextBtn" type="Button" parent="M/VBox/Nav"]
+[node name="NextBtn" type="Button" parent="M/VBox/Nav" unique_id=75943277]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = ">"
 
-[node name="Grid" type="GridContainer" parent="M/VBox"]
+[node name="Grid" type="GridContainer" parent="M/VBox" unique_id=508961059]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 3
 columns = 7
 
-[node name="HistoryBox" type="VBoxContainer" parent="M/VBox"]
+[node name="HistoryBox" type="VBoxContainer" parent="M/VBox" unique_id=1953204619]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label" type="Label" parent="M/VBox/HistoryBox"]
+[node name="Label" type="Label" parent="M/VBox/HistoryBox" unique_id=1034206547]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "LETZTE AKTIVITÄTEN"
 
-[node name="List" type="VBoxContainer" parent="M/VBox/HistoryBox"]
+[node name="List" type="VBoxContainer" parent="M/VBox/HistoryBox" unique_id=916266975]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="DetailBox" type="VBoxContainer" parent="M/VBox"]
+[node name="DetailBox" type="VBoxContainer" parent="M/VBox" unique_id=2139463524]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="DetailLabel" type="Label" parent="M/VBox/DetailBox"]
+[node name="DetailLabel" type="Label" parent="M/VBox/DetailBox" unique_id=1397581134]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Datum"
 
-[node name="EntryList" type="VBoxContainer" parent="M/VBox/DetailBox"]
+[node name="EntryList" type="VBoxContainer" parent="M/VBox/DetailBox" unique_id=1201147420]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="AddBtn" type="Button" parent="M/VBox/DetailBox"]
+[node name="AddBtn" type="Button" parent="M/VBox/DetailBox" unique_id=913411941]
 unique_name_in_owner = true
 layout_mode = 2
 text = "+ Zeit manuell"

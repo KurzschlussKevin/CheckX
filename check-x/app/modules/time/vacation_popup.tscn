@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://vacation_popup_v2"]
+[gd_scene format=3 uid="uid://8xuqgd0a5s72"]
 
-[ext_resource type="Script" path="res://app/modules/time/vacation_popup.gd" id="1_logic"]
+[ext_resource type="Script" uid="uid://dhxgiatx886hb" path="res://app/modules/time/vacation_popup.gd" id="1_logic"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.1, 0.1, 0.12, 1)
@@ -9,7 +9,7 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="VacationPopup" type="Control"]
+[node name="VacationPopup" type="Control" unique_id=961898603]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,100 +18,105 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_logic")
 
-[node name="Bg" type="ColorRect" parent="."]
+[node name="Bg" type="ColorRect" parent="." unique_id=147574565]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=228036122]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Center"]
+[node name="Panel" type="PanelContainer" parent="Center" unique_id=1487177011]
 custom_minimum_size = Vector2(450, 500)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="M" type="MarginContainer" parent="Center/Panel"]
+[node name="M" type="MarginContainer" parent="Center/Panel" unique_id=326961619]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="Center/Panel/M"]
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/M" unique_id=664096276]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Title" type="Label" parent="Center/Panel/M/VBox"]
+[node name="Title" type="Label" parent="Center/Panel/M/VBox" unique_id=78371291]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "URLAUB BEANTRAGEN"
 horizontal_alignment = 1
 
-[node name="TypeOption" type="OptionButton" parent="Center/Panel/M/VBox"]
+[node name="TypeOption" type="OptionButton" parent="Center/Panel/M/VBox" unique_id=1232878497]
 unique_name_in_owner = true
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Erholungsurlaub"
 popup/item_0/id = 0
 popup/item_1/text = "Sonderurlaub"
 popup/item_1/id = 1
 
-[node name="Nav" type="HBoxContainer" parent="Center/Panel/M/VBox"]
+[node name="Nav" type="HBoxContainer" parent="Center/Panel/M/VBox" unique_id=486569624]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 20
+alignment = 1
 
-[node name="PrevBtn" type="Button" parent="Center/Panel/M/VBox/Nav"]
+[node name="PrevBtn" type="Button" parent="Center/Panel/M/VBox/Nav" unique_id=1149630743]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = "<"
 
-[node name="MonthLabel" type="Label" parent="Center/Panel/M/VBox/Nav"]
+[node name="MonthLabel" type="Label" parent="Center/Panel/M/VBox/Nav" unique_id=1061901140]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "MONAT 2024"
 horizontal_alignment = 1
 
-[node name="NextBtn" type="Button" parent="Center/Panel/M/VBox/Nav"]
+[node name="NextBtn" type="Button" parent="Center/Panel/M/VBox/Nav" unique_id=1358755320]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = ">"
 
-[node name="Grid" type="GridContainer" parent="Center/Panel/M/VBox"]
+[node name="Grid" type="GridContainer" parent="Center/Panel/M/VBox" unique_id=1960607421]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_horizontal = 4
+size_flags_vertical = 6
 columns = 7
 
-[node name="Info" type="Label" parent="Center/Panel/M/VBox"]
+[node name="Info" type="Label" parent="Center/Panel/M/VBox" unique_id=2019350246]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.8, 1, 1)
 text = "Startdatum wählen..."
 horizontal_alignment = 1
 
-[node name="Btns" type="HBoxContainer" parent="Center/Panel/M/VBox"]
+[node name="Btns" type="HBoxContainer" parent="Center/Panel/M/VBox" unique_id=81662636]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="SaveBtn" type="Button" parent="Center/Panel/M/VBox/Btns"]
+[node name="SaveBtn" type="Button" parent="Center/Panel/M/VBox/Btns" unique_id=2085190776]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "Beantragen"
 
-[node name="CancelBtn" type="Button" parent="Center/Panel/M/VBox/Btns"]
+[node name="CancelBtn" type="Button" parent="Center/Panel/M/VBox/Btns" unique_id=1999333138]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
