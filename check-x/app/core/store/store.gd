@@ -42,7 +42,7 @@ var active_sessions = {}
 func start_timer(emp_id: String) -> void:
 	active_sessions[emp_id] = Time.get_unix_time_from_system()
 
-# KORRIGIERT: Nimmt jetzt 3 Argumente (Notes)
+# KORRIGIERT: Akzeptiert jetzt 'notes' als 3. Parameter
 func stop_timer(emp_id: String, project: String, notes: String = "") -> void:
 	if not active_sessions.has(emp_id): return
 	var start = active_sessions[emp_id]
@@ -52,7 +52,7 @@ func stop_timer(emp_id: String, project: String, notes: String = "") -> void:
 	time_entries.append(entry)
 	active_sessions.erase(emp_id)
 
-# KORRIGIERT: Nimmt jetzt Notes entgegen
+# KORRIGIERT: Akzeptiert jetzt 'notes'
 func add_manual_entry(emp_id: String, date_str: String, duration_min: int, project: String, notes: String = "") -> void:
 	var now = Time.get_unix_time_from_system()
 	var entry = _create_entry_struct(emp_id, now, now + (duration_min * 60), project, "open", notes)
@@ -71,7 +71,7 @@ func admin_approve_entry(entry_id: String) -> void:
 			e.status = "locked"
 			e.change_reason = ""
 
-# Hilfsfunktion mit Notes-Support
+# Hilfsfunktion
 func _create_entry_struct(emp_id, start, end, proj, status, notes = "") -> Dictionary:
 	return {
 		"id": str(randi()),
@@ -80,7 +80,7 @@ func _create_entry_struct(emp_id, start, end, proj, status, notes = "") -> Dicti
 		"end": end,
 		"duration": end - start,
 		"project": proj,
-		"notes": notes, # Das neue Feld
+		"notes": notes, # Neues Feld
 		"date": Time.get_date_string_from_system(),
 		"status": status,
 		"change_reason": ""
