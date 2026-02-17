@@ -1,6 +1,6 @@
 extends Control
 
-# --- UI REFERENZEN (Unique Names %) ---
+# --- UI REFERENZEN ---
 @onready var login_panel: PanelContainer = %LoginPanel
 @onready var center_container: CenterContainer = $CenterContainer
 @onready var title: Label = %Title
@@ -11,6 +11,7 @@ extends Control
 @onready var password_input: LineEdit = %PasswordInput
 @onready var confirm_box: VBoxContainer = %ConfirmPasswordBox
 @onready var confirm_input: LineEdit = %ConfirmPasswordInput
+@onready var keep_logged_in_check: CheckBox = %KeepLoggedInCheck
 @onready var status_label: Label = %StatusLabel
 @onready var submit_button: Button = %SubmitButton
 @onready var switch_button: Button = %SwitchModeButton
@@ -19,26 +20,31 @@ var is_register_mode: bool = false
 var is_loading: bool = false
 
 func _ready() -> void:
-	# Signale automatisch verbinden
 	switch_button.pressed.connect(_on_switch_mode_pressed)
 	submit_button.pressed.connect(_on_submit_pressed)
 	
+	# NEU: Signal vom Store verbinden
+	if Store.has_signal("login_completed"):
+		Store.login_completed.connect(_on_server_response)
+	
 	status_label.text = ""
-	
-	# Initialen Zustand der UI setzen (Login oder Register)
 	_apply_ui_state()
+	_force_window_resize(true)
 	
-	# Start-Animation: Das Panel blendet weich ein
+	# AUTO-LOGIN PRÜFUNG (Bleibt wie von dir gewünscht)
+	if Config.get_value("auth", "keep_logged_in", false):
+		var last_mail = Config.get_value("auth", "last_email", "")
+		if last_mail != "":
+			email_input.text = last_mail
+			keep_logged_in_check.button_pressed = true
+	
+	# Animation beim Start
 	login_panel.modulate.a = 0
 	var tween = create_tween()
 	tween.tween_property(login_panel, "modulate:a", 1.0, 0.4)
-	
-	# Fenster beim Start sofort physisch anpassen
-	_force_window_resize(true)
 
-## KERN-LOGIK: Passt das physikalische Betriebssystem-Fenster an
+## KERN-LOGIK: Passt das physikalische Betriebssystem-Fenster an (DEIN ORIGINAL)
 func _force_window_resize(instant: bool = false) -> void:
-	# Wir warten Frames, damit Godot die neue Mindestgröße der UI berechnet hat
 	await get_tree().process_frame
 	await get_tree().process_frame
 	
@@ -50,48 +56,38 @@ func _force_window_resize(instant: bool = false) -> void:
 	win.mode = Window.MODE_WINDOWED
 	
 	if instant:
-		# Sofortige Anpassung ohne Animation
 		win.size = Vector2i(target_size)
 		win.content_scale_size = Vector2i(target_size)
 		win.move_to_center()
 	else:
-		# Smoothe Fenster-Anpassung per Tween (Morphing)
 		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		tween.tween_property(win, "size", Vector2i(target_size), 0.3)
 		tween.tween_property(win, "content_scale_size", Vector2i(target_size), 0.3)
 		
-		# Das Fenster auf dem Monitor zentriert halten während der Skalierung
 		var screen_rect = DisplayServer.screen_get_usable_rect(win.current_screen)
 		var center_pos = Vector2(screen_rect.position) + (Vector2(screen_rect.size) / 2.0) - (target_size / 2.0)
 		tween.tween_property(win, "position", Vector2i(center_pos), 0.3)
 
-	# Container im neuen Fenster-Bereich ausrichten
 	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 
-## MODUS-WECHSEL: Mit weichem Cross-Fade und Fenster-Anpassung
 func _on_switch_mode_pressed() -> void:
 	if is_loading: return
 	is_register_mode = !is_register_mode
 	
-	# 1. Inhalt kurz ausfaden
 	var fade_out = create_tween()
 	fade_out.tween_property(login_panel, "modulate:a", 0.0, 0.1)
 	await fade_out.finished
 	
-	# 2. UI-Elemente im Hintergrund umschalten
 	_apply_ui_state()
+	_force_window_resize(false) # Triggert die Größenänderung
 	
-	# 3. Fenster-Resize an die neuen Felder (z.B. Namen) anpassen
-	_force_window_resize(false)
-	
-	# 4. Inhalt sanft wieder einfaden
 	var fade_in = create_tween()
 	fade_in.tween_property(login_panel, "modulate:a", 1.0, 0.2)
 
-## Hilfsfunktion für Texte und Sichtbarkeiten
 func _apply_ui_state() -> void:
 	register_fields.visible = is_register_mode
 	confirm_box.visible = is_register_mode
+	keep_logged_in_check.visible = !is_register_mode
 	
 	title.text = "Registrieren" if is_register_mode else "Login"
 	submit_button.text = "Konto erstellen" if is_register_mode else "Anmelden"
@@ -101,7 +97,7 @@ func _apply_ui_state() -> void:
 func _on_submit_pressed() -> void:
 	if is_loading: return
 	
-	# Validierung für Namen bei Registrierung
+	# Validierung
 	if is_register_mode:
 		if first_name_input.text.is_empty() or last_name_input.text.is_empty():
 			_perform_error_shake("Vor- und Nachname erforderlich!")
@@ -110,14 +106,12 @@ func _on_submit_pressed() -> void:
 			_perform_error_shake("Passwörter ungleich!")
 			return
 			
-	# Allgemeine Validierung
 	if email_input.text.is_empty() or password_input.text.is_empty():
 		_perform_error_shake("Bitte alle Felder ausfüllen!")
 		return
 
 	_start_auth_process()
 
-## Feedback bei Fehlern (Wackeln)
 func _perform_error_shake(msg: String) -> void:
 	_show_status(msg, true)
 	var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_IN_OUT)
@@ -126,20 +120,36 @@ func _perform_error_shake(msg: String) -> void:
 	tween.tween_property(login_panel, "position:x", pos.x - 8, 0.05)
 	tween.tween_property(login_panel, "position:x", pos.x, 0.05)
 
-## Platzhalter für den eigentlichen Server-Login
+# NEU: Startet den echten Netzwerk-Prozess
 func _start_auth_process() -> void:
 	is_loading = true
 	submit_button.disabled = true
-	_show_status("Authentifizierung...", false)
+	_show_status("Verbindung zum Server...", false)
 	
-	# Simulierter Ladevorgang (Hier kommt später die Server-Anfrage hin)
-	await get_tree().create_timer(1.5).timeout
+	if is_register_mode:
+		Store.register(first_name_input.text, last_name_input.text, email_input.text, password_input.text)
+	else:
+		Store.login(email_input.text, password_input.text)
+
+# NEU: Antwort vom Store verarbeiten
+func _on_server_response(success: bool, message: String) -> void:
+	is_loading = false
+	submit_button.disabled = false
 	
-	_show_status("Erfolgreich!", false)
-	
-	# WECHSEL ZUM LOADINGSCREEN
-	# Dieser übernimmt das Fenster-Morphing zurück auf 1920x1080
-	get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
+	if success:
+		_show_status(message, false)
+		
+		# EINSTELLUNG SPEICHERN (Nur beim erfolgreichen Login)
+		if !is_register_mode:
+			Config.set_value("auth", "keep_logged_in", keep_logged_in_check.button_pressed)
+			if keep_logged_in_check.button_pressed:
+				Config.set_value("auth", "last_email", email_input.text)
+		
+		# Kurze Pause für das Erfolgs-Gefühl, dann weiter
+		await get_tree().create_timer(0.6).timeout
+		get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
+	else:
+		_perform_error_shake(message)
 
 func _show_status(msg: String, is_error: bool) -> void:
 	status_label.text = msg

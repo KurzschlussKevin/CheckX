@@ -1,0 +1,74 @@
+extends Node
+
+# Pfad zur Speicherdatei
+const SAVE_PATH = "user://settings.cfg"
+
+# Standard-Werte für alle Einstellungen
+var settings = {
+	"general": {
+		"dark_mode": true,
+		"ui_scale": 1.0,
+		"font_size": 16,
+		"auto_login": false
+	},
+	"dashboard": {
+		"show_welcome": true,
+		"show_revenue": true,
+		"show_employees": true,
+		"show_tasks": true,
+		"show_timer": true,
+		"show_server": false,
+		"column_mode": 0, # 0 = Auto, 1 = 3 Spalten
+		"refresh_rate": 30
+	},
+	"user": {
+		"name": "",
+		"job_title": "",
+		"email": ""
+	}
+}
+
+signal settings_changed(section, key, value)
+
+func _ready() -> void:
+	load_settings()
+
+func set_value(section: String, key: String, value: Variant) -> void:
+	if not settings.has(section):
+		settings[section] = {}
+	
+	settings[section][key] = value
+	emit_signal("settings_changed", section, key, value)
+	save_settings() # Sofort speichern
+
+func get_value(section: String, key: String, default: Variant = null) -> Variant:
+	if settings.has(section) and settings[section].has(key):
+		return settings[section][key]
+	return default
+
+func save_settings() -> void:
+	var config = ConfigFile.new()
+	for section in settings:
+		for key in settings[section]:
+			config.set_value(section, key, settings[section][key])
+	config.save(SAVE_PATH)
+
+func load_settings() -> void:
+	var config = ConfigFile.new()
+	var err = config.load(SAVE_PATH)
+	if err == OK:
+		for section in config.get_sections():
+			if not settings.has(section): settings[section] = {}
+			for key in config.get_section_keys(section):
+				settings[section][key] = config.get_value(section, key)
+		print("Einstellungen geladen.")
+		_apply_global_settings()
+	else:
+		print("Keine gespeicherten Einstellungen gefunden. Nutze Standards.")
+
+# Wendet sofort globale Dinge wie Skalierung an
+func _apply_global_settings() -> void:
+	var scale = get_value("general", "ui_scale", 1.0)
+	get_window().content_scale_factor = scale
+	
+	# Hier könnte man später auch Themes umschalten

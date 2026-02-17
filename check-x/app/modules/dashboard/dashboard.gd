@@ -3,65 +3,69 @@ extends Control
 @onready var tile_grid = %TileGrid
 var stat_card_scene = preload("res://app/modules/dashboard/stat_card.tscn")
 
-# Variable für das Live-Update der Arbeitszeit
 var work_time_card = null
-var uid = "001" 
+var uid = "001"
 
 func _ready() -> void:
-	# 1. Kunden Kachel
-	_add_stat("KUNDEN GESAMT", "842", "+ 5% diese Woche", Color.SKY_BLUE)
+	# Auf Einstellungsänderungen hören
+	if Config.has_signal("settings_changed"):
+		Config.settings_changed.connect(_on_config_changed)
 	
-	# 2. Umsatz Kachel
-	_add_stat("UMSATZ (MONAT)", "42.150 €", "+ 18.4%", Color.PALE_GREEN)
-	
-	# 3. Mitarbeiter Kachel (dynamisch aus dem Store)
-	_add_stat("MITARBEITER", str(Store.get_employee_count()), "Alle aktiv", Color.WHITE)
-	
-	# 4. AKTUELLE ARBEITSZEIT (Die Kachel, die wir live updaten)
-	work_time_card = _add_stat("AKTUELLE ARBEITSZEIT", "00:00:00", "Timer inaktiv", Color.TURQUOISE)
-	
-	# 5. Offene Tasks
-	_add_stat("OFFENE TASKS", "12", "3 mit hoher Prio", Color.INDIAN_RED)
-	
-	# 6. Systemstatus
-	_add_stat("SYSTEMSTATUS", "Online", "Latenz: 24ms", Color.LIGHT_SEA_GREEN)
+	_build_dashboard()
 
 func _process(_delta: float) -> void:
-	# Aktualisiert die Arbeitszeit-Kachel in Echtzeit
-	_update_work_time_display()
+	_update_live_timer()
 
-func _update_work_time_display():
+func _build_dashboard() -> void:
+	# Grid leeren
+	for c in tile_grid.get_children(): c.queue_free()
+	work_time_card = null
+	
+	# Kacheln basierend auf Config laden
+	if Config.get_value("dashboard", "show_welcome", true):
+		_add_stat("BEGRÜSSUNG", "Hallo Chef", Time.get_date_string_from_system(), Color.CORNFLOWER_BLUE)
+
+	if Config.get_value("dashboard", "show_revenue", true):
+		_add_stat("UMSATZ (MONAT)", "42.150 €", "+ 18.4%", Color.PALE_GREEN)
+	
+	if Config.get_value("dashboard", "show_employees", true):
+		_add_stat("MITARBEITER", str(Store.get_employee_count()), "Alle aktiv", Color.WHITE)
+	
+	if Config.get_value("dashboard", "show_timer", true):
+		work_time_card = _add_stat("AKTUELLE ARBEITSZEIT", "00:00:00", "Timer inaktiv", Color.TURQUOISE)
+	
+	if Config.get_value("dashboard", "show_tasks", true):
+		_add_stat("OFFENE TASKS", "12", "3 mit hoher Prio", Color.INDIAN_RED)
+
+func _update_live_timer():
 	if work_time_card == null: return
 	
 	if Store.is_timer_running(uid):
-		var start_time = Store.get_timer_start(uid)
-		var current_time = Time.get_unix_time_from_system()
-		var elapsed = current_time - start_time
+		var start = Store.get_timer_start(uid)
+		var now = Time.get_unix_time_from_system()
+		var diff = now - start
 		
-		var hours = int(elapsed / 3600)
-		var minutes = int(fmod(elapsed, 3600) / 60)
-		var seconds = int(fmod(elapsed, 60))
+		var h = int(diff / 3600)
+		var m = int(fmod(diff, 3600) / 60)
+		var s = int(fmod(diff, 60))
 		
-		work_time_card.get_node("%Value").text = "%02d:%02d:%02d" % [hours, minutes, seconds]
-		work_time_card.get_node("%Trend").text = "Timer läuft aktiv"
-		work_time_card.get_node("%Trend").add_theme_color_override("font_color", Color.PALE_GREEN)
+		work_time_card.get_node("%Value").text = "%02d:%02d:%02d" % [h, m, s]
+		work_time_card.get_node("%Trend").text = "Timer läuft..."
+		work_time_card.get_node("%Trend").add_theme_color_override("font_color", Color.GREEN)
 	else:
 		work_time_card.get_node("%Value").text = "00:00:00"
-		work_time_card.get_node("%Trend").text = "Timer gestoppt"
-		work_time_card.get_node("%Trend").add_theme_color_override("font_color", Color.LIGHT_SLATE_GRAY)
+		work_time_card.get_node("%Trend").text = "Inaktiv"
+		work_time_card.get_node("%Trend").add_theme_color_override("font_color", Color.GRAY)
 
-func _add_stat(title: String, value: String, trend: String, color: Color) -> PanelContainer:
+func _add_stat(title, val, trend, col) -> PanelContainer:
 	var card = stat_card_scene.instantiate()
 	tile_grid.add_child(card)
-	
-	card.get_node("%Title").text = title.to_upper()
-	card.get_node("%Value").text = value
-	card.get_node("%Value").add_theme_color_override("font_color", color)
+	card.get_node("%Title").text = title
+	card.get_node("%Value").text = val
+	card.get_node("%Value").add_theme_color_override("font_color", col)
 	card.get_node("%Trend").text = trend
-	
-	# Animation beim Erscheinen
-	card.modulate.a = 0
-	var tween = create_tween()
-	tween.tween_property(card, "modulate:a", 1.0, 0.3).set_delay(tile_grid.get_child_count() * 0.05)
-	
 	return card
+
+func _on_config_changed(section, _key, _val):
+	if section == "dashboard":
+		_build_dashboard()

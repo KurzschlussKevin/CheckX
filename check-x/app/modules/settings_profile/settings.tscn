@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://dl2hrgupumeys"]
 
 [ext_resource type="Script" uid="uid://b5mp6tkn2mbe5" path="res://app/modules/settings_profile/settings.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://b01ayjqtxk5e1" path="res://app/modules/settings_profile/settings_personal.tscn" id="2_personal"]
-[ext_resource type="PackedScene" uid="uid://n4bnv3eogad3" path="res://app/modules/settings_profile/settings_business.tscn" id="3_business"]
-[ext_resource type="PackedScene" uid="uid://de55xerid56yi" path="res://app/modules/settings_profile/settings_tech.tscn" id="4_tech"]
+[ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_personal.tscn" id="2_personal"]
+[ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_business.tscn" id="3_business"]
+[ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_tech.tscn" id="4_tech"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.05, 0.05, 0.07, 1)

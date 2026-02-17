@@ -1,62 +1,99 @@
 extends Control
 
-# Wir suchen die Nodes jetzt dynamisch, da sie in Sub-Szenen liegen
-@onready var name_input = find_child("NameInput", true, false)
-@onready var email_input = find_child("EmailInput", true, false)
-@onready var save_profile_btn = find_child("SaveProfileBtn", true, false)
+# --- UI REFERENZEN (Dynamische Suche in Sub-Szenen) ---
+# Wir nutzen Lazy-Loading Variablen, damit sie erst gesucht werden, wenn die Szene bereit ist
 
-@onready var dark_mode_check = find_child("DarkModeCheck", true, false)
-@onready var font_size_slider = find_child("FontSizeSlider", true, false)
+@onready var save_btn = find_child("SaveProfileBtn", true, false)
 
-@onready var default_project_input = find_child("DefaultProjectInput", true, false)
-@onready var auto_stop_check = find_child("AutoStopCheck", true, false)
-@onready var two_factor_check = find_child("TwoFactorCheck", true, false)
+# Profil
+@onready var inp_name = find_child("NameInput", true, false)
+@onready var inp_job = find_child("JobTitleInput", true, false)
+@onready var inp_mail = find_child("EmailInput", true, false)
+
+# Dashboard Konfig (Checkboxen aus settings_personal.tscn)
+@onready var check_welcome = find_child("Check1", true, false)
+@onready var check_revenue = find_child("Check2", true, false)
+@onready var check_emp = find_child("Check3", true, false)
+@onready var check_tasks = find_child("Check4", true, false)
+@onready var check_timer = find_child("Check5", true, false)
+
+# Darstellung
+@onready var check_dark = find_child("DarkModeCheck", true, false)
+@onready var slider_scale = find_child("UIScaleSlider", true, false)
 
 func _ready() -> void:
+	# Warten bis alle Sub-Szenen geladen sind
 	await get_tree().process_frame
-	_load_settings_from_store()
+	
+	_load_values()
 	_connect_signals()
 
-func _load_settings_from_store() -> void:
-	# Benutzerdaten laden
+func _load_values() -> void:
+	# 1. Benutzerdaten aus Store oder Config laden
 	var employees = Store.get_all_employees()
 	if employees.size() > 0:
-		var user = employees[0]
-		if name_input: name_input.text = user.name
-		if email_input: email_input.text = user.mail
+		var u = employees[0]
+		if inp_name: inp_name.text = u.name
+		if inp_mail: inp_mail.text = u.mail
+		# Job Title laden wir aus Config, falls im Store nicht vorhanden
+		if inp_job: inp_job.text = Config.get_value("user", "job_title", "")
+
+	# 2. Checkboxen setzen
+	if check_welcome: check_welcome.button_pressed = Config.get_value("dashboard", "show_welcome", true)
+	if check_revenue: check_revenue.button_pressed = Config.get_value("dashboard", "show_revenue", true)
+	if check_emp: check_emp.button_pressed = Config.get_value("dashboard", "show_employees", true)
+	if check_tasks: check_tasks.button_pressed = Config.get_value("dashboard", "show_tasks", true)
+	if check_timer: check_timer.button_pressed = Config.get_value("dashboard", "show_timer", true)
 	
-	# Einstellungen laden (Mockup)
-	if dark_mode_check: dark_mode_check.button_pressed = true 
-	if font_size_slider: font_size_slider.value = 16
+	if check_dark: check_dark.button_pressed = Config.get_value("general", "dark_mode", true)
+	if slider_scale: slider_scale.value = Config.get_value("general", "ui_scale", 1.0)
 
 func _connect_signals() -> void:
-	if save_profile_btn:
-		save_profile_btn.pressed.connect(_on_save_pressed)
+	if save_btn: save_btn.pressed.connect(_on_save)
 	
-	if font_size_slider:
-		font_size_slider.value_changed.connect(func(v): print("Schriftgröße:", v))
+	# Live-Update Signale für Dashboard
+	if check_welcome: check_welcome.toggled.connect(func(v): Config.set_value("dashboard", "show_welcome", v))
+	if check_revenue: check_revenue.toggled.connect(func(v): Config.set_value("dashboard", "show_revenue", v))
+	if check_emp: check_emp.toggled.connect(func(v): Config.set_value("dashboard", "show_employees", v))
+	if check_tasks: check_tasks.toggled.connect(func(v): Config.set_value("dashboard", "show_tasks", v))
+	if check_timer: check_timer.toggled.connect(func(v): Config.set_value("dashboard", "show_timer", v))
+	
+	# Live-Update Darstellung
+	if slider_scale: 
+		slider_scale.value_changed.connect(func(v): 
+			Config.set_value("general", "ui_scale", v)
+			get_window().content_scale_factor = v
+		)
 
-func _on_save_pressed() -> void:
-	if not save_profile_btn: return
+func _on_save() -> void:
+	if not save_btn: return
 	
-	save_profile_btn.text = "WIRD GESPEICHERT..."
-	save_profile_btn.disabled = true
+	# UI Feedback
+	var old_text = save_btn.text
+	save_btn.text = "SPEICHERT..."
+	save_btn.disabled = true
 	
-	await get_tree().create_timer(0.6).timeout
+	# Simuliere Speichern
+	await get_tree().create_timer(0.5).timeout
 	
-	var employees = Store.get_all_employees()
-	if employees.size() > 0 and name_input and email_input:
-		Store.update_employee(employees[0], {
-			"name": name_input.text, 
-			"mail": email_input.text
+	# Store Update (Simulation)
+	var emps = Store.get_all_employees()
+	if emps.size() > 0:
+		Store.update_employee(emps[0], {
+			"name": inp_name.text if inp_name else "",
+			"mail": inp_mail.text if inp_mail else ""
 		})
 	
-	save_profile_btn.text = "GESPEICHERT ✔"
-	save_profile_btn.modulate = Color(0.4, 0.9, 0.5)
+	# Job Titel in Config speichern
+	if inp_job: Config.set_value("user", "job_title", inp_job.text)
 	
-	await get_tree().create_timer(1.5).timeout
+	# Erfolg
+	save_btn.text = "GESPEICHERT ✔"
+	save_btn.modulate = Color.GREEN
 	
-	if is_instance_valid(save_profile_btn):
-		save_profile_btn.text = "ÄNDERUNGEN SPEICHERN"
-		save_profile_btn.modulate = Color.WHITE
-		save_profile_btn.disabled = false
+	await get_tree().create_timer(1.0).timeout
+	
+	if is_instance_valid(save_btn):
+		save_btn.text = old_text
+		save_btn.modulate = Color.WHITE
+		save_btn.disabled = false
