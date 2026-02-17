@@ -137,3 +137,28 @@ func get_all_employees() -> Array: return employees
 func get_employee_count() -> int: return employees.size()
 func is_timer_running(emp_id: String) -> bool: return active_timer_state.has(emp_id)
 func get_timer_start(emp_id: String) -> float: return active_timer_state.get(emp_id, 0.0)
+
+
+# --- ABFRAGEN (CACHE) ---
+
+# Gibt alle Einträge für einen bestimmten Mitarbeiter an einem Datum zurück
+func get_entries_for_date(emp_id: String, date_str: String) -> Array:
+	return time_entries.filter(func(e): 
+		return str(e.get("emp_id")) == emp_id and e.get("date") == date_str
+	)
+
+# Gibt die gesamte Historie eines Mitarbeiters zurück
+func get_entries_by_employee(emp_id: String) -> Array:
+	return time_entries.filter(func(e): 
+		return str(e.get("emp_id")) == emp_id
+	)
+
+func request_vacation(emp_id: String, start_date: String, end_date: String, type: String) -> void:
+	var url = get_api_url() + "/time/request_vacation"
+	var body = {
+		"emp_id": emp_id,
+		"start_date": start_date,
+		"end_date": end_date,
+		"vacation_type": type
+	}
+	_send_post(url, body)

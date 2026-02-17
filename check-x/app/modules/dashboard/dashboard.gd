@@ -4,7 +4,7 @@ extends Control
 var stat_card_scene = preload("res://app/modules/dashboard/stat_card.tscn")
 
 var work_time_card = null
-var uid = "001"
+var uid = "001" # HINWEIS: Sollte dynamisch über Store.get_current_user_id() gesetzt werden
 
 func _ready() -> void:
 	# Auf Einstellungsänderungen hören

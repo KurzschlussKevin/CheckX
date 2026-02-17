@@ -4,8 +4,8 @@ extends Control
 @onready var main_layout = $MainLayout
 @onready var module_container = $MainLayout/ContentLayout/ModuleContainer
 @onready var page_title = $MainLayout/ContentLayout/TopBar/Margin/HBox/PageTitle
-# Pfad zur Sidebar-VBox, wo die Buttons landen sollen
 @onready var nav_container = $MainLayout/Sidebar/Margin/VBox/NavButtons
+@onready var user_name_label = %UserName
 
 # Vorlage für die Buttons laden
 var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
@@ -15,19 +15,24 @@ var modules = {
 	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
 	"Zeiterfassung": "res://app/modules/time/time_tracking_new.tscn",
 	"Mitarbeiter": "res://app/modules/employees/employees.tscn",
-	"Einstellungen": "res://app/modules/settings_profile/settings.tscn"
+	"Einstellungen": "res://app/modules/settings_profile/settings.tscn",
+	"Admin-Panel": "res://app/modules/admin/admin_panel.tscn"
 }
 
 func _ready() -> void:
 	# 1. FENSTER MAXIMIEREN
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 	
+	# Benutzername in der TopBar anzeigen
+	if user_name_label:
+		user_name_label.text = Store.current_user.get("name", "Gast")
+	
 	# Sicherheits-Check: Existiert der Container für die Buttons?
 	if nav_container == null:
-		printerr("Fehler: NavButtons Container wurde nicht gefunden! Prüfe den Pfad in main.gd.")
+		printerr("Fehler: NavButtons Container nicht gefunden!")
 		return
 	
-	# 2. Sidebar mit Buttons füllen
+	# 2. Sidebar mit Buttons füllen (inkl. Rollenprüfung)
 	_setup_sidebar()
 	
 	# 3. Das Dashboard als Startseite laden
@@ -43,8 +48,15 @@ func _setup_sidebar() -> void:
 	for child in nav_container.get_children():
 		child.queue_free()
 	
+	# Aktuelle Rolle aus dem Store abrufen
+	var user_role = Store.current_user.get("role", "Prüfer")
+	
 	# Für jeden Eintrag in 'modules' einen Button erstellen
 	for module_name in modules:
+		# ADMIN-CHECK: Das Admin-Panel nur anzeigen, wenn die Rolle 'Admin' ist
+		if module_name == "Admin-Panel" and user_role != "Admin":
+			continue
+			
 		var btn = nav_button_scene.instantiate()
 		btn.text = "  " + module_name
 		
@@ -59,14 +71,17 @@ func load_module(path: String, title: String = "") -> void:
 	
 	if not module_container: return
 	
+	# Aktuelles Modul entfernen
 	for child in module_container.get_children():
 		child.queue_free()
 	
+	# Neue Szene laden und instanziieren
 	if ResourceLoader.exists(path):
 		var scene = load(path)
 		var instance = scene.instantiate()
 		module_container.add_child(instance)
 		
+		# Einblend-Animation für das Modul
 		instance.modulate.a = 0
 		var t = create_tween()
 		t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)

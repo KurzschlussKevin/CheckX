@@ -85,8 +85,8 @@ func _update_cal():
 			btn.add_theme_stylebox_override("normal", style_today)
 		
 		# Farbe basierend auf vorhandenen Einträgen
-		if Store.get_entries_for_date(uid, ds).size() > 0:
-			btn.modulate = Color(0.4, 1.0, 0.6)
+		if Store.get_entries_for_date(str(uid), ds).size() > 0:
+			btn.modulate = Color(0.4, 1.0, 0.6) # Grün markieren
 		else: 
 			btn.modulate = Color(1, 1, 1, 0.6)
 		

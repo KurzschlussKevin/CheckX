@@ -34,7 +34,7 @@ func _toggle_timer():
 		var project = %ProjectInput.text
 		var notes = %NotesInput.text
 		
-		Store.stop_timer(uid, project, notes)
+		Store.stop_timer(project, notes)
 		
 		# UI zurücksetzen
 		%StartBtn.text = "START"

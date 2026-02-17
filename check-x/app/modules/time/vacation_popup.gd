@@ -70,7 +70,9 @@ func _click(ds):
 
 func _save():
 	if start != "" and end != "":
-		Store.request_vacation(uid, start, end, "Erholung")
+		# Typ aus OptionButton holen
+		var type_str = %TypeOption.get_item_text(%TypeOption.selected)
+		Store.request_vacation(uid, start, end, type_str)
 		visible = false
 		emit_signal("requested")
 
