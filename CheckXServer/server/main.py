@@ -90,3 +90,11 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+@app.get("/absences/me")
+def route_my_absences(emp_id: str):
+    return absences.get_user_absences(emp_id)
+
+@app.get("/absences/calendar")
+def route_team_calendar():
+    return absences.get_all_approved_absences()
