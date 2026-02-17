@@ -4,14 +4,21 @@ extends Control
 var stat_card_scene = preload("res://app/modules/dashboard/stat_card.tscn")
 
 var work_time_card = null
-var uid = "001" # HINWEIS: Sollte dynamisch über Store.get_current_user_id() gesetzt werden
+var uid = "" 
 
 func _ready() -> void:
+	# Mitarbeiter-ID dynamisch vom Store beziehen
+	uid = Store.get_current_user_id()
+	
 	# Auf Einstellungsänderungen hören
 	if Config.has_signal("settings_changed"):
 		Config.settings_changed.connect(_on_config_changed)
 	
+	# Dashboard initial aufbauen
 	_build_dashboard()
+	
+	# Eigenen Urlaubsstatus vom Server laden
+	_load_my_vacation_status()
 
 func _process(_delta: float) -> void:
 	_update_live_timer()
@@ -40,6 +47,7 @@ func _build_dashboard() -> void:
 func _update_live_timer():
 	if work_time_card == null: return
 	
+	# Prüfen, ob der Timer für die aktuelle UID läuft
 	if Store.is_timer_running(uid):
 		var start = Store.get_timer_start(uid)
 		var now = Time.get_unix_time_from_system()
@@ -65,6 +73,32 @@ func _add_stat(title, val, trend, col) -> PanelContainer:
 	card.get_node("%Value").add_theme_color_override("font_color", col)
 	card.get_node("%Trend").text = trend
 	return card
+
+# --- NEU: Urlaubsstatus-Integration ---
+
+func _load_my_vacation_status():
+	if uid == "": return
+	
+	var url = Store.get_api_url() + "/absences/me?emp_id=" + uid
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(_on_status_received)
+	http.request(url)
+
+func _on_status_received(_result, response_code, _headers, body):
+	if response_code == 200:
+		var data = JSON.parse_string(body.get_string_from_utf8())
+		if data is Array and data.size() > 0:
+			var latest = data[0] # Den aktuellsten Antrag anzeigen
+			var status_text = latest.get("status", "unbekannt")
+			
+			# Farbe basierend auf dem Status festlegen
+			var color = Color.YELLOW
+			if status_text == "approved": color = Color.GREEN
+			elif status_text == "rejected": color = Color.RED
+			
+			# Eine neue Status-Kachel zum Dashboard hinzufügen
+			_add_stat("URLAUBSSTATUS", status_text.to_upper(), "Antrag vom: " + latest.get("start_date", ""), color)
 
 func _on_config_changed(section, _key, _val):
 	if section == "dashboard":

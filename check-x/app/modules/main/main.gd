@@ -14,6 +14,7 @@ var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
 var modules = {
 	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
 	"Zeiterfassung": "res://app/modules/time/time_tracking_new.tscn",
+	"Team-Urlaub": "res://app/modules/team_calendar/team_calendar.tscn",
 	"Mitarbeiter": "res://app/modules/employees/employees.tscn",
 	"Einstellungen": "res://app/modules/settings_profile/settings.tscn",
 	"Admin-Panel": "res://app/modules/admin/admin_panel.tscn"

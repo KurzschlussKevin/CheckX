@@ -1,0 +1,156 @@
+[gd_scene format=3 uid="uid://3m7t4nyoc3ih"]
+
+[ext_resource type="Script" uid="uid://cu6ide38k8b5d" path="res://app/modules/team_calendar/team_calendar.gd" id="1_logic"]
+
+[node name="TeamCalendar" type="Control" unique_id=580960]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_logic")
+
+[node name="Bg" type="ColorRect" parent="." unique_id=338671064]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="MainLayout" type="HBoxContainer" parent="." unique_id=651040742]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="LeftArea" type="VBoxContainer" parent="MainLayout" unique_id=1586408405]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="HeaderBar" type="HBoxContainer" parent="MainLayout/LeftArea" unique_id=1765487378]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=887585878]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar/Margin" unique_id=1458359831]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TodayBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/Margin/HBox" unique_id=1259549627]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "HEUTE"
+
+[node name="YearViewBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/Margin/HBox" unique_id=1605627481]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+toggle_mode = true
+text = "JAHRESANSICHT"
+
+[node name="Spacer" type="Control" parent="MainLayout/LeftArea/HeaderBar" unique_id=841555745]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NavBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=1460164911]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PrevBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=689141282]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = "<"
+
+[node name="MonthLabel" type="Label" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=274072134]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "JANUAR 2026"
+horizontal_alignment = 1
+
+[node name="NextBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=165214963]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = ">"
+
+[node name="MarginRight" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=1725181968]
+layout_mode = 2
+theme_override_constants/margin_right = 20
+
+[node name="Scroll" type="ScrollContainer" parent="MainLayout/LeftArea" unique_id=738861716]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Centerer" type="CenterContainer" parent="MainLayout/LeftArea/Scroll" unique_id=381373288]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Grid" type="GridContainer" parent="MainLayout/LeftArea/Scroll/Centerer" unique_id=329998520]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 7
+
+[node name="Sidebar" type="PanelContainer" parent="MainLayout" unique_id=285339150]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/Sidebar" unique_id=816699141]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MainLayout/Sidebar/Margin" unique_id=1301948666]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="StatsTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=638630161]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "STATISTIK (MONAT)"
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=741770738]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Lade Daten..."
+
+[node name="ExportBtn" type="Button" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1241471171]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Diesen Monat Exportieren"
+
+[node name="DetailTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=718101461]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "DETAILS"
+horizontal_alignment = 1
+
+[node name="InfoLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1441378360]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+bbcode_enabled = true
+text = "[color=gray]Wähle einen Tag aus[/color]"
