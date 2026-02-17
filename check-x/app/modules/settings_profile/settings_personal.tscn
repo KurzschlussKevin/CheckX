@@ -1,0 +1,378 @@
+[gd_scene load_steps=3 format=3 uid="uid://settings_part_personal_full"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+border_width_top = 2
+border_color = Color(0.2, 0.6, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 20.0
+content_margin_top = 15.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.14, 0.14, 0.16, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PersonalSettings" type="TabContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
+current_tab = 0
+
+[node name="Profil" type="ScrollContainer" parent="."]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="M" type="MarginContainer" parent="Profil"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Profil/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Personal" type="PanelContainer" parent="Profil/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Personal"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Profil/M/V/Card_Personal/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
+text = "Stammdaten"
+
+[node name="NameInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Vorname Nachname"
+
+[node name="JobTitleInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Jobtitel / Rolle"
+
+[node name="EmpIdInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Personalnummer (P-XXXX)"
+editable = false
+
+[node name="DeptInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Abteilung"
+
+[node name="Card_Contact" type="PanelContainer" parent="Profil/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Contact"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Profil/M/V/Card_Contact/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.5, 1)
+text = "Kontakt & Zeit"
+
+[node name="EmailInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "E-Mail Adresse"
+
+[node name="PhoneInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Telefon / Mobil"
+
+[node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Europe/Berlin (UTC+1)"
+popup/item_0/id = 0
+popup/item_1/text = "Europe/London (UTC+0)"
+popup/item_1/id = 1
+
+[node name="Card_Status" type="PanelContainer" parent="Profil/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Status"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Profil/M/V/Card_Status/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.5, 1)
+text = "Status & Verfügbarkeit"
+
+[node name="StatusMsgInput" type="LineEdit" parent="Profil/M/V/Card_Status/V"]
+layout_mode = 2
+placeholder_text = "Aktueller Status (z.B. Homeoffice)"
+
+[node name="ShareStatusCheck" type="CheckBox" parent="Profil/M/V/Card_Status/V"]
+layout_mode = 2
+button_pressed = true
+text = "Status im Team teilen"
+
+[node name="VacationRepOption" type="OptionButton" parent="Profil/M/V/Card_Status/V"]
+layout_mode = 2
+item_count = 1
+selected = 0
+popup/item_0/text = "Urlaubsvertretung wählen..."
+popup/item_0/id = 0
+
+[node name="Card_Signatur" type="PanelContainer" parent="Profil/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Signatur"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Profil/M/V/Card_Signatur/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "E-Mail Signatur"
+
+[node name="SignaturEdit" type="TextEdit" parent="Profil/M/V/Card_Signatur/V"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+placeholder_text = "Mit freundlichen Grüßen..."
+
+[node name="SaveProfileBtn" type="Button" parent="Profil/M"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_vertical = 8
+text = "ÄNDERUNGEN SPEICHERN"
+
+[node name="Darstellung" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="M" type="MarginContainer" parent="Darstellung"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Darstellung/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Theme" type="PanelContainer" parent="Darstellung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Theme"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Theme/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.4, 0.8, 1)
+text = "Interface"
+
+[node name="DarkModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Dark Mode aktivieren"
+
+[node name="SystemThemeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+layout_mode = 2
+text = "Thema an System anpassen"
+
+[node name="CompactModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kompakte Listenansicht"
+
+[node name="ShowAvatarsCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+layout_mode = 2
+button_pressed = true
+text = "Avatare anzeigen"
+
+[node name="Card_Format" type="PanelContainer" parent="Darstellung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Format"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Format/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+text = "Formate"
+
+[node name="DateFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "DD.MM.YYYY"
+popup/item_0/id = 0
+popup/item_1/text = "YYYY-MM-DD"
+popup/item_1/id = 1
+
+[node name="NumberFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "1.000,00 (DE)"
+popup/item_0/id = 0
+popup/item_1/text = "1,000.00 (US)"
+popup/item_1/id = 1
+
+[node name="WeekStartOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Wochenstart: Montag"
+popup/item_0/id = 0
+popup/item_1/text = "Wochenstart: Sonntag"
+popup/item_1/id = 1
+
+[node name="Card_Access" type="PanelContainer" parent="Darstellung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Access"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Access/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+text = "Barrierefreiheit"
+
+[node name="FontSizeSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 10.0
+max_value = 30.0
+value = 16.0
+
+[node name="Label2" type="Label" parent="Darstellung/M/V/Card_Access/V"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Schriftgröße"
+horizontal_alignment = 2
+
+[node name="UIScaleSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V"]
+layout_mode = 2
+min_value = 0.8
+max_value = 1.5
+step = 0.1
+value = 1.0
+
+[node name="HighContrastCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V"]
+layout_mode = 2
+text = "Hoher Kontrast"
+
+[node name="ReducedMotionCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V"]
+layout_mode = 2
+text = "Animationen reduzieren"
+
+[node name="Dashboard" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="M" type="MarginContainer" parent="Dashboard"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Dashboard/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Widgets" type="PanelContainer" parent="Dashboard/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Widgets"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
+text = "Sichtbare Kacheln"
+
+[node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+button_pressed = true
+text = "Begrüßung & Datum"
+
+[node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+button_pressed = true
+text = "Umsatz-Statistik"
+
+[node name="Check3" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+button_pressed = true
+text = "Mitarbeiter-Status"
+
+[node name="Check4" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+button_pressed = true
+text = "Offene Tickets"
+
+[node name="Check5" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+layout_mode = 2
+button_pressed = true
+text = "Mini-Timer"
+
+[node name="Card_Layout" type="PanelContainer" parent="Dashboard/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Layout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Layout/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
+text = "Verhalten"
+
+[node name="ColOption" type="OptionButton" parent="Dashboard/M/V/Card_Layout/V"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Spalten: Automatisch"
+popup/item_0/id = 0
+popup/item_1/text = "Spalten: 3 Fest"
+popup/item_1/id = 1
+
+[node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V"]
+layout_mode = 2
+prefix = "Refresh (Sek):"
+value = 30.0

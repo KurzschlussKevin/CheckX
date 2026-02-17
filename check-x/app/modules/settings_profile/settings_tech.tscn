@@ -1,0 +1,367 @@
+[gd_scene load_steps=3 format=3 uid="uid://settings_part_tech_full"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+border_width_top = 2
+border_color = Color(0.2, 0.6, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 20.0
+content_margin_top = 15.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.14, 0.14, 0.16, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="TechSettings" type="TabContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
+current_tab = 0
+
+[node name="System" type="ScrollContainer" parent="."]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="M" type="MarginContainer" parent="System"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="System/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_App" type="PanelContainer" parent="System/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_App"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="System/M/V/Card_App/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+text = "Anwendung"
+
+[node name="StartOnBootCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+layout_mode = 2
+text = "Autostart mit Windows"
+
+[node name="MinimizeToTrayCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+layout_mode = 2
+text = "In Tray minimieren"
+
+[node name="AutoUpdateCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+layout_mode = 2
+button_pressed = true
+text = "Auto-Updates"
+
+[node name="Card_Server" type="PanelContainer" parent="System/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Server"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="System/M/V/Card_Server/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
+text = "Server & Verbindung"
+
+[node name="ServerHostInput" type="LineEdit" parent="System/M/V/Card_Server/V"]
+layout_mode = 2
+placeholder_text = "https://api.checkx.com"
+
+[node name="ServerPortSpin" type="SpinBox" parent="System/M/V/Card_Server/V"]
+layout_mode = 2
+prefix = "Port:"
+max_value = 65535.0
+value = 443.0
+
+[node name="AuthProxyCheck" type="CheckBox" parent="System/M/V/Card_Server/V"]
+layout_mode = 2
+text = "Proxy-Auth nutzen"
+
+[node name="TestConnectionBtn" type="Button" parent="System/M/V/Card_Server/V"]
+layout_mode = 2
+text = "Verbindung testen"
+
+[node name="Card_Files" type="PanelContainer" parent="System/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Files"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+text = "Dateien & Speicher"
+
+[node name="DownloadPathInput" type="LineEdit" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+placeholder_text = "Download-Pfad..."
+
+[node name="OfflineCacheCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+text = "Offline-Cache aktiv"
+
+[node name="UploadLimitSpin" type="SpinBox" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+prefix = "Upload Limit (MB):"
+value = 10.0
+
+[node name="ImgCompressCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+text = "Bilder komprimieren"
+
+[node name="TempCleanCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+layout_mode = 2
+button_pressed = true
+text = "Temp-Dateien beim Beenden löschen"
+
+[node name="Card_Security" type="PanelContainer" parent="System/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Security"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="System/M/V/Card_Security/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+text = "Sicherheit & DSGVO"
+
+[node name="TwoFactorCheck" type="CheckBox" parent="System/M/V/Card_Security/V"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "2FA Aktivieren"
+
+[node name="AppLockCheck" type="CheckBox" parent="System/M/V/Card_Security/V"]
+layout_mode = 2
+text = "Auto-Lock bei Inaktivität"
+
+[node name="DataLimitSpin" type="SpinBox" parent="System/M/V/Card_Security/V"]
+layout_mode = 2
+prefix = "Logs löschen nach (Tagen):"
+value = 30.0
+
+[node name="ClearCacheBtn" type="Button" parent="System/M/V/Card_Security/V"]
+layout_mode = 2
+text = "Cache leeren & Neustart"
+
+[node name="Integration" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="M" type="MarginContainer" parent="Integration"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Integration/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Sync" type="PanelContainer" parent="Integration/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Sync"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Integration/M/V/Card_Sync/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+text = "Kalender Sync"
+
+[node name="OutlookSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+layout_mode = 2
+text = "Outlook synchronisieren"
+
+[node name="GoogleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+layout_mode = 2
+text = "Google Calendar"
+
+[node name="AppleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+layout_mode = 2
+text = "Apple iCloud"
+
+[node name="Card_Connect" type="PanelContainer" parent="Integration/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Connect"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Integration/M/V/Card_Connect/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.9, 1)
+text = "Webhooks & Messenger"
+
+[node name="SlackInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V"]
+layout_mode = 2
+placeholder_text = "Slack Webhook URL"
+
+[node name="TeamsCheck" type="CheckBox" parent="Integration/M/V/Card_Connect/V"]
+layout_mode = 2
+text = "Teams Status koppeln"
+
+[node name="ApiTokenInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V"]
+layout_mode = 2
+placeholder_text = "API Personal Token"
+secret = true
+
+[node name="Automatisierung" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="M" type="MarginContainer" parent="Automatisierung"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Automatisierung/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Intel" type="PanelContainer" parent="Automatisierung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Intel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Intel/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.4, 1, 1)
+text = "KI & Smart Features"
+
+[node name="OCRCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V"]
+layout_mode = 2
+text = "OCR Beleg-Scan"
+
+[node name="KISuggestCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V"]
+layout_mode = 2
+text = "KI-Projektvorschläge"
+
+[node name="Card_Work" type="PanelContainer" parent="Automatisierung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Work"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Work/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.3, 0.5, 1)
+text = "Workflows"
+
+[node name="AutoPauseCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+layout_mode = 2
+text = "Auto-Pause (6h)"
+
+[node name="FeierabendCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+layout_mode = 2
+text = "Feierabend-Warnung"
+
+[node name="ArchiveCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+layout_mode = 2
+text = "Auto-Archivierung (30 Tage)"
+
+[node name="Benachrichtigung" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3
+
+[node name="M" type="MarginContainer" parent="Benachrichtigung"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Card_Notify" type="PanelContainer" parent="Benachrichtigung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Notify"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Notify/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+text = "Kanäle & Sounds"
+
+[node name="DesktopNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+layout_mode = 2
+button_pressed = true
+text = "Desktop-Popups"
+
+[node name="SoundNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+layout_mode = 2
+text = "Sound-Feedback"
+
+[node name="EmailReportCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+layout_mode = 2
+text = "E-Mail Tagesbericht"
+
+[node name="Card_Events" type="PanelContainer" parent="Benachrichtigung/M/V"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Events"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Events/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Auslöser"
+
+[node name="NotifyTimerCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+layout_mode = 2
+text = "Timer > 10 Std Warnung"
+
+[node name="NotifyVacationCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+layout_mode = 2
+text = "Urlaubs-Status Updates"
+
+[node name="NotifyBreakCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+layout_mode = 2
+text = "Pausenerinnerung"

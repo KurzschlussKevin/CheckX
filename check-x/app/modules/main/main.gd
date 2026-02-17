@@ -15,7 +15,7 @@ var modules = {
 	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
 	"Zeiterfassung": "res://app/modules/time/time_tracking_new.tscn",
 	"Mitarbeiter": "res://app/modules/employees/employees.tscn",
-	"Einstellungen": "res://app/modules/settings/settings.tscn"
+	"Einstellungen": "res://app/modules/settings_profile/settings.tscn"
 }
 
 func _ready() -> void:

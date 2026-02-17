@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://dl2hrgupumeys"]
+
+[ext_resource type="Script" uid="uid://b5mp6tkn2mbe5" path="res://app/modules/settings_profile/settings.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://b01ayjqtxk5e1" path="res://app/modules/settings_profile/settings_personal.tscn" id="2_personal"]
+[ext_resource type="PackedScene" uid="uid://n4bnv3eogad3" path="res://app/modules/settings_profile/settings_business.tscn" id="3_business"]
+[ext_resource type="PackedScene" uid="uid://de55xerid56yi" path="res://app/modules/settings_profile/settings_tech.tscn" id="4_tech"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="Settings" type="Control" unique_id=64228202]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="." unique_id=362740066]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="MainMargin" type="MarginContainer" parent="." unique_id=211519153]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBox" type="VBoxContainer" parent="MainMargin" unique_id=50091050]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HeaderHBox" type="HBoxContainer" parent="MainMargin/VBox" unique_id=19991214]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MainMargin/VBox/HeaderHBox" unique_id=1880539819]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 32
+text = "⚙ EINSTELLUNGEN"
+
+[node name="Spacer" type="Control" parent="MainMargin/VBox/HeaderHBox" unique_id=1617764918]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VersionLabel" type="Label" parent="MainMargin/VBox/HeaderHBox" unique_id=1015704792]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+text = "v3.0.0 Modular"
+
+[node name="MainTabs" type="TabContainer" parent="MainMargin/VBox" unique_id=970236224]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="👤 Persönlich" parent="MainMargin/VBox/MainTabs" unique_id=1466920202 instance=ExtResource("2_personal")]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="💼 Business" parent="MainMargin/VBox/MainTabs" unique_id=1091690431 instance=ExtResource("3_business")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="🖥️ Technik" parent="MainMargin/VBox/MainTabs" unique_id=1006520783 instance=ExtResource("4_tech")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
