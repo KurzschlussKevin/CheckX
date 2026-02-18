@@ -175,6 +175,22 @@ def route_team_calendar(year: int, month: int):
 def route_get_dashboard_stats(emp_id: str):
     return dashboard.get_stats(emp_id)
 
+@app.post("/time/manual")
+async def route_add_manual_time(data: dict):
+    from time_tracking import add_manual_entry
+    # Wir reichen die Daten an eine Funktion in der time_tracking.py weiter
+    return add_manual_entry(
+        data.get("emp_id"),
+        data.get("date"),
+        data.get("duration"),
+        data.get("project")
+    )
+
+@app.get("/time/stats/daily")
+async def route_daily_stats(emp_id: str, date: str):
+    from time_tracking import get_daily_stats
+    return get_daily_stats(emp_id, date)
+
 # --- SYSTEM-START ---
 
 @app.on_event("startup")
