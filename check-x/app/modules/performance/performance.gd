@@ -9,6 +9,7 @@ extends Control
 @onready var history_list = %HistoryList
 @onready var progress_bar = %ProgressBar
 @onready var progress_label = %ProgressLabel
+@onready var export_btn = %ExportPdfBtn # NEU
 
 # Popup & Vorlagen
 @onready var popup = %CustomerPopup
@@ -43,6 +44,7 @@ extends Control
 
 var current_uid = ""
 var all_services_cache = []
+var last_saved_report_id = -1 # ID des letzten Berichts für den Export
 
 # --- FARBEN FÜR ZEBRA-LOOK ---
 const COLOR_ROW_A = Color(0.08, 0.08, 0.10, 1.0) # Sehr dunkel
@@ -55,6 +57,7 @@ func _ready():
 	%ManageBtn.pressed.connect(_open_customer_popup)
 	%CancelCustomerBtn.pressed.connect(func(): popup.visible = false)
 	%SaveCustomerBtn.pressed.connect(_on_save_customer)
+	export_btn.pressed.connect(_on_export_pdf) # NEU
 	
 	customer_opt.item_selected.connect(_on_customer_selected)
 	check_billing.toggled.connect(func(v): billing_grid.visible = v)
@@ -94,15 +97,13 @@ func _fetch_customers():
 	)
 	http.request(url)
 
-# --- INTELLIGENTE SUCHE & FILTER (HAUPTFENSTER) ---
+# --- INTELLIGENTE SUCHE & FILTER ---
 func _on_search_text_changed(txt):
 	var filter = txt.to_lower()
 	var visible_count = 0
-	
 	for child in table_container.get_children():
 		if child is PanelContainer and child.has_meta("service_name"):
 			var s_name = child.get_meta("service_name").to_lower()
-			
 			if filter.is_empty() or filter in s_name:
 				child.visible = true
 				_apply_row_color(child, visible_count % 2 != 0)
@@ -115,12 +116,13 @@ func _apply_row_color(panel: PanelContainer, is_highlighted: bool):
 	style.bg_color = COLOR_ROW_B if is_highlighted else COLOR_ROW_A
 	panel.add_theme_stylebox_override("panel", style)
 
-# --- TABELLE BAUEN (HAUPTFENSTER) ---
+# --- TABELLE BAUEN ---
 func _on_customer_selected(idx):
 	var cid = customer_opt.get_item_id(idx)
 	if cid <= 0: return
 	
 	for c in table_container.get_children(): c.queue_free()
+	last_saved_report_id = -1 # Reset
 	
 	var url = Store.get_api_url() + "/performance/progress?customer_id=" + str(cid)
 	var http = HTTPRequest.new(); add_child(http)
@@ -219,7 +221,7 @@ func _add_performance_row(item, is_darker):
 	panel.add_child(row)
 	table_container.add_child(panel)
 
-# --- SPEICHERN (HAUPTFENSTER) ---
+# --- SPEICHERN ---
 func _on_save_performance():
 	var cid = customer_opt.get_item_id(customer_opt.selected)
 	if cid <= 0:
@@ -229,11 +231,23 @@ func _on_save_performance():
 	for panel in table_container.get_children():
 		if panel.visible and panel.has_meta("service_id"):
 			var row = panel.get_child(0)
-			var spin = row.get_child(5)
-			if spin.value > 0:
-				details.append({"service_id": panel.get_meta("service_id"), "amount": int(spin.value)})
+			
+			# FIX: Wir suchen einfach nach IRGENDEINER SpinBox in der Zeile.
+			# In der Hauptansicht gibt es pro Zeile nur eine (die für die Menge).
+			for child in row.get_children():
+				if child is SpinBox:
+					if child.value > 0:
+						details.append({
+							"service_id": panel.get_meta("service_id"), 
+							"amount": int(child.value)
+						})
+					# Sobald wir die Box gefunden haben, können wir zur nächsten Zeile springen
+					break 
 	
-	if details.is_empty(): status_label.text = "Keine Mengen eingetragen!"; status_label.modulate = Color.YELLOW; return
+	if details.is_empty(): 
+		status_label.text = "Keine Mengen eingetragen!" 
+		status_label.modulate = Color.YELLOW
+		return
 
 	var payload = {
 		"emp_id": current_uid, "customer_id": cid,
@@ -241,16 +255,31 @@ func _on_save_performance():
 		"notes": notes_input.text, "details": details
 	}
 	
+	# Button sperren
+	%SaveBtn.disabled = true
+	%SaveBtn.text = "Speichere..."
+	
 	var url = Store.get_api_url() + "/performance"
 	var http = HTTPRequest.new(); add_child(http)
-	http.request_completed.connect(func(_r, c, _h, _b):
+	http.request_completed.connect(func(_r, c, _h, b):
+		%SaveBtn.disabled = false
+		%SaveBtn.text = "SPEICHERN"
+		
 		if c == 200:
-			status_label.text = "Gespeichert ✔"
+			var resp = JSON.parse_string(b.get_string_from_utf8())
+			var new_id = int(resp.get("id")) # ID merken
+			
+			status_label.text = "Gespeichert ✔ PDF bereit."
 			status_label.modulate = Color.GREEN
 			notes_input.text = ""
 			search_input.text = ""
+			
+			# Liste neu laden (setzt ID auf -1)
 			_on_customer_selected(customer_opt.selected)
-			_fetch_history()
+			
+			# ID wiederherstellen für den Export-Button
+			last_saved_report_id = new_id 
+			
 		else:
 			status_label.text = "Fehler: " + str(c)
 			status_label.modulate = Color.RED
@@ -258,6 +287,16 @@ func _on_save_performance():
 	)
 	var headers = ["Content-Type: application/json"]
 	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(payload))
+
+# --- PDF EXPORT (NEU) ---
+func _on_export_pdf():
+	if last_saved_report_id == -1:
+		status_label.text = "Erst speichern!"
+		status_label.modulate = Color.YELLOW
+		return
+		
+	var url = Store.get_api_url() + "/export/pdf/performance/" + str(last_saved_report_id)
+	OS.shell_open(url) # Öffnet Standard-Browser/PDF-Viewer
 
 # --- VORLAGEN LOGIK ---
 func _fetch_templates():
@@ -319,17 +358,13 @@ func _on_load_template():
 # --- POPUP HELPER ---
 func _open_customer_popup():
 	popup.visible = true
-	# Wir lassen es leer, damit man Vorlagen nutzen kann
 
-# --- HIER: Zeilen mit Lösch-Button und Zebra-Look für das Popup ---
 func _add_target_row_ui(s_name, id, amount, price, is_darker):
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
 	style.bg_color = COLOR_ROW_B if is_darker else COLOR_ROW_A
-	style.content_margin_left = 10
-	style.content_margin_right = 10
-	style.content_margin_top = 5
-	style.content_margin_bottom = 5
+	style.content_margin_left = 10; style.content_margin_right = 10
+	style.content_margin_top = 5; style.content_margin_bottom = 5
 	style.set_corner_radius_all(4)
 	panel.add_theme_stylebox_override("panel", style)
 	
@@ -353,21 +388,18 @@ func _add_target_row_ui(s_name, id, amount, price, is_darker):
 	spin_price.value = price
 	spin_price.custom_minimum_size = Vector2(100, 0)
 	
-	# NEU: Löschen-Button (X)
+	# Löschen Button (Wie gewünscht)
 	var del_btn = Button.new()
 	del_btn.text = "✖"
 	del_btn.custom_minimum_size = Vector2(30, 0)
-	del_btn.modulate = Color(1, 0.4, 0.4) # Leicht rötlich
+	del_btn.modulate = Color(1, 0.4, 0.4)
 	del_btn.flat = true
-	del_btn.tooltip_text = "Zeile entfernen"
-	del_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	# Wenn geklickt -> Entferne das gesamte Panel
 	del_btn.pressed.connect(func(): panel.queue_free())
 	
 	row.add_child(lbl)
 	row.add_child(spin_amount)
 	row.add_child(spin_price)
-	row.add_child(del_btn) # Button hinzufügen
+	row.add_child(del_btn)
 	
 	panel.add_child(row)
 	target_container.add_child(panel)
