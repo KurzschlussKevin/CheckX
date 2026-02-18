@@ -1,6 +1,8 @@
 from database import get_db_conn
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import HTTPException
+
+# --- TIMER FUNKTIONEN ---
 
 def start_timer(data):
     conn = get_db_conn()
@@ -14,9 +16,10 @@ def start_timer(data):
 
     start_dt = datetime.fromtimestamp(data.start_time)
     
+    # Neuen Eintrag erstellen (immer 'open' und ungesperrt am Anfang)
     cur.execute("""
-        INSERT INTO time_entries (employee_id, project, start_time, status)
-        VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running')
+        INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
+        VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running', 'open', FALSE)
     """, (data.emp_id, data.project, start_dt))
     
     conn.commit()
@@ -28,6 +31,7 @@ def stop_timer(data):
     cur = conn.cursor()
     end_dt = datetime.fromtimestamp(data.end_time)
     
+    # Timer beenden und Dauer berechnen
     cur.execute("""
         UPDATE time_entries 
         SET end_time = %s, notes = %s, status = 'open',
@@ -40,16 +44,21 @@ def stop_timer(data):
     conn.close()
     return {"status": "stopped"}
 
+# --- MANUELLE EINGABE ---
+
 def add_manual_entry(emp_id, date_str, duration_mins, project):
+    # ZUERST: Prüfen, ob der Tag gesperrt ist!
+    if check_is_locked(emp_id, date_str)["is_locked"]:
+        return {"status": "error", "message": "Dieser Tag ist bereits eingereicht oder genehmigt. Keine Änderungen mehr möglich."}
+
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        # Wir kombinieren das Datum mit einer Standard-Startzeit (08:00 Uhr)
-        # und berechnen die Endzeit basierend auf den Minuten.
+        # Wir setzen Start auf 08:00 und berechnen Ende automatisch
         start_ts_str = f"{date_str} 08:00:00"
         
         cur.execute("""
-            INSERT INTO time_entries (employee_id, project, start_time, end_time, notes, status, duration_minutes)
+            INSERT INTO time_entries (employee_id, project, start_time, end_time, notes, status, duration_minutes, approval_status, is_locked)
             VALUES (
                 (SELECT id FROM employees WHERE emp_id = %s), 
                 %s, 
@@ -57,9 +66,11 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
                 (%s::timestamp + (%s || ' minutes')::interval),
                 'Manuelle Nacherfassung',
                 'open',
-                %s
+                %s,
+                'open',
+                FALSE
             )
-        """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins))
+        """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins, duration_mins))
         
         conn.commit()
         return {"status": "success"}
@@ -69,12 +80,13 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
     finally:
         conn.close()
 
+# --- STATISTIKEN & CHECK ---
 
 def get_daily_stats(emp_id, date_str):
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        # Wir berechnen die Minuten direkt aus start_time und end_time
+        # Summiere die Minuten für den Tag
         cur.execute("""
             SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time))/60), 0) as total_mins
             FROM time_entries 
@@ -87,52 +99,48 @@ def get_daily_stats(emp_id, date_str):
         minutes = int(row['total_mins']) if row else 0
         return {"total_minutes": minutes}
     except Exception as e:
-        print(f"Fehler bei Stats: {e}")
         return {"total_minutes": 0}
     finally:
         conn.close()
 
-def submit_times_for_approval(emp_id, date_str):
-    """Mitarbeiter reicht seine Zeiten für einen Tag ein."""
+def check_is_locked(emp_id, date_str):
+    """Prüft, ob ein Tag für Bearbeitung gesperrt ist."""
     conn = get_db_conn()
     cur = conn.cursor()
     try:
+        # Ein Tag ist gesperrt, wenn:
+        # 1. Das Feld 'is_locked' TRUE ist (Admin-Sperre)
+        # 2. ODER der Status 'submitted' (Eingereicht) ist
+        # 3. ODER der Status 'approved' (Genehmigt) ist
         cur.execute("""
-            UPDATE time_entries 
-            SET approval_status = 'submitted' 
+            SELECT 1 FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             AND start_time::date = %s::date
-            AND is_locked = FALSE
+            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved'))
+            LIMIT 1
         """, (emp_id, date_str))
-        conn.commit()
-        return {"status": "success", "message": "Zeiten eingereicht"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+        row = cur.fetchone()
+        return {"is_locked": True if row else False}
     finally:
         conn.close()
 
-def admin_approve_time(entry_id):
-    """Admin bestätigt einen einzelnen Zeiteintrag und sperrt ihn."""
-    conn = get_db_conn()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            UPDATE time_entries 
-            SET approval_status = 'approved', is_locked = TRUE 
-            WHERE id = %s
-        """, (entry_id,))
-        conn.commit()
-        return {"status": "success"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-    finally:
-        conn.close()
+# --- WORKFLOW & FREIGABE ---
 
 def submit_day(emp_id, date_str):
+    """Mitarbeiter reicht den Tag ein."""
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        # Alle offenen Einträge dieses Tages auf 'submitted' setzen
+        # Check: Timer darf nicht laufen
+        cur.execute("""
+            SELECT 1 FROM time_entries 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND status = 'running'
+        """, (emp_id,))
+        if cur.fetchone():
+             return {"status": "error", "message": "Bitte erst den laufenden Timer stoppen!"}
+
+        # Status auf 'submitted' setzen
         cur.execute("""
             UPDATE time_entries 
             SET approval_status = 'submitted'
@@ -141,7 +149,44 @@ def submit_day(emp_id, date_str):
             AND approval_status = 'open'
         """, (emp_id, date_str))
         conn.commit()
-        return {"status": "success", "message": "Tag zur Prüfung eingereicht"}
+        return {"status": "success", "message": "Tag eingereicht"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+def admin_approve_full_day(emp_id, date_str):
+    """Admin bestätigt den Tag -> endgültig gesperrt."""
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE time_entries 
+            SET approval_status = 'approved', is_locked = TRUE 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+        """, (emp_id, date_str))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+def request_correction(emp_id, date_str, note):
+    """Setzt den Status auf 'correction_requested', damit der User wieder bearbeiten kann (oder Admin benachrichtigt wird)."""
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        # Wir setzen den Status zurück auf 'correction_requested' und entsperren (is_locked = FALSE)
+        cur.execute("""
+            UPDATE time_entries 
+            SET approval_status = 'correction_requested', is_locked = FALSE, notes = notes || ' [Korrektur: ' || %s || ']'
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+        """, (note, emp_id, date_str))
+        conn.commit()
+        return {"status": "success", "message": "Korrektur beantragt. Tag ist wieder offen."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
     finally:

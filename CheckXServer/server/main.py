@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db_conn
 import os
+import uvicorn
+
+# Module imports
 import auth
 import employees
 import absences 
@@ -30,18 +33,34 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
-class TimeEntry(BaseModel):
+# UPDATE: Erweiterte Modelle für die Zeiterfassung
+class TimerData(BaseModel):
     emp_id: str
     project: str
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     notes: Optional[str] = ""
 
+class ManualEntryData(BaseModel):
+    emp_id: str
+    date: str
+    duration: int
+    project: str
+
+class SubmitDayData(BaseModel):
+    emp_id: str
+    date: str
+
 class VacationRequest(BaseModel):
     emp_id: str
     start_date: str
     end_date: str
     vacation_type: str
+
+class CorrectionData(BaseModel):
+    emp_id: str
+    date: str
+    note: str
 
 # --- ROUTEN: AUTHENTIFIZIERUNG ---
 
@@ -123,33 +142,58 @@ def route_get_progress(customer_id: int):
 
 @app.get("/export/pdf/performance/{pid}")
 def route_export_pdf(pid: int):
-    # 1. Daten aus der DB holen
     data = performance.get_report_data(pid)
     if not data:
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
     
-    # 2. Temp-Ordner sicherstellen
     if not os.path.exists("temp"):
         os.makedirs("temp")
     
     filename = f"Montagebericht_{pid}.pdf"
     filepath = f"temp/{filename}"
     
-    # 3. PDF generieren
     pdf_generator.create_performance_pdf(data, filepath)
-    
-    # 4. Als Datei zurückgeben
     return FileResponse(filepath, filename=filename, media_type='application/pdf')
 
-# --- ROUTEN: ZEITERFASSUNG & URLAUB ---
+# --- ROUTEN: ZEITERFASSUNG (AKTUALISIERT) ---
 
 @app.post("/time/start")
-def route_time_start(entry: TimeEntry):
+async def route_time_start(entry: TimerData):
     return time_tracking.start_timer(entry)
 
 @app.post("/time/stop")
-def route_time_stop(entry: TimeEntry):
+async def route_time_stop(entry: TimerData):
     return time_tracking.stop_timer(entry)
+
+@app.post("/time/manual")
+async def route_add_manual(data: ManualEntryData):
+    return time_tracking.add_manual_entry(data.emp_id, data.date, data.duration, data.project)
+
+@app.get("/time/stats/daily")
+async def route_daily_stats(emp_id: str, date: str):
+    return time_tracking.get_daily_stats(emp_id, date)
+
+# --- NEUE ROUTEN: SPERREN & WORKFLOW ---
+
+@app.get("/time/is_locked")
+async def route_check_locked(emp_id: str, date: str):
+    # Ruft die Logik aus time_tracking.py auf
+    return time_tracking.check_is_locked(emp_id, date)
+
+@app.post("/time/submit_day")
+async def route_submit_day(data: SubmitDayData):
+    return time_tracking.submit_day(data.emp_id, data.date)
+
+@app.post("/time/admin/approve_day")
+async def route_admin_approve_day(data: SubmitDayData):
+    return time_tracking.admin_approve_full_day(data.emp_id, data.date)
+
+@app.post("/time/request_correction")
+async def route_request_correction(data: CorrectionData):
+    from time_tracking import request_correction
+    return request_correction(data.emp_id, data.date, data.note)
+
+# --- ROUTEN: URLAUB ---
 
 @app.post("/time/request_vacation")
 def route_request_vacation(req: VacationRequest):
@@ -176,65 +220,11 @@ def route_team_calendar(year: int, month: int):
 def route_get_dashboard_stats(emp_id: str):
     return dashboard.get_stats(emp_id)
 
-@app.post("/time/manual")
-async def route_add_manual_time(data: dict):
-    from time_tracking import add_manual_entry
-    # Wir reichen die Daten an eine Funktion in der time_tracking.py weiter
-    return add_manual_entry(
-        data.get("emp_id"),
-        data.get("date"),
-        data.get("duration"),
-        data.get("project")
-    )
-
-@app.get("/time/stats/daily")
-async def route_daily_stats(emp_id: str, date: str):
-    from time_tracking import get_daily_stats
-    return get_daily_stats(emp_id, date)
-
-# --- ADMIN ZEIT-FREIGABE ---
-
-@app.post("/time/submit")
-async def route_submit_time(data: dict):
-    from time_tracking import submit_times_for_approval
-    return submit_times_for_approval(data.get("emp_id"), data.get("date"))
-
-@app.post("/time/admin/approve")
-async def route_admin_approve(data: dict):
-    from time_tracking import admin_approve_time
-    return admin_approve_time(data.get("entry_id"))
-
-@app.get("/time/is_locked")
-async def route_check_locked(emp_id: str, date: str):
-    from database import get_db_conn
-    try:
-        conn = get_db_conn()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT is_locked FROM time_entries 
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            AND start_time::date = %s::date
-            LIMIT 1
-        """, (emp_id, date))
-        row = cur.fetchone()
-        conn.close()
-        
-        # Falls kein Eintrag existiert, ist er logischerweise auch nicht gesperrt
-        is_locked = row['is_locked'] if row and 'is_locked' in row else False
-        return {"is_locked": is_locked}
-    except Exception as e:
-        print(f"Fehler bei is_locked Abfrage: {e}")
-        return {"is_locked": False, "error": str(e)}
-
-@app.post("/time/submit_day")
-async def route_submit_day(data: dict):
-    from time_tracking import submit_day
-    return submit_day(data.get("emp_id"), data.get("date"))
 # --- SYSTEM-START ---
 
 @app.on_event("startup")
 def on_startup():
-    # Die Reihenfolge ist wichtig, da Tabellen voneinander abhängen (Foreign Keys)
+    # Tabellen initialisieren
     services.init_services_table()
     templates.init_templates_table()
     customers.init_customers_table()
@@ -245,5 +235,4 @@ def health_check():
     return {"status": "online", "message": "CheckX Backend ist bereit"}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
