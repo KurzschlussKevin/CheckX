@@ -9,6 +9,7 @@ import customers
 import performance 
 import time_tracking
 import services
+import templates
 
 app = FastAPI(title="CheckX API")
 
@@ -122,6 +123,19 @@ def route_my_absences(emp_id: str):
 def route_team_calendar(year: int, month: int):
     return absences.get_approved_absences_in_range(year, month)
 
+# --- ROUTEN: VORLAGEN (TEMPLATES) ---
+@app.get("/templates")
+def route_get_templates():
+    return templates.get_all_templates()
+
+@app.get("/templates/{tid}")
+def route_get_template_details(tid: int):
+    return templates.get_template_details(tid)
+
+@app.post("/templates")
+def route_create_template(t: templates.TemplateCreate):
+    return templates.create_template(t)
+
 # --- SYSTEM-START ---
 @app.on_event("startup")
 def on_startup():
@@ -129,6 +143,7 @@ def on_startup():
     services.init_services_table()
     customers.init_customers_table()
     performance.init_performance_table()
+    templates.init_templates_table()
 
 @app.get("/")
 def health_check():
