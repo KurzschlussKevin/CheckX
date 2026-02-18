@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+psycopg2
+passlib
+bcrypt
+pydantic
+reportlab
+python-multipart

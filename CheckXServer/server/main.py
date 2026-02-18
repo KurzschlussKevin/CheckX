@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
+import os
 import auth
 import employees
 import absences 
@@ -10,10 +12,12 @@ import performance
 import time_tracking
 import services
 import templates
+import pdf_generator
 
 app = FastAPI(title="CheckX API")
 
 # --- DATENMODELLE ---
+
 class UserRegister(BaseModel):
     first_name: str
     last_name: str
@@ -37,7 +41,8 @@ class VacationRequest(BaseModel):
     end_date: str
     vacation_type: str
 
-# --- ROUTEN: AUTH ---
+# --- ROUTEN: AUTHENTIFIZIERUNG ---
+
 @app.post("/auth/register")
 def route_register(user: UserRegister):
     return auth.register_user(user)
@@ -47,11 +52,13 @@ def route_login(user: UserLogin):
     return auth.login_user(user)
 
 # --- ROUTEN: MITARBEITER ---
+
 @app.get("/employees")
 def route_get_employees():
     return employees.list_all_employees()
 
-# --- ROUTEN: SERVICES ---
+# --- ROUTEN: SERVICES (KATALOG) ---
+
 @app.get("/services")
 def route_get_services():
     return services.get_all_services()
@@ -60,7 +67,22 @@ def route_get_services():
 def route_create_service(s: services.ServiceModel):
     return services.create_service(s)
 
+# --- ROUTEN: VORLAGEN (TEMPLATES) ---
+
+@app.get("/templates")
+def route_get_templates():
+    return templates.get_all_templates()
+
+@app.get("/templates/{tid}")
+def route_get_template_details(tid: int):
+    return templates.get_template_details(tid)
+
+@app.post("/templates")
+def route_create_template(t: templates.TemplateCreate):
+    return templates.create_template(t)
+
 # --- ROUTEN: KUNDEN ---
+
 @app.get("/customers")
 def route_get_customers():
     return customers.get_active_customers()
@@ -81,7 +103,8 @@ def route_set_targets(cid: int, targets: List[customers.CustomerTarget]):
 def route_get_targets(cid: int):
     return customers.get_customer_targets(cid)
 
-# --- ROUTEN: PERFORMANCE ---
+# --- ROUTEN: PERFORMANCE (LEISTUNG) ---
+
 @app.post("/performance")
 def route_add_performance(p: performance.DailyPerformance):
     return performance.add_performance_entry(p)
@@ -94,7 +117,30 @@ def route_get_my_performance(emp_id: str):
 def route_get_progress(customer_id: int):
     return performance.get_customer_progress(customer_id)
 
-# --- ROUTEN: ZEIT & URLAUB ---
+# --- ROUTEN: PDF EXPORT ---
+
+@app.get("/export/pdf/performance/{pid}")
+def route_export_pdf(pid: int):
+    # 1. Daten aus der DB holen
+    data = performance.get_report_data(pid)
+    if not data:
+        raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
+    
+    # 2. Temp-Ordner sicherstellen
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+    
+    filename = f"Montagebericht_{pid}.pdf"
+    filepath = f"temp/{filename}"
+    
+    # 3. PDF generieren
+    pdf_generator.create_performance_pdf(data, filepath)
+    
+    # 4. Als Datei zurückgeben
+    return FileResponse(filepath, filename=filename, media_type='application/pdf')
+
+# --- ROUTEN: ZEITERFASSUNG & URLAUB ---
+
 @app.post("/time/start")
 def route_time_start(entry: TimeEntry):
     return time_tracking.start_timer(entry)
@@ -123,27 +169,15 @@ def route_my_absences(emp_id: str):
 def route_team_calendar(year: int, month: int):
     return absences.get_approved_absences_in_range(year, month)
 
-# --- ROUTEN: VORLAGEN (TEMPLATES) ---
-@app.get("/templates")
-def route_get_templates():
-    return templates.get_all_templates()
-
-@app.get("/templates/{tid}")
-def route_get_template_details(tid: int):
-    return templates.get_template_details(tid)
-
-@app.post("/templates")
-def route_create_template(t: templates.TemplateCreate):
-    return templates.create_template(t)
-
 # --- SYSTEM-START ---
+
 @app.on_event("startup")
 def on_startup():
-    # Reihenfolge ist wichtig!
+    # Die Reihenfolge ist wichtig, da Tabellen voneinander abhängen (Foreign Keys)
     services.init_services_table()
+    templates.init_templates_table()
     customers.init_customers_table()
     performance.init_performance_table()
-    templates.init_templates_table()
 
 @app.get("/")
 def health_check():
