@@ -177,3 +177,28 @@ func add_manual_entry(emp_id: String, date_str: String, minutes: int, project: S
 		"type": type
 	}
 	_send_post(url, body)
+
+# Prüft den Sperrstatus für einen bestimmten Tag
+func is_day_locked(emp_id: String, date_str: String, callback: Callable) -> void:
+	var url = get_api_url() + "/time/is_locked?emp_id=" + emp_id + "&date=" + date_str
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		var locked = false
+		if code == 200:
+			var json = JSON.parse_string(body.get_string_from_utf8())
+			locked = json.get("is_locked", false)
+		callback.call(locked)
+		http.queue_free()
+	)
+	http.request(url)
+
+# Sendet einen Korrekturantrag an den Admin
+func request_time_correction(emp_id: String, date_str: String, note: String) -> void:
+	var url = get_api_url() + "/time/request_correction"
+	var body = {
+		"emp_id": emp_id,
+		"date": date_str,
+		"note": note
+	}
+	_send_post(url, body)
