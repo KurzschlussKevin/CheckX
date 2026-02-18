@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
+from database import get_db_conn
 import os
 import auth
 import employees
@@ -191,6 +192,44 @@ async def route_daily_stats(emp_id: str, date: str):
     from time_tracking import get_daily_stats
     return get_daily_stats(emp_id, date)
 
+# --- ADMIN ZEIT-FREIGABE ---
+
+@app.post("/time/submit")
+async def route_submit_time(data: dict):
+    from time_tracking import submit_times_for_approval
+    return submit_times_for_approval(data.get("emp_id"), data.get("date"))
+
+@app.post("/time/admin/approve")
+async def route_admin_approve(data: dict):
+    from time_tracking import admin_approve_time
+    return admin_approve_time(data.get("entry_id"))
+
+@app.get("/time/is_locked")
+async def route_check_locked(emp_id: str, date: str):
+    from database import get_db_conn
+    try:
+        conn = get_db_conn()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT is_locked FROM time_entries 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+            LIMIT 1
+        """, (emp_id, date))
+        row = cur.fetchone()
+        conn.close()
+        
+        # Falls kein Eintrag existiert, ist er logischerweise auch nicht gesperrt
+        is_locked = row['is_locked'] if row and 'is_locked' in row else False
+        return {"is_locked": is_locked}
+    except Exception as e:
+        print(f"Fehler bei is_locked Abfrage: {e}")
+        return {"is_locked": False, "error": str(e)}
+
+@app.post("/time/submit_day")
+async def route_submit_day(data: dict):
+    from time_tracking import submit_day
+    return submit_day(data.get("emp_id"), data.get("date"))
 # --- SYSTEM-START ---
 
 @app.on_event("startup")

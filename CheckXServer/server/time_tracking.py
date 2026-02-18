@@ -91,3 +91,58 @@ def get_daily_stats(emp_id, date_str):
         return {"total_minutes": 0}
     finally:
         conn.close()
+
+def submit_times_for_approval(emp_id, date_str):
+    """Mitarbeiter reicht seine Zeiten für einen Tag ein."""
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE time_entries 
+            SET approval_status = 'submitted' 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+            AND is_locked = FALSE
+        """, (emp_id, date_str))
+        conn.commit()
+        return {"status": "success", "message": "Zeiten eingereicht"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+def admin_approve_time(entry_id):
+    """Admin bestätigt einen einzelnen Zeiteintrag und sperrt ihn."""
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE time_entries 
+            SET approval_status = 'approved', is_locked = TRUE 
+            WHERE id = %s
+        """, (entry_id,))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+def submit_day(emp_id, date_str):
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        # Alle offenen Einträge dieses Tages auf 'submitted' setzen
+        cur.execute("""
+            UPDATE time_entries 
+            SET approval_status = 'submitted'
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+            AND approval_status = 'open'
+        """, (emp_id, date_str))
+        conn.commit()
+        return {"status": "success", "message": "Tag zur Prüfung eingereicht"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
