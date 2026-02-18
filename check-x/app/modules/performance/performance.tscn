@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://performance_redesign_v5_fixed"]
+[gd_scene format=3 uid="uid://l3ndssi77pc2"]
 
-[ext_resource type="Script" path="res://app/modules/performance/performance.gd" id="1_logic"]
+[ext_resource type="Script" uid="uid://bohrtkoofmdej" path="res://app/modules/performance/performance.gd" id="1_logic"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.05, 0.05, 0.07, 1)
@@ -22,13 +22,6 @@ border_color = Color(0.2, 0.6, 1, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_table_header"]
-bg_color = Color(0.18, 0.18, 0.22, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
 bg_color = Color(0.1, 0.1, 0.1, 0.5)
 corner_radius_top_left = 4
@@ -43,6 +36,13 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_table_header"]
+bg_color = Color(0.18, 0.18, 0.22, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
 bg_color = Color(0.15, 0.15, 0.18, 1)
 corner_radius_top_left = 8
@@ -50,7 +50,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="Performance" type="Control"]
+[node name="Performance" type="Control" unique_id=954340992]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -59,7 +59,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_logic")
 
-[node name="Bg" type="Panel" parent="."]
+[node name="Bg" type="Panel" parent="." unique_id=1119065404]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,7 +68,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
-[node name="MainMargin" type="MarginContainer" parent="."]
+[node name="MainMargin" type="MarginContainer" parent="." unique_id=1657902576]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -80,82 +80,82 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="HSplit" type="HBoxContainer" parent="MainMargin"]
+[node name="HSplit" type="HBoxContainer" parent="MainMargin" unique_id=466870957]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="LeftCol" type="VBoxContainer" parent="MainMargin/HSplit"]
+[node name="LeftCol" type="VBoxContainer" parent="MainMargin/HSplit" unique_id=822159269]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.75
 theme_override_constants/separation = 20
 
-[node name="HeaderCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol"]
+[node name="HeaderCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol" unique_id=583446722]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard"]
+[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard" unique_id=569094372]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="TopStrip" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox"]
+[node name="TopStrip" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox" unique_id=1264368490]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_header_accent")
 
-[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip"]
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip" unique_id=875780099]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 10
 
-[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M"]
+[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M" unique_id=1850210676]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+[node name="Label" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H" unique_id=1865878241]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "AKTIVER AUFTRAG / KUNDE"
 
-[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H" unique_id=1703566638]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ManageBtn" type="Button" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+[node name="ManageBtn" type="Button" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H" unique_id=174494956]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Kunden verwalten ⚙"
 flat = true
 
-[node name="ContentM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox"]
+[node name="ContentM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox" unique_id=629357918]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM"]
+[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM" unique_id=2031057216]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="CustomerOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox"]
+[node name="CustomerOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox" unique_id=1544620360]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 45)
 layout_mode = 2
 
-[node name="StatsBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox"]
+[node name="StatsBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox" unique_id=346144431]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="ProgressLabel" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox"]
+[node name="ProgressLabel" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox" unique_id=1417342434]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 12
 text = "Gesamtfortschritt: 0 / 0"
 
-[node name="ProgressBar" type="ProgressBar" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox"]
+[node name="ProgressBar" type="ProgressBar" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox" unique_id=7114960]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
@@ -163,40 +163,59 @@ theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
 show_percentage = false
 
-[node name="TableCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol"]
+[node name="TableCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol" unique_id=312352528]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard"]
+[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard" unique_id=566621740]
 layout_mode = 2
 
-[node name="HeaderM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+[node name="HeaderM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox" unique_id=2119943144]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 5
 
-[node name="TableHeader" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM"]
+[node name="HSearch" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM" unique_id=176851424]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/HSearch" unique_id=1255201210]
+layout_mode = 2
+text = "🔍"
+
+[node name="SearchInput" type="LineEdit" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/HSearch" unique_id=1778677254]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Leistung suchen..."
+
+[node name="TableHeader" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox" unique_id=1586953955]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_table_header")
 
-[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader"]
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader" unique_id=633335043]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+
+[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M" unique_id=1509620419]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="L1" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L1" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=994548131]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_font_sizes/font_size = 13
-text = "  LEISTUNG"
+text = "LEISTUNG"
 vertical_alignment = 1
 
-[node name="L2" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L2" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=1498178961]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -205,7 +224,7 @@ text = "PREIS (€)"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="L3" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L3" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=1906743410]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -214,7 +233,7 @@ text = "SOLL"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="L4" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L4" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=911425584]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -223,7 +242,7 @@ text = "IST"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="L5" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L5" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=1130407268]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -232,7 +251,7 @@ text = "REST"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="L6" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+[node name="L6" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/TableHeader/M/H" unique_id=973814707]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.8, 0.4, 1)
@@ -241,72 +260,72 @@ text = "EINGABE  "
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="Scroll" type="ScrollContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox" unique_id=251651213]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll"]
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll" unique_id=769612377]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_right = 15
 
-[node name="TableContainer" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll/M"]
+[node name="TableContainer" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll/M" unique_id=292304781]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 0
 
-[node name="FooterM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+[node name="FooterM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox" unique_id=1207885872]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM"]
+[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM" unique_id=532807362]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
+[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V" unique_id=639866283]
 layout_mode = 2
 
-[node name="AllServicesOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+[node name="AllServicesOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox" unique_id=1653728201]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 35)
 layout_mode = 2
-item_count = 1
 selected = 0
+item_count = 1
 popup/item_0/text = "+ Leistung hinzufügen"
 popup/item_0/id = -1
 
-[node name="AddServiceBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+[node name="AddServiceBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox" unique_id=1349225205]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Hinzufügen"
 
-[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox" unique_id=2077883251]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="StatusLabel" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
-unique_name_in_owner = true
+[node name="HSeparator" type="HSeparator" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V" unique_id=202210305]
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
-layout_mode = 2
-
-[node name="BottomRow" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
+[node name="BottomRow" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V" unique_id=1701474844]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="NotesInput" type="TextEdit" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow"]
+[node name="NotesInput" type="TextEdit" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow" unique_id=2088444438]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Bemerkungen zum Tagesbericht..."
 
-[node name="SaveBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow"]
+[node name="StatusLabel" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow" unique_id=1065968781]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SaveBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow" unique_id=1372906724]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
@@ -314,44 +333,44 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "BERICHT SPEICHERN"
 
-[node name="RightCol" type="VBoxContainer" parent="MainMargin/HSplit"]
+[node name="RightCol" type="VBoxContainer" parent="MainMargin/HSplit" unique_id=1977604253]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
 theme_override_constants/separation = 20
 
-[node name="HistoryCard" type="PanelContainer" parent="MainMargin/HSplit/RightCol"]
+[node name="HistoryCard" type="PanelContainer" parent="MainMargin/HSplit/RightCol" unique_id=1129173166]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="M" type="MarginContainer" parent="MainMargin/HSplit/RightCol/HistoryCard"]
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/RightCol/HistoryCard" unique_id=1541961672]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M"]
+[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M" unique_id=573947798]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Label" type="Label" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V"]
+[node name="Label" type="Label" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V" unique_id=803185375]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "MEINE HISTORIE"
 
-[node name="HistoryScroll" type="ScrollContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V"]
+[node name="HistoryScroll" type="ScrollContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V" unique_id=35206222]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HistoryList" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V/HistoryScroll"]
+[node name="HistoryList" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V/HistoryScroll" unique_id=1107708249]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="CustomerPopup" type="ColorRect" parent="."]
+[node name="CustomerPopup" type="ColorRect" parent="." unique_id=399725854]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -362,50 +381,52 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.85)
 
-[node name="Center" type="CenterContainer" parent="CustomerPopup"]
+[node name="Center" type="CenterContainer" parent="CustomerPopup" unique_id=1335778722]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="CustomerPopup/Center"]
-custom_minimum_size = Vector2(800, 700)
+[node name="Panel" type="PanelContainer" parent="CustomerPopup/Center" unique_id=214421557]
+custom_minimum_size = Vector2(900, 750)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 
-[node name="M" type="MarginContainer" parent="CustomerPopup/Center/Panel"]
+[node name="M" type="MarginContainer" parent="CustomerPopup/Center/Panel" unique_id=1434843422]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="VBox" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M"]
+[node name="VBox" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M" unique_id=836201852]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Header" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+[node name="Header" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox" unique_id=1204471840]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Header"]
+[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Header" unique_id=338209753]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "KUNDEN & AUFTRÄGE VERWALTEN"
 
-[node name="CancelCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Header"]
+[node name="CancelCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Header" unique_id=1694897639]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 text = "X"
 flat = true
 
-[node name="Tabs" type="TabContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+[node name="Tabs" type="TabContainer" parent="CustomerPopup/Center/Panel/M/VBox" unique_id=1018041040]
 layout_mode = 2
 size_flags_vertical = 3
 current_tab = 0
 
-[node name="Stammdaten" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+[node name="Stammdaten" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs" unique_id=234852355]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
@@ -413,65 +434,65 @@ theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 metadata/_tab_index = 0
 
-[node name="Grid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten"]
+[node name="Grid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten" unique_id=2097769114]
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 columns = 2
 
-[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=170710201]
 layout_mode = 2
 text = "Firmenname *"
 
-[node name="InpName" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="InpName" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=1920990129]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "z.B. Müller GmbH"
 
-[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=1723866509]
 layout_mode = 2
 text = "Standort (Haupt)"
 
-[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=307676681]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="InpStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H"]
+[node name="InpStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H" unique_id=1692839091]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Straße"
 
-[node name="InpHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H"]
+[node name="InpHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H" unique_id=1489761778]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.3
 placeholder_text = "Nr."
 
-[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=821361197]
 layout_mode = 2
 text = "PLZ / Stadt"
 
-[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid" unique_id=1946310161]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="InpZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2"]
+[node name="InpZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2" unique_id=877852649]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.3
 placeholder_text = "PLZ"
 
-[node name="InpCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2"]
+[node name="InpCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2" unique_id=2127629120]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Stadt"
 
-[node name="Auftrag & Preise" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+[node name="Rechnung & Kontakt" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs" unique_id=2000431675]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 20
@@ -480,69 +501,140 @@ theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 metadata/_tab_index = 1
 
-[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
-layout_mode = 2
-text = "Vereinbarte Leistungen & Preise definieren"
-
-[node name="ListHeader" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
+[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt" unique_id=1716687029]
 layout_mode = 2
 
-[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
-custom_minimum_size = Vector2(250, 0)
+[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll" unique_id=1238766073]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
-theme_override_font_sizes/font_size = 12
-text = "LEISTUNG"
+theme_override_constants/separation = 20
 
-[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
-custom_minimum_size = Vector2(100, 0)
+[node name="CheckBilling" type="CheckBox" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=582299267]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
-theme_override_font_sizes/font_size = 12
-text = "MENGE (SOLL)"
+text = "Abweichende Rechnungsadresse"
 
-[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
-custom_minimum_size = Vector2(100, 0)
+[node name="BillingGrid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=1516017459]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
-theme_override_font_sizes/font_size = 12
-text = "PREIS / STK (€)"
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
+columns = 2
 
-[node name="Spacer" type="Control" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
-custom_minimum_size = Vector2(30, 0)
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid" unique_id=866192221]
+layout_mode = 2
+text = "Straße & Nr"
+
+[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid" unique_id=1432683212]
 layout_mode = 2
 
-[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="TargetListContainer" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/Scroll"]
+[node name="InpBillStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H" unique_id=62716671]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 10
+placeholder_text = "Straße"
 
-[node name="AddServiceRow" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="NewServiceInput" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow"]
+[node name="InpBillHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H" unique_id=389336199]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "+ Neue Leistung in den Katalog aufnehmen..."
+size_flags_stretch_ratio = 0.3
+placeholder_text = "Nr."
 
-[node name="CreateServiceBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow"]
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid" unique_id=1610736782]
+layout_mode = 2
+text = "PLZ / Stadt"
+
+[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid" unique_id=617757516]
+layout_mode = 2
+
+[node name="InpBillZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2" unique_id=2091202885]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Hinzufügen"
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+placeholder_text = "PLZ"
 
-[node name="Rechnung & Kontakt" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+[node name="InpBillCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2" unique_id=364839145]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Stadt"
+
+[node name="HSeparator" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=559567491]
+layout_mode = 2
+
+[node name="L_Kontakte" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=1292721829]
+layout_mode = 2
+text = "Ansprechpartner"
+
+[node name="Grid1" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=746900045]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 2
+
+[node name="InpCP1First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1" unique_id=2070496265]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Vorname"
+
+[node name="InpCP1Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1" unique_id=918968054]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nachname"
+
+[node name="InpCP1Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1" unique_id=143683167]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "E-Mail"
+
+[node name="InpCP1Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1" unique_id=300995130]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Telefon"
+
+[node name="HSeparator2" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=657292427]
+layout_mode = 2
+
+[node name="L_Kontakte2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=2076985588]
+layout_mode = 2
+text = "Zweiter Kontakt (Optional)"
+
+[node name="Grid2" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V" unique_id=335201672]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 2
+
+[node name="InpCP2First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2" unique_id=536553172]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Vorname"
+
+[node name="InpCP2Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2" unique_id=1985586635]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nachname"
+
+[node name="InpCP2Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2" unique_id=1132759018]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "E-Mail"
+
+[node name="InpCP2Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2" unique_id=563239872]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Telefon"
+
+[node name="Auftrag & Preise" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs" unique_id=1961102554]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 20
@@ -551,145 +643,106 @@ theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 metadata/_tab_index = 2
 
-[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt"]
+[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise" unique_id=2081176003]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="TemplateRow" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V" unique_id=1015480104]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=998099617]
+layout_mode = 2
+text = "VORLAGEN:"
+
+[node name="TemplateOption" type="OptionButton" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=1523817783]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
-[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll"]
+[node name="LoadTemplateBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=390540029]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Laden"
+
+[node name="Spacer" type="Control" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=634206377]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 20
 
-[node name="CheckBilling" type="CheckBox" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+[node name="TemplateNameInput" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=1213381476]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+placeholder_text = "Name für neue Vorlage..."
+
+[node name="SaveTemplateBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/TemplateRow" unique_id=1123867946]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Abweichende Rechnungsadresse"
+text = "Liste als Vorlage speichern"
 
-[node name="BillingGrid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_constants/h_separation = 15
-theme_override_constants/v_separation = 15
-columns = 2
-
-[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
-layout_mode = 2
-text = "Straße & Nr"
-
-[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+[node name="HSeparator" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V" unique_id=45247500]
 layout_mode = 2
 
-[node name="InpBillStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H"]
-unique_name_in_owner = true
+[node name="ListHeader" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V" unique_id=1322374559]
+layout_mode = 2
+
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader" unique_id=215386056]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Straße"
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "LEISTUNG"
 
-[node name="InpBillHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H"]
-unique_name_in_owner = true
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader" unique_id=374500251]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.3
-placeholder_text = "Nr."
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "MENGE (SOLL)"
 
-[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader" unique_id=545454097]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-text = "PLZ / Stadt"
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "PREIS / STK (€)"
 
-[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
-layout_mode = 2
-
-[node name="InpBillZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.4
-placeholder_text = "PLZ"
-
-[node name="InpBillCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Stadt"
-
-[node name="HSeparator" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+[node name="Spacer" type="Control" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader" unique_id=1577214466]
+custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 
-[node name="L_Kontakte" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V" unique_id=1630540442]
 layout_mode = 2
-text = "Ansprechpartner"
+size_flags_vertical = 3
 
-[node name="Grid1" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
-layout_mode = 2
-theme_override_constants/h_separation = 10
-columns = 2
-
-[node name="InpCP1First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Vorname"
-
-[node name="InpCP1Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+[node name="TargetListContainer" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/Scroll" unique_id=743412519]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Nachname"
+theme_override_constants/separation = 10
 
-[node name="InpCP1Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+[node name="AddServiceRow" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V" unique_id=896388919]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NewServiceInput" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow" unique_id=315697471]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "E-Mail"
+placeholder_text = "+ Neue Leistung in den Katalog aufnehmen..."
 
-[node name="InpCP1Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+[node name="CreateServiceBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow" unique_id=1590702214]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Telefon"
+text = "Hinzufügen"
 
-[node name="HSeparator2" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
-layout_mode = 2
-
-[node name="L_Kontakte2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
-layout_mode = 2
-text = "Zweiter Kontakt (Optional)"
-
-[node name="Grid2" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
-layout_mode = 2
-theme_override_constants/h_separation = 10
-columns = 2
-
-[node name="InpCP2First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Vorname"
-
-[node name="InpCP2Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Nachname"
-
-[node name="InpCP2Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "E-Mail"
-
-[node name="InpCP2Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Telefon"
-
-[node name="Footer" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+[node name="Footer" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox" unique_id=1975396839]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="SaveCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Footer"]
+[node name="SaveCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Footer" unique_id=260352190]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 50)
 layout_mode = 2
