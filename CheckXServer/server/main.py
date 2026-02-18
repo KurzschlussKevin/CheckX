@@ -13,6 +13,7 @@ import time_tracking
 import services
 import templates
 import pdf_generator
+import dashboard
 
 app = FastAPI(title="CheckX API")
 
@@ -168,6 +169,11 @@ def route_my_absences(emp_id: str):
 @app.get("/absences/calendar")
 def route_team_calendar(year: int, month: int):
     return absences.get_approved_absences_in_range(year, month)
+
+# --- DASHBOARD ---
+@app.get("/dashboard/stats")
+def route_get_dashboard_stats(emp_id: str):
+    return dashboard.get_stats(emp_id)
 
 # --- SYSTEM-START ---
 
