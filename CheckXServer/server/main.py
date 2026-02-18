@@ -96,5 +96,6 @@ def route_my_absences(emp_id: str):
     return absences.get_user_absences(emp_id)
 
 @app.get("/absences/calendar")
-def route_team_calendar():
-    return absences.get_all_approved_absences()
+def route_team_calendar(year: int, month: int):
+    # Jetzt mit Pflicht-Parametern für Performance
+    return absences.get_approved_absences_in_range(year, month)

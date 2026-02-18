@@ -87,17 +87,30 @@ def get_user_absences(emp_id):
     conn.close()
     return data
 
-def get_all_approved_absences():
+def get_approved_absences_in_range(year: int, month: int):
     conn = get_db_conn()
     cur = conn.cursor()
-    # Wir laden Namen, Zeitraum und Typ für den Team-Kalender
+    
+    # SQL-Logik: Ein Urlaub ist relevant, wenn er im angezeigten Monat endet ODER beginnt
+    # oder über den ganzen Monat geht.
+    # Einfache Formel: (Start <= Monatsende) AND (Ende >= Monatsanfang)
+    
+    # Start/Ende des angefragten Monats bauen (String Vergleich reicht bei ISO Format YYYY-MM-DD)
+    month_str = f"{year}-{month:02d}"
+    
     cur.execute("""
         SELECT e.first_name, e.last_name, a.start_date, a.end_date, a.type
         FROM absences a
         JOIN employees e ON a.employee_id = e.id
         WHERE a.status = 'approved'
+        AND (
+            TO_CHAR(a.start_date, 'YYYY-MM') = %s 
+            OR TO_CHAR(a.end_date, 'YYYY-MM') = %s
+            OR (a.start_date < TO_DATE(%s, 'YYYY-MM') AND a.end_date > (TO_DATE(%s, 'YYYY-MM') + INTERVAL '1 month'))
+        )
         ORDER BY a.start_date ASC
-    """)
+    """, (month_str, month_str, month_str, month_str))
+    
     data = cur.fetchall()
     conn.close()
     return data
