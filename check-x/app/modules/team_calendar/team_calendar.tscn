@@ -2,7 +2,16 @@
 
 [ext_resource type="Script" uid="uid://cu6ide38k8b5d" path="res://app/modules/team_calendar/team_calendar.gd" id="1_logic"]
 
-[node name="TeamCalendar" type="Control" unique_id=580960]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
+bg_color = Color(0.08, 0.08, 0.1, 0.85)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 10
+
+[node name="TeamCalendar" type="Control" unique_id=484921296]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_logic")
 
-[node name="Bg" type="ColorRect" parent="." unique_id=338671064]
+[node name="Bg" type="ColorRect" parent="." unique_id=753276973]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +29,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.05, 0.07, 1)
 
-[node name="MainLayout" type="HBoxContainer" parent="." unique_id=651040742]
+[node name="MainLayout" type="HBoxContainer" parent="." unique_id=798375418]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,126 +38,177 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="LeftArea" type="VBoxContainer" parent="MainLayout" unique_id=1586408405]
+[node name="LeftArea" type="VBoxContainer" parent="MainLayout" unique_id=969684116]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="HeaderBar" type="HBoxContainer" parent="MainLayout/LeftArea" unique_id=1765487378]
+[node name="HeaderBar" type="HBoxContainer" parent="MainLayout/LeftArea" unique_id=899294214]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Margin" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=887585878]
+[node name="Margin" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=507793742]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_bottom = 10
 
-[node name="HBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar/Margin" unique_id=1458359831]
+[node name="HBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar/Margin" unique_id=1129154496]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TodayBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/Margin/HBox" unique_id=1259549627]
+[node name="TodayBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/Margin/HBox" unique_id=1663652272]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 40)
 layout_mode = 2
 text = "HEUTE"
 
-[node name="YearViewBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/Margin/HBox" unique_id=1605627481]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 40)
-layout_mode = 2
-toggle_mode = true
-text = "JAHRESANSICHT"
-
-[node name="Spacer" type="Control" parent="MainLayout/LeftArea/HeaderBar" unique_id=841555745]
+[node name="Spacer" type="Control" parent="MainLayout/LeftArea/HeaderBar" unique_id=103206974]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NavBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=1460164911]
+[node name="NavBox" type="HBoxContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=1807357668]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="PrevBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=689141282]
+[node name="MonthOption" type="OptionButton" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=209056490]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 50)
+custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
-text = "<"
+alignment = 1
+selected = 0
+item_count = 12
+popup/item_0/text = "Januar"
+popup/item_0/id = 1
+popup/item_1/text = "Februar"
+popup/item_1/id = 2
+popup/item_2/text = "März"
+popup/item_2/id = 3
+popup/item_3/text = "April"
+popup/item_3/id = 4
+popup/item_4/text = "Mai"
+popup/item_4/id = 5
+popup/item_5/text = "Juni"
+popup/item_5/id = 6
+popup/item_6/text = "Juli"
+popup/item_6/id = 7
+popup/item_7/text = "August"
+popup/item_7/id = 8
+popup/item_8/text = "September"
+popup/item_8/id = 9
+popup/item_9/text = "Oktober"
+popup/item_9/id = 10
+popup/item_10/text = "November"
+popup/item_10/id = 11
+popup/item_11/text = "Dezember"
+popup/item_11/id = 12
 
-[node name="MonthLabel" type="Label" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=274072134]
+[node name="YearOption" type="OptionButton" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=1873812512]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(100, 40)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "JANUAR 2026"
-horizontal_alignment = 1
+alignment = 1
 
-[node name="NextBtn" type="Button" parent="MainLayout/LeftArea/HeaderBar/NavBox" unique_id=165214963]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 50)
-layout_mode = 2
-text = ">"
-
-[node name="MarginRight" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=1725181968]
+[node name="MarginRight" type="MarginContainer" parent="MainLayout/LeftArea/HeaderBar" unique_id=919266134]
 layout_mode = 2
 theme_override_constants/margin_right = 20
 
-[node name="Scroll" type="ScrollContainer" parent="MainLayout/LeftArea" unique_id=738861716]
+[node name="Scroll" type="ScrollContainer" parent="MainLayout/LeftArea" unique_id=1923018712]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Centerer" type="CenterContainer" parent="MainLayout/LeftArea/Scroll" unique_id=381373288]
+[node name="Centerer" type="CenterContainer" parent="MainLayout/LeftArea/Scroll" unique_id=1530574580]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Grid" type="GridContainer" parent="MainLayout/LeftArea/Scroll/Centerer" unique_id=329998520]
+[node name="Grid" type="GridContainer" parent="MainLayout/LeftArea/Scroll/Centerer" unique_id=398919541]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 7
 
-[node name="Sidebar" type="PanelContainer" parent="MainLayout" unique_id=285339150]
-custom_minimum_size = Vector2(300, 0)
+[node name="LoadingOverlay" type="CenterContainer" parent="MainLayout/LeftArea" unique_id=923228559]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Margin" type="MarginContainer" parent="MainLayout/Sidebar" unique_id=816699141]
+[node name="Panel" type="PanelContainer" parent="MainLayout/LeftArea/LoadingOverlay" unique_id=77587111]
+custom_minimum_size = Vector2(250, 150)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/LeftArea/LoadingOverlay/Panel" unique_id=521883828]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="MainLayout/Sidebar/Margin" unique_id=1301948666]
+[node name="VBox" type="VBoxContainer" parent="MainLayout/LeftArea/LoadingOverlay/Panel/Margin" unique_id=1185310909]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Spinner" type="Label" parent="MainLayout/LeftArea/LoadingOverlay/Panel/Margin/VBox" unique_id=2140337924]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 48
+text = "↻"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="MainLayout/LeftArea/LoadingOverlay/Panel/Margin/VBox" unique_id=2106882485]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Daten werden geladen..."
+horizontal_alignment = 1
+
+[node name="Sidebar" type="PanelContainer" parent="MainLayout" unique_id=1717132312]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="MainLayout/Sidebar" unique_id=206190793]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MainLayout/Sidebar/Margin" unique_id=2021977608]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="StatsTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=638630161]
+[node name="StatsTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1997190852]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "STATISTIK (MONAT)"
 horizontal_alignment = 1
 
-[node name="StatsLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=741770738]
+[node name="StatsLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1208104552]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+bbcode_enabled = true
 text = "Lade Daten..."
 
-[node name="ExportBtn" type="Button" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1241471171]
+[node name="ExportBtn" type="Button" parent="MainLayout/Sidebar/Margin/VBox" unique_id=754882124]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "Diesen Monat Exportieren"
 
-[node name="DetailTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=718101461]
+[node name="DetailTitle" type="Label" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1915388862]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "DETAILS"
 horizontal_alignment = 1
 
-[node name="InfoLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1441378360]
+[node name="InfoLabel" type="RichTextLabel" parent="MainLayout/Sidebar/Margin/VBox" unique_id=1484201304]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
