@@ -1,6 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b6p2x8q8y4n2p"]
 
 [ext_resource type="Script" path="res://app/modules/dashboard/dashboard.gd" id="1_dash_script"]
+[ext_resource type="PackedScene" uid="uid://cpsydjtw1cbwx" path="res://app/modules/dashboard/stat_card.tscn" id="2_stat_card"]
 
 [node name="Dashboard" type="Control"]
 layout_mode = 3
@@ -23,31 +24,86 @@ horizontal_scroll_mode = 0
 [node name="Margin" type="MarginContainer" parent="ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="Header" type="VBoxContainer" parent="ScrollContainer/Margin/VBox"]
+[node name="HeaderBox" type="HBoxContainer" parent="ScrollContainer/Margin/VBox"]
 layout_mode = 2
 
-[node name="WelcomeLabel" type="Label" parent="ScrollContainer/Margin/VBox/Header"]
+[node name="Header" type="VBoxContainer" parent="ScrollContainer/Margin/VBox/HeaderBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WelcomeLabel" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Willkommen im System"
 
-[node name="Subline" type="Label" parent="ScrollContainer/Margin/VBox/Header"]
+[node name="Subline" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "Hier ist die aktuelle Übersicht Ihres Unternehmens."
+
+[node name="RefreshBtn" type="Button" parent="ScrollContainer/Margin/VBox/HeaderBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Aktualisieren ↻"
 
 [node name="TileGrid" type="HFlowContainer" parent="ScrollContainer/Margin/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
+
+[node name="StatRevenue" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+layout_mode = 2
+
+[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="0"]
+text = "UMSATZ DIESE WOCHE"
+
+[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="1"]
+unique_name_in_owner = true
+text = "0,00 €"
+
+[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="2"]
+text = "Aktuelle Erfassung"
+
+[node name="StatHours" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+layout_mode = 2
+
+[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="0"]
+text = "STUNDEN DIESE WOCHE"
+
+[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="1"]
+unique_name_in_owner = true
+text = "0,0 Std."
+
+[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="2"]
+text = "Zeiterfassung"
+
+[node name="StatTasks" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+layout_mode = 2
+
+[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="0"]
+text = "OFFENE AUFGABEN"
+
+[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="1"]
+unique_name_in_owner = true
+text = "0"
+
+[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="2"]
+text = "To-Do Liste"
+
+# Damit das Skript die internen Labels findet, mappen wir sie im Skript um
+[editable path="ScrollContainer/Margin/VBox/TileGrid/StatRevenue"]
+[editable path="ScrollContainer/Margin/VBox/TileGrid/StatHours"]
+[editable path="ScrollContainer/Margin/VBox/TileGrid/StatTasks"]

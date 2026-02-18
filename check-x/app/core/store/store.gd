@@ -9,6 +9,7 @@ var employees = []
 var time_entries = []
 var active_timer_state = {} 
 var current_user = {} 
+var current_user_data: Dictionary = {}
 
 # HTTP Client Nodes
 var http_client: HTTPRequest
@@ -160,5 +161,19 @@ func request_vacation(emp_id: String, start_date: String, end_date: String, type
 		"start_date": start_date,
 		"end_date": end_date,
 		"vacation_type": type
+	}
+	_send_post(url, body)
+
+func get_current_user_data() -> Dictionary:
+	return current_user_data
+
+func add_manual_entry(emp_id: String, date_str: String, minutes: int, project: String, type: String = "Manuell") -> void:
+	var url = get_api_url() + "/time/manual"
+	var body = {
+		"emp_id": emp_id,
+		"date": date_str,      # Format: "YYYY-MM-DD"
+		"duration": minutes,   # Ganze Zahl
+		"project": project,
+		"type": type
 	}
 	_send_post(url, body)

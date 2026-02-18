@@ -1,91 +1,123 @@
 extends Control
 
 var uid = "" 
-
-@onready var customer_opt = %CustomerOption
+var blink_timer = 0.0
 
 func _ready():
 	uid = Store.get_current_user_id()
 	
-	%StartBtn.pressed.connect(_toggle_timer)
-	%VacBtn.pressed.connect(func(): %VacationPopup.open(uid))
-	%PdfBtn.pressed.connect(_export_pdf)
+	# 1. Signale verbinden
+	if has_node("%StartBtn"):
+		%StartBtn.pressed.connect(_toggle_timer)
+	if has_node("%VacBtn"):
+		%VacBtn.pressed.connect(func(): if has_node("%VacationPopup"): %VacationPopup.open(uid))
 	
-	%CalendarPanel.setup(uid)
-	%CalendarPanel.request_manual.connect(func(d): %ManualPopup.open(uid, d))
-	%ManualPopup.entry_saved.connect(func(): %CalendarPanel.refresh())
+	# 2. Untermodule initialisieren
+	if has_node("%CalendarPanel"):
+		%CalendarPanel.setup(uid)
+		%CalendarPanel.request_manual.connect(func(d): if has_node("%ManualPopup"): %ManualPopup.open(uid, d))
 	
-	%DateLabel.text = Time.get_date_string_from_system()
+	if has_node("%ManualPopup"):
+		# WICHTIG: Hier wird nach dem Speichern aktualisiert
+		%ManualPopup.entry_saved.connect(func(): 
+			_refresh_all()
+			_update_stats()
+		)
 	
-	if Store.is_timer_running(uid):
-		%StartBtn.text = "STOP"
-		customer_opt.disabled = true
+	if has_node("%DateLabel"):
+		%DateLabel.text = Time.get_date_string_from_system()
 	
-	# NEU: Kunden laden statt Projekte
+	# 3. INITIALDATEN BEIM START LADEN <-- Das hat gefehlt!
+	_update_ui_state()
 	_fetch_customers()
+	_update_stats() # Ruft die heutigen Minuten direkt beim Öffnen ab
 
-func _fetch_customers():
-	var url = Store.get_api_url() + "/customers"
-	var http = HTTPRequest.new()
-	add_child(http)
-	http.request_completed.connect(func(_r, code, _h, body):
-		if code == 200:
-			var customers = JSON.parse_string(body.get_string_from_utf8())
-			customer_opt.clear()
-			
-			if customers is Array and customers.size() > 0:
-				for c in customers:
-					# Anzeige: "Müller GmbH (Berlin)"
-					var label = c.get("company_name", "Unbekannt")
-					if c.get("city"):
-						label += " (" + c.get("city") + ")"
-					
-					customer_opt.add_item(label)
-					# Metadaten: Wir speichern den Firmennamen für den Timer
-					customer_opt.set_item_metadata(customer_opt.item_count - 1, c.get("company_name"))
-			else:
-				customer_opt.add_item("Keine Kunden angelegt")
-		else:
-			customer_opt.add_item("Offline: Intern")
-		http.queue_free()
-	)
-	http.request(url)
-
-func _process(_delta):
+func _process(delta):
 	if Store.is_timer_running(uid):
 		var dur = Time.get_unix_time_from_system() - Store.get_timer_start(uid)
 		var hours = int(dur / 3600)
 		var minutes = int(fmod(dur, 3600) / 60)
 		var seconds = int(fmod(dur, 60))
-		%TimerLabel.text = "%02d:%02d:%02d" % [hours, minutes, seconds]
+		
+		if has_node("%TimerLabel"):
+			%TimerLabel.text = "%02d:%02d:%02d" % [hours, minutes, seconds]
+		
+		if has_node("%Bar"):
+			%Bar.value = dur / 3600.0
+			
+		blink_timer += delta
+		if has_node("%PulseDot"):
+			%PulseDot.visible = true
+			%PulseDot.modulate.a = 0.3 + abs(sin(blink_timer * 4.0)) * 0.7
+	else:
+		if has_node("%PulseDot"):
+			%PulseDot.visible = false
 
 func _toggle_timer():
 	if Store.is_timer_running(uid):
-		# STOP
-		var notes = %NotesInput.text
-		Store.stop_timer("", notes) 
-		
-		%StartBtn.text = "START"
-		%NotesInput.text = ""
-		%TimerLabel.text = "00:00:00"
-		customer_opt.disabled = false
-		%CalendarPanel.refresh()
+		var notes = ""
+		if has_node("%NotesInput"):
+			notes = %NotesInput.text
+			%NotesInput.text = ""
+		Store.stop_timer("", notes)
+		_refresh_all()
 	else:
-		# START
-		var selected_idx = customer_opt.selected
-		var customer_name = "Allgemein"
-		
-		if selected_idx >= 0:
-			# Wir holen den reinen Firmennamen aus den Metadaten
-			var meta = customer_opt.get_item_metadata(selected_idx)
-			if meta: customer_name = meta
-			else: customer_name = customer_opt.get_item_text(selected_idx)
-		
-		# Wir nutzen das Feld 'project' in der DB aktuell für den Kundennamen
-		Store.start_timer(customer_name)
-		
-		%StartBtn.text = "STOP"
-		customer_opt.disabled = true
+		var customer = "Allgemein"
+		if has_node("%CustomerOption"):
+			customer = %CustomerOption.get_item_text(%CustomerOption.selected)
+		Store.start_timer(customer)
+	_update_ui_state()
 
-func _export_pdf():
-	pass
+func _refresh_all():
+	if has_node("%CalendarPanel"):
+		%CalendarPanel.refresh()
+
+func _update_ui_state():
+	var running = Store.is_timer_running(uid)
+	if has_node("%StartBtn"):
+		%StartBtn.text = "STOPP" if running else "START"
+	if has_node("%CustomerOption"):
+		%CustomerOption.disabled = running
+	if has_node("%StatusLabel"):
+		%StatusLabel.text = "AKTIV" if running else "BEREIT"
+
+func _fetch_customers():
+	var url = Store.get_api_url() + "/customers"
+	var http = HTTPRequest.new(); add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		if code == 200 and has_node("%CustomerOption"):
+			var customers = JSON.parse_string(body.get_string_from_utf8())
+			%CustomerOption.clear()
+			if customers is Array:
+				for c in customers:
+					%CustomerOption.add_item(c.get("company_name", "Kunde"))
+		http.queue_free()
+	)
+	http.request(url)
+
+func _update_stats():
+	if uid == "": return
+	
+	var date_today = Time.get_date_string_from_system()
+	var url = Store.get_api_url() + "/time/stats/daily?emp_id=" + uid + "&date=" + date_today
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		if code == 200:
+			var json = JSON.parse_string(body.get_string_from_utf8())
+			if json and json.has("total_minutes"):
+				var total = int(json["total_minutes"])
+				var h = total / 60
+				var m = total % 60
+				
+				# UI-Update
+				if has_node("%StatTodayLabel"):
+					%StatTodayLabel.text = str(h) + "h " + str(m).pad_zeros(2) + "m"
+				
+				# Den Fortschrittsbalken ebenfalls füllen (Soll 8h = 480 Min)
+				if has_node("%Bar"):
+					%Bar.value = float(total) / 60.0 
+		http.queue_free()
+	)
+	http.request(url)
