@@ -40,7 +40,6 @@ func login(email: String, password: String) -> void:
 	print("Login Versuch bei: ", url)
 	login_http.request(url, headers, HTTPClient.METHOD_POST, body)
 
-# NEU: Die fehlende Register-Funktion
 func register(first_name: String, last_name: String, email: String, password: String) -> void:
 	var url = get_api_url() + "/auth/register"
 	var body = JSON.stringify({
@@ -67,7 +66,7 @@ func _on_login_request_completed(_result, response_code, _headers, body):
 			# Registrierung war erfolgreich (Server schickt kein User-Objekt zurück)
 			emit_signal("login_completed", true, "Konto erfolgreich erstellt! Bitte einloggen.")
 	else:
-		# Fehlerbehandlung: Versuche die Fehlermeldung vom Server (Python) zu lesen
+		# Fehlerbehandlung
 		var error_msg = "Fehler: " + str(response_code)
 		if json is Dictionary and json.has("detail"):
 			error_msg = json["detail"]
@@ -111,7 +110,6 @@ func start_timer(project: String = "Allgemein") -> void:
 	_send_post(url, body)
 
 func stop_timer(_project: String, notes: String = "") -> void:
-	# _project mit Unterstrich versehen, um die Warnung zu beheben
 	var emp_id = get_current_user_id()
 	if emp_id.is_empty(): return
 	
@@ -142,13 +140,11 @@ func get_timer_start(emp_id: String) -> float: return active_timer_state.get(emp
 
 # --- ABFRAGEN (CACHE) ---
 
-# Gibt alle Einträge für einen bestimmten Mitarbeiter an einem Datum zurück
 func get_entries_for_date(emp_id: String, date_str: String) -> Array:
 	return time_entries.filter(func(e): 
 		return str(e.get("emp_id")) == emp_id and e.get("date") == date_str
 	)
 
-# Gibt die gesamte Historie eines Mitarbeiters zurück
 func get_entries_by_employee(emp_id: String) -> Array:
 	return time_entries.filter(func(e): 
 		return str(e.get("emp_id")) == emp_id
@@ -171,7 +167,7 @@ func add_manual_entry(emp_id: String, date_str: String, minutes: int, project: S
 	var url = get_api_url() + "/time/manual"
 	var body = {
 		"emp_id": emp_id,
-		"date": date_str,      # Format: "YYYY-MM-DD"
+		"date": date_str,
 		"duration": minutes,   # Ganze Zahl
 		"project": project,
 		"type": type
@@ -187,7 +183,8 @@ func is_day_locked(emp_id: String, date_str: String, callback: Callable) -> void
 		var locked = false
 		if code == 200:
 			var json = JSON.parse_string(body.get_string_from_utf8())
-			locked = json.get("is_locked", false)
+			if json is Dictionary:
+				locked = json.get("is_locked", false)
 		callback.call(locked)
 		http.queue_free()
 	)
@@ -202,3 +199,36 @@ func request_time_correction(emp_id: String, date_str: String, note: String) -> 
 		"note": note
 	}
 	_send_post(url, body)
+
+func request_correction(emp_id: String, date_str: String, note: String, callback: Callable) -> void:
+	var url = get_api_url() + "/time/request_correction"
+	var body = {
+		"emp_id": emp_id,
+		"date": date_str,
+		"note": note
+	}
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, _b):
+		callback.call(code == 200)
+		http.queue_free()
+	)
+	var headers = ["Content-Type: application/json"]
+	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
+
+# --- NEU HINZUGEFÜGT: WORKFLOW ---
+
+func submit_day(emp_id: String, date_str: String, callback: Callable) -> void:
+	var url = get_api_url() + "/time/submit_day"
+	var body = {"emp_id": emp_id, "date": date_str}
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, _b):
+		# Callback mit true aufrufen, wenn Status 200 (OK)
+		callback.call(code == 200)
+		http.queue_free()
+	)
+	var headers = ["Content-Type: application/json"]
+	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))

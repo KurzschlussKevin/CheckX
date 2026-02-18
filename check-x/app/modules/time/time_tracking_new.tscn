@@ -77,6 +77,7 @@ layout_mode = 2
 theme_override_constants/separation = 20
 
 [node name="TodayCard" type="PanelContainer" parent="MainLayout/VBox/StatsRow"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 90)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
@@ -213,11 +214,31 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "START"
 
-[node name="VacBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel"]
+[node name="ActionGrid" type="GridContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel"]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+columns = 2
+
+[node name="VacBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
-text = "Abwesenheit / Urlaub"
+size_flags_horizontal = 3
+text = "Abwesenheit"
+
+[node name="SubmitDayBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tag einreichen"
+
+[node name="PdfBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Export PDF"
 
 [node name="RightPanel" type="PanelContainer" parent="MainLayout/VBox/ContentSplit"]
 layout_mode = 2

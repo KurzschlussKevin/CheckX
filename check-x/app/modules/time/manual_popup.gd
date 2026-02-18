@@ -1,45 +1,58 @@
 extends Control
 
-signal entry_saved 
-var target_date = ""
-var user_id = ""
+signal entry_saved
 
-func _ready():
-	%CancelBtn.pressed.connect(func(): visible = false)
-	%SaveBtn.pressed.connect(_save)
+var user_id = ""
+var target_date = ""
 
 func open(uid, date_str):
 	user_id = uid
 	target_date = date_str
-	%DateInfo.text = "Datum: " + date_str
+	
+	if has_node("%DateInfo"):
+		%DateInfo.text = "Datum: " + date_str
 	
 	# Initial alles aktivieren
-	%SaveBtn.disabled = false
-	%ProjectInput.editable = true
-	%TimeInput.editable = true
-	%SaveBtn.text = "Speichern"
+	if has_node("%SaveBtn"): 
+		%SaveBtn.disabled = false
+		%SaveBtn.text = "Speichern"
+	if has_node("%ProjectInput"): %ProjectInput.editable = true
+	if has_node("%TimeInput"): %TimeInput.editable = true
 	
-	# Sperrstatus prüfen
+	# SPERR-CHECK VOM SERVER
 	Store.is_day_locked(uid, date_str, func(is_locked):
 		if is_locked:
-			%DateInfo.text = "Datum: " + date_str + " (GESPERRT)"
-			%DateInfo.modulate = Color.RED
-			%SaveBtn.disabled = true
-			%SaveBtn.text = "Vom Admin bestätigt"
-			%ProjectInput.editable = false
-			%TimeInput.editable = false
-			# Hier könnte man einen Button "Korrektur beantragen" einblenden
+			if has_node("%DateInfo"):
+				%DateInfo.text = date_str + " (GESPERRT)"
+				%DateInfo.modulate = Color(1, 0.4, 0.4) # Rot markieren
+			
+			if has_node("%SaveBtn"):
+				%SaveBtn.disabled = true
+				%SaveBtn.text = "Gesperrt"
+			
+			if has_node("%ProjectInput"): %ProjectInput.editable = false
+			if has_node("%TimeInput"): %TimeInput.editable = false
 		else:
-			%DateInfo.modulate = Color.WHITE
+			if has_node("%DateInfo"): %DateInfo.modulate = Color.WHITE
 	)
 	
-	%ProjectInput.text = ""
-	%TimeInput.value = 0
+	if has_node("%ProjectInput"): %ProjectInput.text = ""
+	if has_node("%TimeInput"): %TimeInput.value = 0
 	visible = true
 
-func _save():
-	var mins = int(%TimeInput.value)
+func _ready():
+	if has_node("%SaveBtn"):
+		%SaveBtn.pressed.connect(_on_save)
+	if has_node("%CancelBtn"):
+		%CancelBtn.pressed.connect(func(): visible = false)
+
+func _on_save():
+	var mins = 0
+	var proj = ""
+	if has_node("%TimeInput"): mins = int(%TimeInput.value)
+	if has_node("%ProjectInput"): proj = %ProjectInput.text
+	
 	if mins > 0:
-		Store.add_manual_entry(user_id, target_date, mins, %ProjectInput.text, "Manuell")
+		Store.add_manual_entry(user_id, target_date, mins, proj)
+		entry_saved.emit()
 		visible = false
-		emit_signal("entry_saved")
