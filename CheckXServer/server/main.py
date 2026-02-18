@@ -3,13 +3,16 @@ from pydantic import BaseModel
 from typing import Optional, List
 import auth
 import employees
-import absences # Dieses Modul muss im Server-Ordner existieren
+import absences 
 import database
+import customers 
+import performance 
+import time_tracking
+import services
 
 app = FastAPI(title="CheckX API")
 
-# --- DATENMODELLE (PYDANTIC) ---
-
+# --- DATENMODELLE ---
 class UserRegister(BaseModel):
     first_name: str
     last_name: str
@@ -33,8 +36,7 @@ class VacationRequest(BaseModel):
     end_date: str
     vacation_type: str
 
-# --- ROUTEN: AUTHENTIFIZIERUNG ---
-
+# --- ROUTEN: AUTH ---
 @app.post("/auth/register")
 def route_register(user: UserRegister):
     return auth.register_user(user)
@@ -44,44 +46,89 @@ def route_login(user: UserLogin):
     return auth.login_user(user)
 
 # --- ROUTEN: MITARBEITER ---
-
 @app.get("/employees")
 def route_get_employees():
     return employees.list_all_employees()
 
-# --- ROUTEN: ZEITERFASSUNG ---
+# --- ROUTEN: SERVICES ---
+@app.get("/services")
+def route_get_services():
+    return services.get_all_services()
 
+@app.post("/services")
+def route_create_service(s: services.ServiceModel):
+    return services.create_service(s)
+
+# --- ROUTEN: KUNDEN ---
+@app.get("/customers")
+def route_get_customers():
+    return customers.get_active_customers()
+
+@app.post("/customers")
+def route_create_customer(c: customers.CustomerModel):
+    return customers.create_customer(c)
+
+@app.put("/customers")
+def route_update_customer(c: customers.CustomerModel):
+    return customers.update_customer(c)
+
+@app.post("/customers/{cid}/targets")
+def route_set_targets(cid: int, targets: List[customers.CustomerTarget]):
+    return customers.set_customer_targets(cid, targets)
+
+@app.get("/customers/{cid}/targets")
+def route_get_targets(cid: int):
+    return customers.get_customer_targets(cid)
+
+# --- ROUTEN: PERFORMANCE ---
+@app.post("/performance")
+def route_add_performance(p: performance.DailyPerformance):
+    return performance.add_performance_entry(p)
+
+@app.get("/performance/me")
+def route_get_my_performance(emp_id: str):
+    return performance.get_performance_by_employee(emp_id)
+
+@app.get("/performance/progress")
+def route_get_progress(customer_id: int):
+    return performance.get_customer_progress(customer_id)
+
+# --- ROUTEN: ZEIT & URLAUB ---
 @app.post("/time/start")
 def route_time_start(entry: TimeEntry):
-    # Logik für Start (Konsolenausgabe zur Prüfung)
-    print(f"Timer Start: {entry.emp_id} für Projekt {entry.project}")
-    return {"status": "ok"}
+    return time_tracking.start_timer(entry)
 
 @app.post("/time/stop")
 def route_time_stop(entry: TimeEntry):
-    # Logik für Stop
-    print(f"Timer Stop: {entry.emp_id}")
-    return {"status": "ok"}
-
-# --- ROUTEN: ADMIN & URLAUB (ABSENCES) ---
+    return time_tracking.stop_timer(entry)
 
 @app.post("/time/request_vacation")
 def route_request_vacation(req: VacationRequest):
-    """Mitarbeiter beantragt Urlaub"""
     return absences.create_vacation_request(req)
 
 @app.get("/admin/pending_absences")
 def route_get_pending():
-    """Admin fragt offene Anträge ab"""
     return absences.get_pending_requests()
 
 @app.post("/admin/approve_absence")
 def route_approve(absence_id: int, status: str, admin_id: str):
-    """Admin genehmigt oder lehnt Antrag ab"""
-    # status: 'approved' oder 'rejected'
     return absences.update_absence_status(absence_id, status, admin_id)
 
+@app.get("/absences/me")
+def route_my_absences(emp_id: str):
+    return absences.get_user_absences(emp_id)
+
+@app.get("/absences/calendar")
+def route_team_calendar(year: int, month: int):
+    return absences.get_approved_absences_in_range(year, month)
+
 # --- SYSTEM-START ---
+@app.on_event("startup")
+def on_startup():
+    # Reihenfolge ist wichtig!
+    services.init_services_table()
+    customers.init_customers_table()
+    performance.init_performance_table()
 
 @app.get("/")
 def health_check():
@@ -90,12 +137,3 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
-@app.get("/absences/me")
-def route_my_absences(emp_id: str):
-    return absences.get_user_absences(emp_id)
-
-@app.get("/absences/calendar")
-def route_team_calendar(year: int, month: int):
-    # Jetzt mit Pflicht-Parametern für Performance
-    return absences.get_approved_absences_in_range(year, month)
