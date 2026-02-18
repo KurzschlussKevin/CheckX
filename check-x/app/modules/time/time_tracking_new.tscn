@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://ciejnv0y8iuci"]
 
-[ext_resource type="Script" uid="uid://djkc7epm5bhmg" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
-[ext_resource type="PackedScene" path="res://app/modules/time/calendar_panel.tscn" id="2_cal"]
-[ext_resource type="PackedScene" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
-[ext_resource type="PackedScene" path="res://app/modules/time/vacation_popup.tscn" id="4_vac"]
+[ext_resource type="Script" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
+[ext_resource type="PackedScene" uid="uid://dqb17e6f7kvtn" path="res://app/modules/time/calendar_panel.tscn" id="2_cal"]
+[ext_resource type="PackedScene" uid="uid://manual_popup_v2" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
+[ext_resource type="PackedScene" uid="uid://8xuqgd0a5s72" path="res://app/modules/time/vacation_popup.tscn" id="4_vac"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass_new"]
 bg_color = Color(0.08, 0.08, 0.1, 0.7)
@@ -125,16 +125,16 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill_new")
 max_value = 1.0
 show_percentage = false
 
-[node name="ProjectInput" type="LineEdit" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=424762794]
+[node name="CustomerOption" type="OptionButton" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
-placeholder_text = "Projekt eingeben..."
 
 [node name="NotesInput" type="TextEdit" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=1704830696]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-placeholder_text = "Notizen..."
+placeholder_text = "Tätigkeitsbeschreibung / Notizen..."
 
 [node name="StartBtn" type="Button" parent="MainLayout/ContentSplit/LeftPanel/TimerCard/CardMargin/CardContent" unique_id=2055749711]
 unique_name_in_owner = true

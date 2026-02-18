@@ -1,0 +1,697 @@
+[gd_scene format=3 uid="uid://performance_redesign_v5_fixed"]
+
+[ext_resource type="Script" path="res://app/modules/performance/performance.gd" id="1_logic"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.05, 0.05, 0.07, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header_accent"]
+bg_color = Color(0.15, 0.15, 0.18, 1)
+border_width_bottom = 2
+border_color = Color(0.2, 0.6, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_table_header"]
+bg_color = Color(0.18, 0.18, 0.22, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
+bg_color = Color(0.1, 0.1, 0.1, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_fill"]
+bg_color = Color(0.2, 0.8, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
+bg_color = Color(0.15, 0.15, 0.18, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Performance" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_logic")
+
+[node name="Bg" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="MainMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="HSplit" type="HBoxContainer" parent="MainMargin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LeftCol" type="VBoxContainer" parent="MainMargin/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.75
+theme_override_constants/separation = 20
+
+[node name="HeaderCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TopStrip" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_header_accent")
+
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "AKTIVER AUFTRAG / KUNDE"
+
+[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ManageBtn" type="Button" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/TopStrip/M/H"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kunden verwalten ⚙"
+flat = true
+
+[node name="ContentM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="CustomerOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+
+[node name="StatsBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Gesamtfortschritt: 0 / 0"
+
+[node name="ProgressBar" type="ProgressBar" parent="MainMargin/HSplit/LeftCol/HeaderCard/VBox/ContentM/HBox/StatsBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+show_percentage = false
+
+[node name="TableCard" type="PanelContainer" parent="MainMargin/HSplit/LeftCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard"]
+layout_mode = 2
+
+[node name="HeaderM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 5
+
+[node name="TableHeader" type="PanelContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_table_header")
+
+[node name="H" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="L1" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "  LEISTUNG"
+vertical_alignment = 1
+
+[node name="L2" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "PREIS (€)"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="L3" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "SOLL"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="L4" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "IST"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="L5" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "REST"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="L6" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/HeaderM/TableHeader/H"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "EINGABE  "
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="TableContainer" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/Scroll/M"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="FooterM" type="MarginContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 20
+
+[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="HBox" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
+layout_mode = 2
+
+[node name="AllServicesOption" type="OptionButton" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 35)
+layout_mode = 2
+item_count = 1
+selected = 0
+popup/item_0/text = "+ Leistung hinzufügen"
+popup/item_0/id = -1
+
+[node name="AddServiceBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Hinzufügen"
+
+[node name="Spacer" type="Control" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
+layout_mode = 2
+
+[node name="BottomRow" type="HBoxContainer" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="NotesInput" type="TextEdit" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Bemerkungen zum Tagesbericht..."
+
+[node name="SaveBtn" type="Button" parent="MainMargin/HSplit/LeftCol/TableCard/VBox/FooterM/V/BottomRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "BERICHT SPEICHERN"
+
+[node name="RightCol" type="VBoxContainer" parent="MainMargin/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+theme_override_constants/separation = 20
+
+[node name="HistoryCard" type="PanelContainer" parent="MainMargin/HSplit/RightCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="M" type="MarginContainer" parent="MainMargin/HSplit/RightCol/HistoryCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="V" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+text = "MEINE HISTORIE"
+
+[node name="HistoryScroll" type="ScrollContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HistoryList" type="VBoxContainer" parent="MainMargin/HSplit/RightCol/HistoryCard/M/V/HistoryScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="CustomerPopup" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85)
+
+[node name="Center" type="CenterContainer" parent="CustomerPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="CustomerPopup/Center"]
+custom_minimum_size = Vector2(800, 700)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
+
+[node name="M" type="MarginContainer" parent="CustomerPopup/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBox" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "KUNDEN & AUFTRÄGE VERWALTEN"
+
+[node name="CancelCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "X"
+flat = true
+
+[node name="Tabs" type="TabContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Stammdaten" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 0
+
+[node name="Grid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 2
+
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+layout_mode = 2
+text = "Firmenname *"
+
+[node name="InpName" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "z.B. Müller GmbH"
+
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+layout_mode = 2
+text = "Standort (Haupt)"
+
+[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InpStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Straße"
+
+[node name="InpHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+placeholder_text = "Nr."
+
+[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+layout_mode = 2
+text = "PLZ / Stadt"
+
+[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InpZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+placeholder_text = "PLZ"
+
+[node name="InpCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Stammdaten/Grid/H2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Stadt"
+
+[node name="Auftrag & Preise" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 1
+
+[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
+layout_mode = 2
+text = "Vereinbarte Leistungen & Preise definieren"
+
+[node name="ListHeader" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
+layout_mode = 2
+
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "LEISTUNG"
+
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "MENGE (SOLL)"
+
+[node name="L3" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "PREIS / STK (€)"
+
+[node name="Spacer" type="Control" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/ListHeader"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TargetListContainer" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="AddServiceRow" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NewServiceInput" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "+ Neue Leistung in den Katalog aufnehmen..."
+
+[node name="CreateServiceBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Auftrag & Preise/V/AddServiceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Hinzufügen"
+
+[node name="Rechnung & Kontakt" type="MarginContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 2
+
+[node name="Scroll" type="ScrollContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt"]
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="CheckBilling" type="CheckBox" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Abweichende Rechnungsadresse"
+
+[node name="BillingGrid" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
+columns = 2
+
+[node name="L1" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+layout_mode = 2
+text = "Straße & Nr"
+
+[node name="H" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+layout_mode = 2
+
+[node name="InpBillStreet" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Straße"
+
+[node name="InpBillHouse" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+placeholder_text = "Nr."
+
+[node name="L2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+layout_mode = 2
+text = "PLZ / Stadt"
+
+[node name="H2" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid"]
+layout_mode = 2
+
+[node name="InpBillZip" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+placeholder_text = "PLZ"
+
+[node name="InpBillCity" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/BillingGrid/H2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Stadt"
+
+[node name="HSeparator" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+
+[node name="L_Kontakte" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+text = "Ansprechpartner"
+
+[node name="Grid1" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 2
+
+[node name="InpCP1First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Vorname"
+
+[node name="InpCP1Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nachname"
+
+[node name="InpCP1Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "E-Mail"
+
+[node name="InpCP1Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Telefon"
+
+[node name="HSeparator2" type="HSeparator" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+
+[node name="L_Kontakte2" type="Label" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+text = "Zweiter Kontakt (Optional)"
+
+[node name="Grid2" type="GridContainer" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 2
+
+[node name="InpCP2First" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Vorname"
+
+[node name="InpCP2Last" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nachname"
+
+[node name="InpCP2Mail" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "E-Mail"
+
+[node name="InpCP2Phone" type="LineEdit" parent="CustomerPopup/Center/Panel/M/VBox/Tabs/Rechnung & Kontakt/Scroll/V/Grid2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Telefon"
+
+[node name="Footer" type="HBoxContainer" parent="CustomerPopup/Center/Panel/M/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="SaveCustomerBtn" type="Button" parent="CustomerPopup/Center/Panel/M/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "KUNDE ANLEGEN & SPEICHERN"
