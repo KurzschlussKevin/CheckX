@@ -1,11 +1,14 @@
 extends PanelContainer
 
 signal request_manual(date)
+
 var date = {"month": 1, "year": 2024}
 var uid = ""
 var sel_date = ""
 
-# Definition der Styles für die Kalender-Buttons
+# NEU: 'static' sorgt dafür, dass Godot den Cache beim Szenenwechsel NICHT löscht!
+static var locked_days_cache = []
+
 var style_normal = StyleBoxFlat.new()
 var style_hover = StyleBoxFlat.new()
 var style_today = StyleBoxFlat.new()
@@ -13,22 +16,20 @@ var style_today = StyleBoxFlat.new()
 func _ready():
 	_setup_styles()
 	date = Time.get_date_dict_from_system()
+	
 	%PrevBtn.pressed.connect(func(): _nav(-1))
 	%NextBtn.pressed.connect(func(): _nav(1))
-	%AddBtn.pressed.connect(func(): emit_signal("request_manual", sel_date))
+	
+	if not %SubmitDayBtn.pressed.is_connected(_on_submit_pressed):
+		%SubmitDayBtn.pressed.connect(_on_submit_pressed)
 
 func _setup_styles():
-	# Standard-Aussehen eines Tages
 	style_normal.bg_color = Color(1, 1, 1, 0.05)
 	style_normal.set_corner_radius_all(4)
-	
-	# Hover-Effekt (Mauszeiger)
 	style_hover.bg_color = Color(0.2, 0.6, 1.0, 0.3)
 	style_hover.set_corner_radius_all(4)
 	style_hover.border_width_bottom = 2
 	style_hover.border_color = Color(0.2, 0.6, 1.0, 1.0)
-	
-	# Markierung für den heutigen Tag
 	style_today.bg_color = Color(1, 1, 1, 0.1)
 	style_today.border_width_left = 1
 	style_today.border_width_top = 1
@@ -65,18 +66,14 @@ func _update_cal():
 	
 	for d in range(1, days + 1):
 		var btn = Button.new()
-		# Feste quadratische Größe gegen das Verzerren
 		btn.custom_minimum_size = Vector2(45, 45) 
 		btn.text = str(d)
 		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		
-		# Zentrierung innerhalb der Grid-Zelle
 		btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		
 		var ds = "%d-%02d-%02d" % [date.year, date.month, d]
 		
-		# Styles zuweisen
 		btn.add_theme_stylebox_override("normal", style_normal)
 		btn.add_theme_stylebox_override("hover", style_hover)
 		btn.add_theme_stylebox_override("pressed", style_hover)
@@ -84,11 +81,26 @@ func _update_cal():
 		if d == today_dict.day and date.month == today_dict.month and date.year == today_dict.year:
 			btn.add_theme_stylebox_override("normal", style_today)
 		
-		# Farbe basierend auf vorhandenen Einträgen
-		if Store.get_entries_for_date(str(uid), ds).size() > 0:
-			btn.modulate = Color(0.4, 1.0, 0.6) # Grün markieren
+		# --- NEUE LOGIK FÜR DIE FARBEN ---
+		if ds in locked_days_cache:
+			# Aus dem permanenten Cache laden
+			btn.modulate = Color(1, 0.3, 0.3, 0.9) # Rot (Gesperrt)
+		elif Store.get_entries_for_date(str(uid), ds).size() > 0:
+			btn.modulate = Color(0.4, 1.0, 0.6) # Grün (Hat Einträge)
+			
+			# Asynchroner Check: Falls die App neu gestartet wurde, fragen wir 
+			# den Server, ob dieser grüne Tag in Wirklichkeit gesperrt ist!
+			Store.is_day_locked(uid, ds, func(is_locked):
+				if is_locked:
+					if not (ds in locked_days_cache):
+						locked_days_cache.append(ds)
+					# is_instance_valid verhindert Fehler, falls du die Szene schon
+					# wieder gewechselt hast, bevor der Server antworten konnte
+					if is_instance_valid(btn): 
+						btn.modulate = Color(1, 0.3, 0.3, 0.9)
+			)
 		else: 
-			btn.modulate = Color(1, 1, 1, 0.6)
+			btn.modulate = Color(1, 1, 1, 0.6) # Weiß (Leer)
 		
 		btn.pressed.connect(func(): _click(ds))
 		%Grid.add_child(btn)
@@ -113,16 +125,85 @@ func _click(ds):
 	%DetailLabel.text = "Details für " + ds
 	for c in %EntryList.get_children(): c.queue_free()
 	
-	# Zeigt Einträge inklusive der gespeicherten Notizen an
 	for e in Store.get_entries_for_date(uid, ds):
 		var l = Label.new()
 		var note_text = ""
 		if e.has("notes") and e.notes != "":
 			note_text = " - " + e.notes
-			
 		l.text = "• %s (%d min)%s" % [e.project, int(e.duration/60), note_text]
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		%EntryList.add_child(l)
+
+	%AddBtn.disabled = true
+	%AddBtn.text = "Prüfe..."
+	%SubmitDayBtn.visible = false 
+	
+	Store.is_day_locked(uid, ds, func(is_locked):
+		var effectively_locked = is_locked or (ds in locked_days_cache)
+		if effectively_locked and not (ds in locked_days_cache):
+			locked_days_cache.append(ds)
+			_paint_grid_cell_red(ds)
+			
+		_update_buttons(effectively_locked)
+	)
+
+func _disconnect_all(btn: Button):
+	for conn in btn.pressed.get_connections():
+		btn.pressed.disconnect(conn.callable)
+
+func _update_buttons(is_locked: bool):
+	%AddBtn.disabled = false
+	_disconnect_all(%AddBtn)
+	
+	if is_locked:
+		%AddBtn.text = "Korrektur beantragen"
+		%AddBtn.modulate = Color(1, 0.4, 0.4) 
+		%AddBtn.pressed.connect(_on_correction_pressed)
+		%SubmitDayBtn.visible = false
+	else:
+		%AddBtn.text = "+ Zeit manuell"
+		%AddBtn.modulate = Color(1, 1, 1) 
+		%AddBtn.pressed.connect(func(): emit_signal("request_manual", sel_date))
+		
+		%SubmitDayBtn.visible = true
+		%SubmitDayBtn.disabled = false
+		%SubmitDayBtn.text = "Tag versenden"
+
+func _paint_grid_cell_red(target_date_str):
+	var day_str = str(int(target_date_str.split("-")[2]))
+	for btn in %Grid.get_children():
+		if btn is Button and btn.text == day_str:
+			btn.modulate = Color(1, 0.3, 0.3, 0.9) 
+
+func _on_submit_pressed():
+	%SubmitDayBtn.disabled = true
+	%SubmitDayBtn.text = "Sende..."
+	
+	Store.submit_day(uid, sel_date, func(success):
+		if success:
+			if not (sel_date in locked_days_cache):
+				locked_days_cache.append(sel_date)
+			_click(sel_date) 
+			_update_cal() 
+		else:
+			%SubmitDayBtn.text = "Fehler!"
+			%SubmitDayBtn.disabled = false
+	)
+
+func _on_correction_pressed():
+	%AddBtn.disabled = true
+	%AddBtn.text = "Sende Antrag..."
+	
+	Store.request_correction(uid, sel_date, "Korrektur", func(success):
+		if success:
+			locked_days_cache.erase(sel_date)
+			_click(sel_date)
+			_update_cal() 
+		else:
+			%AddBtn.text = "Fehler!"
+			await get_tree().create_timer(1.0).timeout
+			_update_buttons(true) 
+	)
 
 func _get_days(m, y):
 	if m in [1,3,5,7,8,10,12]: return 31

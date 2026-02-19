@@ -1,8 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://ciejnv0y8iuci"]
+[gd_scene format=3 uid="uid://ciejnv0y8iuci"]
 
-[ext_resource type="Script" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
+[ext_resource type="Script" uid="uid://djkc7epm5bhmg" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
 [ext_resource type="PackedScene" uid="uid://dqb17e6f7kvtn" path="res://app/modules/time/calendar_panel.tscn" id="2_cal"]
-[ext_resource type="PackedScene" uid="uid://manual_popup_v2" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
+[ext_resource type="PackedScene" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
 [ext_resource type="PackedScene" uid="uid://8xuqgd0a5s72" path="res://app/modules/time/vacation_popup.tscn" id="4_vac"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
@@ -38,7 +38,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="TimeTracking" type="Control"]
+[node name="TimeTracking" type="Control" unique_id=2048783580]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,7 +47,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script_new")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1236084562]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,7 +56,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.05, 0.07, 1)
 
-[node name="MainLayout" type="MarginContainer" parent="."]
+[node name="MainLayout" type="MarginContainer" parent="." unique_id=1280433155]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,125 +68,125 @@ theme_override_constants/margin_top = 25
 theme_override_constants/margin_right = 25
 theme_override_constants/margin_bottom = 25
 
-[node name="VBox" type="VBoxContainer" parent="MainLayout"]
+[node name="VBox" type="VBoxContainer" parent="MainLayout" unique_id=1360077382]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="StatsRow" type="HBoxContainer" parent="MainLayout/VBox"]
+[node name="StatsRow" type="HBoxContainer" parent="MainLayout/VBox" unique_id=921448685]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="TodayCard" type="PanelContainer" parent="MainLayout/VBox/StatsRow"]
+[node name="TodayCard" type="PanelContainer" parent="MainLayout/VBox/StatsRow" unique_id=928439436]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 90)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="M" type="MarginContainer" parent="MainLayout/VBox/StatsRow/TodayCard"]
+[node name="M" type="MarginContainer" parent="MainLayout/VBox/StatsRow/TodayCard" unique_id=1567383794]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 
-[node name="V" type="VBoxContainer" parent="MainLayout/VBox/StatsRow/TodayCard/M"]
+[node name="V" type="VBoxContainer" parent="MainLayout/VBox/StatsRow/TodayCard/M" unique_id=1898691620]
 layout_mode = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="MainLayout/VBox/StatsRow/TodayCard/M/V"]
+[node name="Title" type="Label" parent="MainLayout/VBox/StatsRow/TodayCard/M/V" unique_id=1897167680]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 theme_override_font_sizes/font_size = 12
 text = "HEUTE GEARBEITET"
 
-[node name="StatTodayLabel" type="Label" parent="MainLayout/VBox/StatsRow/TodayCard/M/V"]
+[node name="StatTodayLabel" type="Label" parent="MainLayout/VBox/StatsRow/TodayCard/M/V" unique_id=1759460370]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "0h 00m"
 
-[node name="WeekCard" type="PanelContainer" parent="MainLayout/VBox/StatsRow"]
+[node name="WeekCard" type="PanelContainer" parent="MainLayout/VBox/StatsRow" unique_id=1457675772]
 custom_minimum_size = Vector2(250, 90)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="M" type="MarginContainer" parent="MainLayout/VBox/StatsRow/WeekCard"]
+[node name="M" type="MarginContainer" parent="MainLayout/VBox/StatsRow/WeekCard" unique_id=642743110]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 
-[node name="V" type="VBoxContainer" parent="MainLayout/VBox/StatsRow/WeekCard/M"]
+[node name="V" type="VBoxContainer" parent="MainLayout/VBox/StatsRow/WeekCard/M" unique_id=1418728683]
 layout_mode = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="MainLayout/VBox/StatsRow/WeekCard/M/V"]
+[node name="Title" type="Label" parent="MainLayout/VBox/StatsRow/WeekCard/M/V" unique_id=1727643739]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 theme_override_font_sizes/font_size = 12
 text = "WOCHENSUMME"
 
-[node name="StatWeekLabel" type="Label" parent="MainLayout/VBox/StatsRow/WeekCard/M/V"]
+[node name="StatWeekLabel" type="Label" parent="MainLayout/VBox/StatsRow/WeekCard/M/V" unique_id=1070522903]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "0h 00m"
 
-[node name="Spacer" type="Control" parent="MainLayout/VBox/StatsRow"]
+[node name="Spacer" type="Control" parent="MainLayout/VBox/StatsRow" unique_id=2037757772]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DateLabel" type="Label" parent="MainLayout/VBox/StatsRow"]
+[node name="DateLabel" type="Label" parent="MainLayout/VBox/StatsRow" unique_id=639151109]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Datum heute"
 
-[node name="ContentSplit" type="HBoxContainer" parent="MainLayout/VBox"]
+[node name="ContentSplit" type="HBoxContainer" parent="MainLayout/VBox" unique_id=2019416039]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 20
 
-[node name="LeftPanel" type="VBoxContainer" parent="MainLayout/VBox/ContentSplit"]
+[node name="LeftPanel" type="VBoxContainer" parent="MainLayout/VBox/ContentSplit" unique_id=1490656624]
 custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="TimerCard" type="PanelContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel"]
+[node name="TimerCard" type="PanelContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel" unique_id=710888832]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="M" type="MarginContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard"]
+[node name="M" type="MarginContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard" unique_id=743994901]
 layout_mode = 2
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_top = 25
 theme_override_constants/margin_right = 25
 theme_override_constants/margin_bottom = 25
 
-[node name="V" type="VBoxContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M"]
+[node name="V" type="VBoxContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M" unique_id=701586602]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="StatusHBox" type="HBoxContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="StatusHBox" type="HBoxContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=1541120923]
 layout_mode = 2
 alignment = 1
 
-[node name="PulseDot" type="Panel" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V/StatusHBox"]
+[node name="PulseDot" type="Panel" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V/StatusHBox" unique_id=1849104888]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_pulse")
 
-[node name="StatusLabel" type="Label" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V/StatusHBox"]
+[node name="StatusLabel" type="Label" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V/StatusHBox" unique_id=501183017]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "BEREIT"
 
-[node name="TimerLabel" type="Label" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="TimerLabel" type="Label" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=2102301395]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 64
 text = "00:00:00"
 horizontal_alignment = 1
 
-[node name="Bar" type="ProgressBar" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="Bar" type="ProgressBar" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=1570616063]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 6)
 layout_mode = 2
@@ -195,66 +195,66 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill")
 max_value = 8.0
 show_percentage = false
 
-[node name="CustomerOption" type="OptionButton" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="CustomerOption" type="OptionButton" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=618125550]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
-[node name="NotesInput" type="TextEdit" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="NotesInput" type="TextEdit" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=1126573550]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 placeholder_text = "Tätigkeitsbeschreibung..."
 wrap_mode = 1
 
-[node name="StartBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V"]
+[node name="StartBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=1700893433]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "START"
 
-[node name="ActionGrid" type="GridContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel"]
+[node name="ActionGrid" type="GridContainer" parent="MainLayout/VBox/ContentSplit/LeftPanel" unique_id=912422394]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 columns = 2
 
-[node name="VacBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
+[node name="VacBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid" unique_id=1539106852]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Abwesenheit"
 
-[node name="SubmitDayBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
+[node name="SubmitDayBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid" unique_id=737170213]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Tag einreichen"
 
-[node name="PdfBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid"]
+[node name="PdfBtn" type="Button" parent="MainLayout/VBox/ContentSplit/LeftPanel/ActionGrid" unique_id=272404877]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Export PDF"
 
-[node name="RightPanel" type="PanelContainer" parent="MainLayout/VBox/ContentSplit"]
+[node name="RightPanel" type="PanelContainer" parent="MainLayout/VBox/ContentSplit" unique_id=757819078]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
 
-[node name="CalendarPanel" parent="MainLayout/VBox/ContentSplit/RightPanel" instance=ExtResource("2_cal")]
+[node name="CalendarPanel" parent="MainLayout/VBox/ContentSplit/RightPanel" unique_id=1633941807 instance=ExtResource("2_cal")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ManualPopup" parent="." instance=ExtResource("3_man")]
+[node name="ManualPopup" parent="." unique_id=1817016576 instance=ExtResource("3_man")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
 
-[node name="VacationPopup" parent="." instance=ExtResource("4_vac")]
+[node name="VacationPopup" parent="." unique_id=1587567865 instance=ExtResource("4_vac")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
