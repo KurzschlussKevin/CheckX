@@ -57,6 +57,7 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
         # Wir setzen Start auf 08:00 und berechnen Ende automatisch
         start_ts_str = f"{date_str} 08:00:00"
         
+        # HIER WAR DER FEHLER: Wir haben am Ende der execute-Funktion EINMAL zu viel 'duration_mins' übergeben!
         cur.execute("""
             INSERT INTO time_entries (employee_id, project, start_time, end_time, notes, status, duration_minutes, approval_status, is_locked)
             VALUES (
@@ -70,7 +71,7 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
                 'open',
                 FALSE
             )
-        """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins, duration_mins))
+        """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins)) # <--- Hier waren vorher 7 statt 6 Variablen!
         
         conn.commit()
         return {"status": "success"}
@@ -131,14 +132,15 @@ def submit_day(emp_id, date_str):
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        # Check: Timer darf nicht laufen
+        # Check: Timer darf an DIESEM TAG nicht laufen
         cur.execute("""
             SELECT 1 FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date 
             AND status = 'running'
-        """, (emp_id,))
+        """, (emp_id, date_str))
         if cur.fetchone():
-             return {"status": "error", "message": "Bitte erst den laufenden Timer stoppen!"}
+             return {"status": "error", "message": f"Bitte erst den laufenden Timer für den {date_str} stoppen!"}
 
         # Status auf 'submitted' setzen
         cur.execute("""
@@ -148,6 +150,10 @@ def submit_day(emp_id, date_str):
             AND start_time::date = %s::date
             AND approval_status = 'open'
         """, (emp_id, date_str))
+        
+        if cur.rowcount == 0:
+            return {"status": "error", "message": "Keine offenen Zeiten für diesen Tag in der Datenbank gefunden!"}
+
         conn.commit()
         return {"status": "success", "message": "Tag eingereicht"}
     except Exception as e:
@@ -189,5 +195,28 @@ def request_correction(emp_id, date_str, note):
         return {"status": "success", "message": "Korrektur beantragt. Tag ist wieder offen."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+def get_locked_days_for_month(emp_id, month, year):
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT DISTINCT TO_CHAR(start_time, 'YYYY-MM-DD') as d
+            FROM time_entries 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND EXTRACT(MONTH FROM start_time) = %s
+            AND EXTRACT(YEAR FROM start_time) = %s
+            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved'))
+        """, (emp_id, month, year))
+        
+        rows = cur.fetchall()
+        # Datum-Strings extrahieren
+        locked_dates = [row['d'] for row in rows if row['d']]
+        return {"locked_days": locked_dates}
+    except Exception as e:
+        print(f"Fehler bei get_locked_days_for_month: {e}")
+        return {"locked_days": []}
     finally:
         conn.close()

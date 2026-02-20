@@ -3,6 +3,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db_conn
+from time_tracking import check_is_locked
+from time_tracking import get_locked_days_for_month
 import os
 import uvicorn
 
@@ -192,6 +194,14 @@ async def route_admin_approve_day(data: SubmitDayData):
 async def route_request_correction(data: CorrectionData):
     from time_tracking import request_correction
     return request_correction(data.emp_id, data.date, data.note)
+
+@app.get("/time/is_locked")
+def is_locked(emp_id: str, date: str):
+    return check_is_locked(emp_id, date)
+
+@app.get("/time/locked_days")
+def locked_days(emp_id: str, month: int, year: int):
+    return get_locked_days_for_month(emp_id, month, year)
 
 # --- ROUTEN: URLAUB ---
 
