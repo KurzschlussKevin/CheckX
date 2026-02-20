@@ -6,7 +6,7 @@ var date = {"month": 1, "year": 2024}
 var uid = ""
 var sel_date = ""
 
-# NEU: 'static' sorgt dafür, dass Godot den Cache beim Szenenwechsel NICHT löscht!
+# 'static' sorgt dafür, dass Godot den Cache beim Szenenwechsel behält
 static var locked_days_cache = []
 
 var style_normal = StyleBoxFlat.new()
@@ -20,8 +20,10 @@ func _ready():
 	%PrevBtn.pressed.connect(func(): _nav(-1))
 	%NextBtn.pressed.connect(func(): _nav(1))
 	
-	if not %SubmitDayBtn.pressed.is_connected(_on_submit_pressed):
-		%SubmitDayBtn.pressed.connect(_on_submit_pressed)
+	# WICHTIG: Den SubmitDayBtn (links) nur verbinden, NICHT optisch verändern
+	var submit_node = get_node_or_null("%SubmitDayBtn")
+	if submit_node and not submit_node.pressed.is_connected(_on_submit_pressed):
+		submit_node.pressed.connect(_on_submit_pressed)
 
 func _setup_styles():
 	style_normal.bg_color = Color(1, 1, 1, 0.05)
@@ -81,29 +83,33 @@ func _update_cal():
 		if d == today_dict.day and date.month == today_dict.month and date.year == today_dict.year:
 			btn.add_theme_stylebox_override("normal", style_today)
 		
-		# --- NEUE LOGIK FÜR DIE FARBEN ---
-		if ds in locked_days_cache:
-			# Aus dem permanenten Cache laden
-			btn.modulate = Color(1, 0.3, 0.3, 0.9) # Rot (Gesperrt)
-		elif Store.get_entries_for_date(str(uid), ds).size() > 0:
-			btn.modulate = Color(0.4, 1.0, 0.6) # Grün (Hat Einträge)
-			
-			# Asynchroner Check: Falls die App neu gestartet wurde, fragen wir 
-			# den Server, ob dieser grüne Tag in Wirklichkeit gesperrt ist!
-			Store.is_day_locked(uid, ds, func(is_locked):
-				if is_locked:
-					if not (ds in locked_days_cache):
-						locked_days_cache.append(ds)
-					# is_instance_valid verhindert Fehler, falls du die Szene schon
-					# wieder gewechselt hast, bevor der Server antworten konnte
-					if is_instance_valid(btn): 
-						btn.modulate = Color(1, 0.3, 0.3, 0.9)
-			)
+		var entries = Store.get_entries_for_date(str(uid), ds)
+		var locally_locked = false
+		for e in entries:
+			if e.get("approval_status", "") in ["submitted", "approved"] or e.get("is_locked", false) == true:
+				locally_locked = true
+				
+		if ds in locked_days_cache or locally_locked:
+			btn.modulate = Color(1, 0.3, 0.3, 0.9) # Tag-Zelle ROT
+		elif entries.size() > 0:
+			btn.modulate = Color(0.4, 1.0, 0.6) # Grün
 		else: 
-			btn.modulate = Color(1, 1, 1, 0.6) # Weiß (Leer)
+			btn.modulate = Color(1, 1, 1, 0.6) # Weiß
 		
-		btn.pressed.connect(func(): _click(ds))
+		btn.pressed.connect(func():
+			btn.release_focus()
+			_click(ds)
+		)
 		%Grid.add_child(btn)
+
+	# Bulk-Check für Neustart
+	Store.get_locked_days_for_month(uid, date.month, date.year, func(server_locked_days):
+		if not is_instance_valid(self): return 
+		for ds in server_locked_days:
+			if not (ds in locked_days_cache):
+				locked_days_cache.append(ds)
+			_paint_grid_cell_red(ds)
+	)
 
 func _update_hist():
 	for c in %List.get_children(): c.queue_free()
@@ -131,19 +137,16 @@ func _click(ds):
 		if e.has("notes") and e.notes != "":
 			note_text = " - " + e.notes
 		l.text = "• %s (%d min)%s" % [e.project, int(e.duration/60), note_text]
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		%EntryList.add_child(l)
 
 	%AddBtn.disabled = true
 	%AddBtn.text = "Prüfe..."
-	%SubmitDayBtn.visible = false 
 	
 	Store.is_day_locked(uid, ds, func(is_locked):
 		var effectively_locked = is_locked or (ds in locked_days_cache)
 		if effectively_locked and not (ds in locked_days_cache):
 			locked_days_cache.append(ds)
 			_paint_grid_cell_red(ds)
-			
 		_update_buttons(effectively_locked)
 	)
 
@@ -156,28 +159,28 @@ func _update_buttons(is_locked: bool):
 	_disconnect_all(%AddBtn)
 	
 	if is_locked:
+		# REGEL: AddBtn UNTEN RECHTS wird ROT und zur KORREKTUR
 		%AddBtn.text = "Korrektur beantragen"
 		%AddBtn.modulate = Color(1, 0.4, 0.4) 
 		%AddBtn.pressed.connect(_on_correction_pressed)
-		%SubmitDayBtn.visible = false
 	else:
+		# REGEL: AddBtn UNTEN RECHTS ist WEISS und NORMAL
 		%AddBtn.text = "+ Zeit manuell"
 		%AddBtn.modulate = Color(1, 1, 1) 
 		%AddBtn.pressed.connect(func(): emit_signal("request_manual", sel_date))
-		
-		%SubmitDayBtn.visible = true
-		%SubmitDayBtn.disabled = false
-		%SubmitDayBtn.text = "Tag versenden"
 
 func _paint_grid_cell_red(target_date_str):
-	var day_str = str(int(target_date_str.split("-")[2]))
-	for btn in %Grid.get_children():
-		if btn is Button and btn.text == day_str:
-			btn.modulate = Color(1, 0.3, 0.3, 0.9) 
+	var parts = target_date_str.split("-")
+	if parts.size() == 3:
+		if int(parts[0]) != date.year or int(parts[1]) != date.month:
+			return 
+		var day_str = str(int(parts[2]))
+		for btn in %Grid.get_children():
+			if btn is Button and btn.text == day_str:
+				btn.modulate = Color(1, 0.3, 0.3, 0.9) 
 
 func _on_submit_pressed():
-	%SubmitDayBtn.disabled = true
-	%SubmitDayBtn.text = "Sende..."
+	if sel_date == "": return
 	
 	Store.submit_day(uid, sel_date, func(success):
 		if success:
@@ -185,9 +188,6 @@ func _on_submit_pressed():
 				locked_days_cache.append(sel_date)
 			_click(sel_date) 
 			_update_cal() 
-		else:
-			%SubmitDayBtn.text = "Fehler!"
-			%SubmitDayBtn.disabled = false
 	)
 
 func _on_correction_pressed():

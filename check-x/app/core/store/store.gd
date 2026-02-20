@@ -128,7 +128,18 @@ func _send_post(url: String, data: Dictionary) -> void:
 	var headers = ["Content-Type: application/json"]
 	var temp_client = HTTPRequest.new()
 	add_child(temp_client)
-	temp_client.request_completed.connect(func(_r, _c, _h, _b): temp_client.queue_free())
+	
+	temp_client.request_completed.connect(func(_r, code, _h, body_bytes):
+		var body_str = body_bytes.get_string_from_utf8()
+		print("\n==========================================")
+		print(">>> [STORE POST] An URL: ", url)
+		print(">>> [STORE POST] Gesendete Daten: ", json)
+		print(">>> [STORE POST] Server HTTP Code: ", code)
+		print(">>> [STORE POST] Server Antwort: ", body_str)
+		print("==========================================\n")
+		temp_client.queue_free()
+	)
+	
 	temp_client.request(url, headers, HTTPClient.METHOD_POST, json)
 
 # --- UI HELPER ---
@@ -200,6 +211,32 @@ func request_time_correction(emp_id: String, date_str: String, note: String) -> 
 	}
 	_send_post(url, body)
 
+func submit_day(emp_id: String, date_str: String, callback: Callable) -> void:
+	var url = get_api_url() + "/time/submit_day"
+	var body = {"emp_id": emp_id, "date": date_str}
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body_bytes):
+		var success = false
+		if code == 200:
+			var body_str = body_bytes.get_string_from_utf8()
+			var json = JSON.parse_string(body_str)
+			if json is Dictionary:
+				# NEU: Wir prüfen den echten Status aus dem JSON!
+				if json.get("status", "") == "success":
+					success = true
+				else:
+					print(">>> [STORE] Server hat Absenden verweigert: ", json.get("message", "Unbekannter Fehler"))
+		else:
+			print(">>> [STORE] Schwerer HTTP Fehler: ", code)
+			
+		callback.call(success)
+		http.queue_free()
+	)
+	var headers = ["Content-Type: application/json"]
+	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
+
 func request_correction(emp_id: String, date_str: String, note: String, callback: Callable) -> void:
 	var url = get_api_url() + "/time/request_correction"
 	var body = {
@@ -210,25 +247,37 @@ func request_correction(emp_id: String, date_str: String, note: String, callback
 	
 	var http = HTTPRequest.new()
 	add_child(http)
-	http.request_completed.connect(func(_r, code, _h, _b):
-		callback.call(code == 200)
+	http.request_completed.connect(func(_r, code, _h, body_bytes):
+		var success = false
+		if code == 200:
+			var json = JSON.parse_string(body_bytes.get_string_from_utf8())
+			if json is Dictionary and json.get("status", "") == "success":
+				success = true
+		callback.call(success)
 		http.queue_free()
 	)
 	var headers = ["Content-Type: application/json"]
 	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
-
-# --- NEU HINZUGEFÜGT: WORKFLOW ---
-
-func submit_day(emp_id: String, date_str: String, callback: Callable) -> void:
-	var url = get_api_url() + "/time/submit_day"
-	var body = {"emp_id": emp_id, "date": date_str}
+func get_locked_days_for_month(emp_id: String, month: int, year: int, callback: Callable) -> void:
+	var url = get_api_url() + "/time/locked_days?emp_id=" + emp_id + "&month=" + str(month) + "&year=" + str(year)
+	print(">>> [STORE] Lade gesperrte Tage von: ", url)
 	
 	var http = HTTPRequest.new()
 	add_child(http)
-	http.request_completed.connect(func(_r, code, _h, _b):
-		# Callback mit true aufrufen, wenn Status 200 (OK)
-		callback.call(code == 200)
+	http.request_completed.connect(func(_r, code, _h, body):
+		print(">>> [STORE] Server HTTP Code: ", code)
+		var locked_days = []
+		if code == 200:
+			var body_str = body.get_string_from_utf8()
+			print(">>> [STORE] Server Antwort Body: ", body_str)
+			var json = JSON.parse_string(body_str)
+			if json is Dictionary and json.has("locked_days"):
+				locked_days = json.get("locked_days", [])
+		else:
+			print(">>> [STORE] FEHLER: Konnte Tage nicht laden!")
+		
+		if callback.is_valid() and not callback.is_null():
+			callback.call(locked_days)
 		http.queue_free()
 	)
-	var headers = ["Content-Type: application/json"]
-	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
+	http.request(url)

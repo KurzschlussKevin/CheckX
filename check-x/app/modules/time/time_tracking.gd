@@ -21,11 +21,8 @@ func _ready():
 	# --- MODULE ---
 	if has_node("%CalendarPanel"):
 		%CalendarPanel.setup(uid)
-		# Kalenderklick öffnet Popup nur, wenn Tag nicht gesperrt
-		%CalendarPanel.request_manual.connect(func(d): 
-			if not current_day_locked and has_node("%ManualPopup"): 
-				%ManualPopup.open(uid, d)
-		)
+		# Kalenderklick prüft den Sperrstatus des gewählten Datums
+		%CalendarPanel.request_manual.connect(_on_calendar_request_manual)
 	
 	if has_node("%ManualPopup"):
 		%ManualPopup.entry_saved.connect(func():
@@ -41,6 +38,17 @@ func _ready():
 	_fetch_customers()
 	_update_stats()
 
+# Diese Funktion prüft beim Klick im Kalender den Sperrstatus des gewählten Tages
+func _on_calendar_request_manual(target_date):
+	# Korrektur der Klammern in Zeile 53:
+	Store.is_day_locked(uid, target_date, func(is_locked):
+		if not is_locked:
+			if has_node("%ManualPopup"): 
+				%ManualPopup.open(uid, target_date)
+		else:
+			print("Manueller Eintrag verweigert: Tag " + target_date + " ist gesperrt.")
+	)
+
 # --- BUTTON LOGIK ---
 
 func _on_submit_day_pressed():
@@ -54,7 +62,7 @@ func _on_submit_day_pressed():
 		# FALL A: Tag ist gesperrt -> Wir beantragen Korrektur (Entsperren)
 		Store.request_correction(uid, date_today, "User Correction Request", func(success):
 			if success:
-				_update_stats() # UI aktualisieren -> Tag wird wieder normal
+				_update_stats()
 			else:
 				%SubmitDayBtn.text = "Fehler"
 				%SubmitDayBtn.disabled = false
@@ -63,7 +71,7 @@ func _on_submit_day_pressed():
 		# FALL B: Tag ist offen -> Wir reichen ein (Sperren)
 		Store.submit_day(uid, date_today, func(success):
 			if success:
-				_update_stats() # UI aktualisieren -> Tag wird rot & gesperrt
+				_update_stats()
 				if has_node("%CalendarPanel"): %CalendarPanel.refresh()
 			else:
 				%SubmitDayBtn.text = "Fehler"
@@ -76,7 +84,7 @@ func _update_stats():
 	if uid == "": return
 	var date_today = Time.get_date_string_from_system()
 	
-	# 1. Minuten holen (wie gehabt)
+	# 1. Minuten holen
 	var url = Store.get_api_url() + "/time/stats/daily?emp_id=" + uid + "&date=" + date_today
 	var http = HTTPRequest.new(); add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body):
@@ -107,16 +115,16 @@ func _update_stats():
 		btn.disabled = false
 		
 		if is_locked:
-			# --- ZUSTAND: EINGEREICHT (ROT) ---
+			# --- ZUSTAND: EINGEREICHT ---
 			
-			# Button ändert Funktion zu Korrektur
-			btn.text = "Korrektur beantragen"
-			btn.modulate = Color(1, 0.7, 0.7) # Rötlicher Button
+			# Button bleibt optisch unverändert
+			btn.text = "Tag einreichen"
+			btn.modulate = Color(1, 1, 1) 
 			
-			# Panel wird ROT
-			card.modulate = Color(1, 0.4, 0.4) 
+			# Panel bleibt normal weiß
+			card.modulate = Color(1, 1, 1) 
 			
-			# Status Text
+			# Status Text zeigt Sperre an
 			status_lbl.text = "EINGEREICHT"
 			status_lbl.modulate = Color(1, 0.3, 0.3)
 			
@@ -127,19 +135,11 @@ func _update_stats():
 			
 		else:
 			# --- ZUSTAND: OFFEN (NORMAL) ---
-			
-			# Button ändert Funktion zu Einreichen
 			btn.text = "Tag einreichen"
-			btn.modulate = Color(1, 1, 1) # Weiß
-			
-			# Panel normal
+			btn.modulate = Color(1, 1, 1)
 			card.modulate = Color(1, 1, 1)
-			
-			# Status Text normal
 			status_lbl.modulate = Color(1, 1, 1)
-			
-			# UI State (Start/Stop) normal prüfen
-			_update_ui_state() 
+			_update_ui_state()
 	)
 
 func _process(delta):
@@ -174,7 +174,6 @@ func _refresh_all():
 	_update_stats()
 
 func _update_ui_state():
-	# Wenn gesperrt ist, greift die Logik in _update_stats, hier brechen wir ab
 	if current_day_locked: return
 	
 	var running = Store.is_timer_running(uid)
