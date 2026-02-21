@@ -52,27 +52,37 @@ func _on_calendar_request_manual(target_date):
 # --- BUTTON LOGIK ---
 
 func _on_submit_day_pressed():
+	# Wir prüfen, ob im Kalender ein anderes Datum gewählt ist als 'heute'
+	var selected_date = %CalendarPanel.sel_date
 	var date_today = Time.get_date_string_from_system()
 	
-	# Button kurz deaktivieren für Feedback
+	# Falls im Kalender nichts gewählt ist, nehmen wir heute
+	var target_date = selected_date if selected_date != "" else date_today
+	
 	%SubmitDayBtn.disabled = true
 	%SubmitDayBtn.text = "..."
 	
-	if current_day_locked:
-		# FALL A: Tag ist gesperrt -> Wir beantragen Korrektur (Entsperren)
-		Store.request_correction(uid, date_today, "User Correction Request", func(success):
+	if current_day_locked and target_date == date_today:
+		# Nur wenn der HEUTIGE Tag gesperrt ist, beantragen wir Korrektur
+		Store.request_correction(uid, target_date, "User Correction Request", func(success):
 			if success:
-				_update_stats()
+				_update_stats() # UI für heute aktualisieren
 			else:
 				%SubmitDayBtn.text = "Fehler"
 				%SubmitDayBtn.disabled = false
 		)
 	else:
-		# FALL B: Tag ist offen -> Wir reichen ein (Sperren)
-		Store.submit_day(uid, date_today, func(success):
+		# Einreichen (Sperren) für das Ziel-Datum
+		Store.submit_day(uid, target_date, func(success):
 			if success:
-				_update_stats()
-				if has_node("%CalendarPanel"): %CalendarPanel.refresh()
+				# WICHTIG: Nur wenn wir HEUTE eingereicht haben, 
+				# rufen wir _update_stats auf, um den Timer-Button zu sperren.
+				if target_date == date_today:
+					_update_stats()
+				
+				# Kalender muss immer aktualisiert werden (Zelle wird rot)
+				if has_node("%CalendarPanel"): 
+					%CalendarPanel.refresh()
 			else:
 				%SubmitDayBtn.text = "Fehler"
 				%SubmitDayBtn.disabled = false
@@ -102,8 +112,9 @@ func _update_stats():
 	)
 	http.request(url)
 	
-	# 2. STATUS CHECKEN & FARBEN SETZEN
+# 2. STATUS CHECKEN & FARBEN SETZEN
 	Store.is_day_locked(uid, date_today, func(is_locked):
+		# Wir stellen sicher, dass wir hier NUR den Status für HEUTE speichern
 		current_day_locked = is_locked
 		
 		var btn = %SubmitDayBtn
