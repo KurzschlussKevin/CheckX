@@ -1,34 +1,45 @@
 extends Node
 
-# Signal, um ein UI-Popup zu öffnen (wird von der Main-UI abonniert)
-signal error_occurred(module_name, message, stack_trace)
+signal show_error_dialog(module_name, error_msg)
+var current_error_data = {}
 
-func report(module: String, message: String, stack_trace: String = ""):
-	var emp_id = Store.get_current_user_id()
-	var device_info = OS.get_name() + " - " + OS.get_model_name()
-	
-	var data = {
+func report(module: String, message: String):
+	# Wir sammeln Daten, aber sichern alles mit "Unknown" ab, falls der Store klemmt
+	var emp_id = "Unknown"
+	if Store and Store.has_method("get_current_user_id"):
+		var stored_id = Store.get_current_user_id()
+		if str(stored_id) != "":
+			emp_id = str(stored_id)
+		
+	current_error_data = {
 		"emp_id": emp_id,
 		"module": module,
 		"error_message": message,
-		"stack_trace": stack_trace,
-		"device_info": device_info
+		"device_info": OS.get_name() + " " + OS.get_model_name(),
+		"stack_trace": Time.get_datetime_string_from_system()
 	}
 	
-	# Sende den Bug-Report an das neue Backend-Endpunkt
-	var url = Config.get_api_url() + "/system/report_bug"
+	# WICHTIG: Erst das Signal senden, damit das Fenster aufpoppt
+	emit_signal("show_error_dialog", module, message)
+
+func send_report_to_server(user_note: String = ""):
+	if current_error_data.is_empty(): return
+	
+	if user_note != "":
+		current_error_data["error_message"] += "\nUser-Notiz: " + user_note
+	
+	# Hier lag der Fehler: Wir nutzen jetzt sicher Store statt Config
+	var url = Store.get_api_url() + "/system/report_bug"
+	
 	var http = HTTPRequest.new()
 	add_child(http)
 	
-	var json_data = JSON.stringify(data)
 	var headers = ["Content-Type: application/json"]
+	var body = JSON.stringify(current_error_data)
 	
-	http.request(url, headers, HTTPClient.METHOD_POST, json_data)
-	
-	# Wir warten nicht auf die Antwort, sondern triggern sofort das UI-Signal
-	emit_signal("error_occurred", module, message, stack_trace)
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
 	
 	http.request_completed.connect(func(_r, code, _h, _b):
-		print("Bug-Report gesendet, Status: ", code)
+		print("Bug-Report erfolgreich an Server gesendet. Status: ", code)
 		http.queue_free()
 	)

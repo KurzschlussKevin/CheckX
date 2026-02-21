@@ -106,15 +106,37 @@ func load_module(path: String, title: String = "") -> void:
 
 # Diese Funktion wird aufgerufen, sobald irgendwo ErrorHandler.report(...) getriggert wird
 func _on_error_reported(module_name: String, error_msg: String) -> void:
+	# 1. Wir suchen zuerst das Popup
 	if has_node("%BugReportPopup"):
 		var popup = %BugReportPopup
-		popup.title = "SYSTEM-FEHLER: " + module_name.to_upper()
-		popup.dialog_text = "Ein Problem ist aufgetreten:\n\n[ " + error_msg + " ]\n\nMöchten Sie diesen Fehler an den Entwickler melden?"
 		
-		# Notizfeld im Popup leeren
-		if has_node("%BugNoteInput"):
-			%BugNoteInput.text = ""
-			
+		popup.title = "SYSTEM-FEHLER: " + module_name.to_upper()
+		popup.dialog_text = "Ein technisches Problem ist aufgetreten. Der Fehler wurde unten eingetragen:"
+		
+		# 2. Wir suchen das Eingabefeld INNERHALB des Popups
+		# Wir nutzen get_node_or_null auf dem Popup-Objekt selbst
+		var input_field = popup.find_child("BugNoteInput", true, false)
+		
+		# Alternativ, falls du den Unique Name im Popup-Skript hast:
+		# var input_field = popup.get_node("%BugNoteInput")
+		
+		var tech_info = "--- AUTOMATISCHER FEHLERBERICHT ---\n"
+		tech_info += "MODUL: " + module_name + "\n"
+		tech_info += "FEHLER: " + error_msg + "\n"
+		tech_info += "-----------------------------------\n\n"
+		
+		if input_field:
+			input_field.text = tech_info
+			if input_field.has_method("set_caret_line"):
+				input_field.set_caret_line(input_field.get_line_count())
+		else:
+			# Falls find_child nicht klappt, versuchen wir es über den direkten Pfad
+			# (Passe den Pfad hier an, wenn deine VBox anders heißt)
+			input_field = popup.get_node_or_null("VBox/BugNoteInput")
+			if input_field:
+				input_field.text = tech_info
+
+		# 3. Jetzt das Fenster öffnen
 		popup.popup_centered()
 
 # Wird ausgeführt, wenn der User im Popup auf 'Bug Bericht senden' klickt

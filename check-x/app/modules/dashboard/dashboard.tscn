@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://b6p2x8q8y4n2p"]
+[gd_scene format=3 uid="uid://b6p2x8q8y4n2p"]
 
 [ext_resource type="Script" path="res://app/modules/dashboard/dashboard.gd" id="1_dash_script"]
 [ext_resource type="PackedScene" uid="uid://cpsydjtw1cbwx" path="res://app/modules/dashboard/stat_card.tscn" id="2_stat_card"]

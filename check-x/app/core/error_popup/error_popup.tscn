@@ -20,7 +20,6 @@ theme_override_constants/separation = 10
 
 [node name="ErrorDescription" type="Label" parent="VBox" unique_id=1714564635]
 layout_mode = 2
-text = "Zusätzliche Informationen für den Entwickler (optional):"
 autowrap_mode = 2
 
 [node name="BugNoteInput" type="TextEdit" parent="VBox" unique_id=1538316805]
