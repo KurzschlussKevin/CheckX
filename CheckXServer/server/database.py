@@ -28,8 +28,5 @@ def get_db_connection():
     try:
         yield conn
     finally:
+        # Dies stellt sicher, dass die Verbindung IMMER zurückgegeben wird
         connection_pool.putconn(conn)
-
-def get_db_conn():
-    """Legacy-Support für alten Code."""
-    return connection_pool.getconn()

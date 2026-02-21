@@ -1,4 +1,4 @@
-from database import get_db_connection
+from database import get_db_connection # Geändert von get_db_conn auf get_db_connection
 from datetime import datetime
 from fastapi import HTTPException
 import psycopg2
@@ -7,7 +7,7 @@ import psycopg2
 
 def start_timer(data):
     """Startet einen neuen Timer für einen Mitarbeiter."""
-    with get_db_connection() as conn:
+    with get_db_connection() as conn: # Automatische Pool-Verwaltung
         cur = conn.cursor()
         
         # Prüfen, ob für diesen User bereits ein Timer läuft
@@ -58,6 +58,7 @@ def stop_timer(data):
 
 def add_manual_entry(emp_id, date_str, duration_mins, project):
     """Erlaubt das nachträgliche Eintragen von Arbeitszeit."""
+    # Check nutzt intern ebenfalls einen eigenen Context Manager
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 
