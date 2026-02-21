@@ -38,7 +38,7 @@ class UserLogin(BaseModel):
 # UPDATE: Erweiterte Modelle für die Zeiterfassung
 class TimerData(BaseModel):
     emp_id: str
-    project: str
+    project: Optional[str] = ""
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     notes: Optional[str] = ""
