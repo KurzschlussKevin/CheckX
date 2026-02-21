@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Store="*uid://cefq7u0n3loul"
 Config="*uid://cw55ln6hbpm0o"
+ErrorHandler="*uid://den4hpiumnyvc"
 
 [display]
 

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://dmakwmb0aeim2"]
+
+[node name="BugReportPopup" type="ConfirmationDialog" unique_id=648660955]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "TECHNISCHER FEHLER"
+initial_position = 2
+size = Vector2i(689, 559)
+visible = true
+ok_button_text = "Bug Bericht senden"
+dialog_text = "Ein unerwarteter Fehler ist aufgetreten. Möchten Sie diesen an den Entwickler melden?"
+cancel_button_text = "Abbrechen"
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=402921478]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 681.0
+offset_bottom = 498.0
+theme_override_constants/separation = 10
+
+[node name="ErrorDescription" type="Label" parent="VBox" unique_id=1714564635]
+layout_mode = 2
+text = "Zusätzliche Informationen für den Entwickler (optional):"
+autowrap_mode = 2
+
+[node name="BugNoteInput" type="TextEdit" parent="VBox" unique_id=1538316805]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+placeholder_text = "Was haben Sie gerade gemacht, als der Fehler auftrat? (z.B. Start-Button geklickt...)"
+wrap_mode = 1
+
+[node name="InfoLabel" type="Label" parent="VBox" unique_id=321190691]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.588235, 0.588235, 0.588235, 1)
+theme_override_font_sizes/font_size = 12
+text = "Hinweis: Es werden automatisch anonyme Systemdaten (OS-Version, Modulname) mitgesendet."
+autowrap_mode = 2

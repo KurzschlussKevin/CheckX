@@ -44,6 +44,15 @@ func _ready() -> void:
 	main_layout.modulate.a = 0
 	var tween = create_tween()
 	tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
+	
+	# --- NEU: ERROR-HANDLER VERBINDEN ---
+	# Wir verbinden das Signal vom Autoload-Singleton 'ErrorHandler'
+	if ErrorHandler.has_signal("show_error_dialog"):
+		ErrorHandler.show_error_dialog.connect(_on_error_reported)
+	
+	# Verbindung für den Bestätigungs-Button im Popup (%BugReportPopup)
+	if has_node("%BugReportPopup"):
+		%BugReportPopup.confirmed.connect(_on_send_bug_confirmed)
 
 func _setup_sidebar() -> void:
 	# Alle alten Kinder im Container löschen
@@ -88,4 +97,32 @@ func load_module(path: String, title: String = "") -> void:
 		var t = create_tween()
 		t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
 	else:
-		print("Hinweis: Szene existiert noch nicht: ", path)
+		# Falls eine Datei fehlt, melden wir das jetzt automatisch an dein neues System
+		var err_msg = "Szenen-Datei fehlt oder Pfad ungültig: " + path
+		print(err_msg)
+		ErrorHandler.report("System / Navigation", err_msg)
+
+# --- NEU: BUG-REPORTING LOGIK ---
+
+# Diese Funktion wird aufgerufen, sobald irgendwo ErrorHandler.report(...) getriggert wird
+func _on_error_reported(module_name: String, error_msg: String) -> void:
+	if has_node("%BugReportPopup"):
+		var popup = %BugReportPopup
+		popup.title = "SYSTEM-FEHLER: " + module_name.to_upper()
+		popup.dialog_text = "Ein Problem ist aufgetreten:\n\n[ " + error_msg + " ]\n\nMöchten Sie diesen Fehler an den Entwickler melden?"
+		
+		# Notizfeld im Popup leeren
+		if has_node("%BugNoteInput"):
+			%BugNoteInput.text = ""
+			
+		popup.popup_centered()
+
+# Wird ausgeführt, wenn der User im Popup auf 'Bug Bericht senden' klickt
+func _on_send_bug_confirmed() -> void:
+	var user_note = ""
+	if has_node("%BugNoteInput"):
+		user_note = %BugNoteInput.text
+	
+	# Finales Absenden über das ErrorHandler-Modul an das Backend
+	ErrorHandler.send_report_to_server(user_note)
+	print("Bug-Report wurde durch Benutzer bestätigt.")

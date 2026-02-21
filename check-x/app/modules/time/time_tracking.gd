@@ -40,13 +40,14 @@ func _ready():
 
 # Diese Funktion prüft beim Klick im Kalender den Sperrstatus des gewählten Tages
 func _on_calendar_request_manual(target_date):
-	# Korrektur der Klammern in Zeile 53:
 	Store.is_day_locked(uid, target_date, func(is_locked):
 		if not is_locked:
 			if has_node("%ManualPopup"): 
 				%ManualPopup.open(uid, target_date)
 		else:
 			print("Manueller Eintrag verweigert: Tag " + target_date + " ist gesperrt.")
+			# Optional: Hier könnte man auch einen Error-Report triggern, 
+			# falls das UI den Button trotz Sperre erlaubt hat.
 	)
 
 # --- BUTTON LOGIK ---
@@ -63,29 +64,30 @@ func _on_submit_day_pressed():
 	%SubmitDayBtn.text = "..."
 	
 	if current_day_locked and target_date == date_today:
-		# Nur wenn der HEUTIGE Tag gesperrt ist, beantragen wir Korrektur
+		# FALL A: HEUTIGER Tag ist gesperrt -> Wir beantragen Korrektur
 		Store.request_correction(uid, target_date, "User Correction Request", func(success):
 			if success:
 				_update_stats() # UI für heute aktualisieren
 			else:
 				%SubmitDayBtn.text = "Fehler"
 				%SubmitDayBtn.disabled = false
+				ErrorHandler.report("TimeTracking", "Korrekturanfrage fehlgeschlagen für: " + target_date)
 		)
 	else:
-		# Einreichen (Sperren) für das Ziel-Datum
+		# FALL B: Tag einreichen (Sperren)
 		Store.submit_day(uid, target_date, func(success):
 			if success:
-				# WICHTIG: Nur wenn wir HEUTE eingereicht haben, 
-				# rufen wir _update_stats auf, um den Timer-Button zu sperren.
+				# Nur wenn wir HEUTE eingereicht haben, updaten wir die Timer-Sperre
 				if target_date == date_today:
 					_update_stats()
 				
-				# Kalender muss immer aktualisiert werden (Zelle wird rot)
+				# Kalender-Panel immer aktualisieren (Zelle wird rot)
 				if has_node("%CalendarPanel"): 
 					%CalendarPanel.refresh()
 			else:
 				%SubmitDayBtn.text = "Fehler"
 				%SubmitDayBtn.disabled = false
+				ErrorHandler.report("TimeTracking", "Einreichen fehlgeschlagen für Datum: " + target_date)
 		)
 
 # --- VISUELLE LOGIK ---
@@ -108,13 +110,15 @@ func _update_stats():
 					%StatTodayLabel.text = str(h) + "h " + str(m).pad_zeros(2) + "m"
 				if has_node("%Bar"):
 					%Bar.value = total / 60.0
+		else:
+			ErrorHandler.report("TimeTracking", "API Fehler " + str(code) + " beim Abrufen der Tages-Statistiken.")
 		http.queue_free()
 	)
 	http.request(url)
 	
-# 2. STATUS CHECKEN & FARBEN SETZEN
+	# 2. STATUS CHECKEN & FARBEN SETZEN
 	Store.is_day_locked(uid, date_today, func(is_locked):
-		# Wir stellen sicher, dass wir hier NUR den Status für HEUTE speichern
+		# Wir speichern den Lock-Status NUR für das aktuelle System-Datum
 		current_day_locked = is_locked
 		
 		var btn = %SubmitDayBtn
@@ -122,30 +126,23 @@ func _update_stats():
 		var status_lbl = %StatusLabel
 		var start_btn = %StartBtn
 		
-		# Button immer aktivieren nach Check
 		btn.disabled = false
 		
 		if is_locked:
-			# --- ZUSTAND: EINGEREICHT ---
-			
-			# Button bleibt optisch unverändert
+			# --- ZUSTAND: EINGEREICHT / GESPERRT ---
 			btn.text = "Tag einreichen"
 			btn.modulate = Color(1, 1, 1) 
-			
-			# Panel bleibt normal weiß
 			card.modulate = Color(1, 1, 1) 
 			
-			# Status Text zeigt Sperre an
 			status_lbl.text = "EINGEREICHT"
 			status_lbl.modulate = Color(1, 0.3, 0.3)
 			
-			# Start Button gesperrt
+			# Timer-Button für heute komplett sperren
 			start_btn.disabled = true
 			start_btn.text = "GESPERRT"
 			start_btn.modulate = Color(0.5, 0.5, 0.5)
-			
 		else:
-			# --- ZUSTAND: OFFEN (NORMAL) ---
+			# --- ZUSTAND: OFFEN ---
 			btn.text = "Tag einreichen"
 			btn.modulate = Color(1, 1, 1)
 			card.modulate = Color(1, 1, 1)
@@ -204,6 +201,8 @@ func _fetch_customers():
 			%CustomerOption.clear()
 			if customers is Array:
 				for c in customers: %CustomerOption.add_item(c.get("company_name", "Kunde"))
+		elif code != 200:
+			ErrorHandler.report("Network", "Kundenliste konnte nicht geladen werden (HTTP " + str(code) + ")")
 		http.queue_free()
 	)
 	http.request(url)
