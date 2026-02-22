@@ -6,3 +6,5 @@ bcrypt
 pydantic
 reportlab
 python-multipart
+python-jose[cryptography]
+python-multipart
