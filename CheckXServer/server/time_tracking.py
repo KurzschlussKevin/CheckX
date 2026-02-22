@@ -1,6 +1,7 @@
 from database import get_db_connection
 from datetime import datetime
 from fastapi import HTTPException
+from psycopg2.extras import RealDictCursor
 import psycopg2
 
 # --- TIMER FUNKTIONEN ---
@@ -8,9 +9,9 @@ import psycopg2
 def start_timer(data):
     """Startet einen neuen Timer für einen Mitarbeiter."""
     with get_db_connection() as conn:
-        cur = conn.cursor()
+        # Hier RealDictCursor nutzen, damit row['id'] funktioniert
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Prüfen, ob für diesen User bereits ein Timer läuft
         cur.execute("""
             SELECT id FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
@@ -93,7 +94,7 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
 def get_daily_stats(emp_id, date_str):
     """Summiert die gearbeiteten Minuten eines Tages."""
     with get_db_connection() as conn:
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT COALESCE(SUM(duration_minutes), 0) as total_mins
             FROM time_entries 
@@ -113,7 +114,7 @@ def check_is_locked(emp_id, date_str):
             SELECT 1 FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             AND start_time::date = %s::date
-            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved'))
+            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved', 'correction_pending'))
             LIMIT 1
         """, (emp_id, date_str))
         return {"is_locked": True if cur.fetchone() else False}
@@ -135,9 +136,9 @@ def submit_day(emp_id, date_str):
              return {"status": "error", "message": "Bitte erst den laufenden Timer stoppen!"}
 
         cur.execute("""
-            UPDATE time_entries SET approval_status = 'submitted'
+            UPDATE time_entries SET approval_status = 'submitted', is_locked = TRUE
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            AND start_time::date = %s::date AND approval_status = 'open'
+            AND start_time::date = %s::date AND (approval_status = 'open' OR approval_status = 'rejected')
         """, (emp_id, date_str))
         
         if cur.rowcount == 0:
@@ -158,13 +159,30 @@ def admin_approve_full_day(emp_id, date_str):
                 AND start_time::date = %s::date
             """, (emp_id, date_str))
             
-            # NEU: Benachrichtigung senden
             from notifications import add_notification
-            add_notification(
-                emp_id, 
-                f"Deine Stunden für den {date_str} wurden genehmigt.", 
-                "info"
-            )
+            add_notification(emp_id, f"Deine Stunden für den {date_str} wurden genehmigt.", "info")
+            
+            conn.commit()
+            return {"status": "success"}
+        except Exception as e:
+            conn.rollback()
+            return {"status": "error", "message": str(e)}
+
+def admin_reject_day(emp_id, date_str, reason):
+    """Admin lehnt den Tag ab oder gibt Korrektur frei."""
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                UPDATE time_entries 
+                SET approval_status = 'rejected', is_locked = FALSE,
+                    notes = notes || ' [Info: ' || %s || ']'
+                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+                AND start_time::date = %s::date
+            """, (reason, emp_id, date_str))
+            
+            from notifications import add_notification
+            add_notification(emp_id, f"Tag {date_str} wurde freigegeben/abgelehnt: {reason}", "correction")
             
             conn.commit()
             return {"status": "success"}
@@ -173,30 +191,24 @@ def admin_approve_full_day(emp_id, date_str):
             return {"status": "error", "message": str(e)}
 
 def request_correction(emp_id, date_str, note):
-    """Setzt den Status zurück, damit der Mitarbeiter Korrekturen vornehmen kann."""
+    """Techniker beantragt Korrektur. Status wird auf 'correction_pending' gesetzt."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         try:
-            # 1. Datenbank-Update durchführen
+            # KORREKTUR: Status auf 'correction_pending' vereinheitlicht
             cur.execute("""
                 UPDATE time_entries 
-                SET approval_status = 'correction_requested', is_locked = FALSE, 
-                    notes = notes || ' [Korrektur: ' || %s || ']'
+                SET approval_status = 'correction_pending',
+                    notes = notes || ' [Korrektur-Anfrage: ' || %s || ']'
                 WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
                 AND start_time::date = %s::date
             """, (note, emp_id, date_str))
             
-            # 2. Benachrichtigung in die neue Tabelle schreiben
-            # Wir nutzen die emp_id (P-XXXX), da add_notification das intern auflöst
-            add_notification(
-                emp_id, 
-                f"Korrektur für den {date_str} angefordert: {note}", 
-                "correction"
-            )
+            from notifications import add_notification
+            # Optional: Hier könnte man eine Benachrichtigung an den Admin senden
             
-            # Ein einziger Commit am Ende des Blocks reicht aus
             conn.commit()
-            return {"status": "success", "message": "Tag zur Korrektur freigegeben."}
+            return {"status": "success", "message": "Anfrage an Admin gesendet."}
             
         except Exception as e:
             conn.rollback()
@@ -205,27 +217,25 @@ def request_correction(emp_id, date_str, note):
 def get_locked_days_for_month(emp_id, month, year):
     """Liefert eine Liste aller gesperrten Tage eines Monats."""
     with get_db_connection() as conn:
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT DISTINCT TO_CHAR(start_time, 'YYYY-MM-DD') as d
             FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             AND EXTRACT(MONTH FROM start_time) = %s
             AND EXTRACT(YEAR FROM start_time) = %s
-            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved'))
+            AND (is_locked = TRUE OR approval_status IN ('submitted', 'approved', 'correction_pending'))
         """, (emp_id, month, year))
         
         rows = cur.fetchall()
         return {"locked_days": [row['d'] for row in rows if row['d']]}
 
-# --- ADMIN-PANEL FUNKTION (Vervollständigt) ---
+# --- ADMIN-PANEL FUNKTIONEN ---
 
 def get_all_pending_submissions():
     """Holt alle Tage, die zur Prüfung eingereicht wurden."""
     with get_db_connection() as conn:
-        cur = conn.cursor()
-        # Wir gruppieren nach Tag und Mitarbeiter, da ein Tag mehrere Einträge haben kann
-        # Aber wir prüfen nur Einträge mit Status 'submitted'
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT DISTINCT e.emp_id, e.first_name, e.last_name, t.start_time::date as date
             FROM time_entries t
@@ -233,15 +243,33 @@ def get_all_pending_submissions():
             WHERE t.approval_status = 'submitted'
             ORDER BY date DESC
         """)
-        rows = cur.fetchall()
-        
-        results = []
-        for r in rows:
-            results.append({
-                "emp_id": r['emp_id'],
-                "first_name": r['first_name'],
-                "last_name": r['last_name'],
-                "date": str(r['date']),
-                "status": "submitted"
-            })
-        return results
+        return cur.fetchall()
+
+def get_pending_corrections():
+    """Holt alle Tage, für die eine Korrektur beantragt wurde."""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT e.emp_id, e.first_name, e.last_name, 
+                   te.start_time::date as date, te.notes
+            FROM time_entries te
+            JOIN employees e ON te.employee_id = e.id
+            WHERE te.approval_status = 'correction_pending'
+            GROUP BY e.emp_id, e.first_name, e.last_name, te.start_time::date, te.notes
+            ORDER BY te.start_time::date DESC
+        """)
+        return cur.fetchall()
+    
+def get_entries_by_employee(emp_id):
+    """Holt alle Einträge eines Mitarbeiters aus der DB."""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT id, project, start_time, end_time, duration_minutes as duration, 
+                   notes, approval_status, is_locked, 
+                   TO_CHAR(start_time, 'YYYY-MM-DD') as date
+            FROM time_entries
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            ORDER BY start_time DESC
+        """, (emp_id,))
+        return cur.fetchall()

@@ -20,7 +20,7 @@ import templates
 import pdf_generator
 import dashboard
 import bug_system
-import notifications # Neuer Import
+import notifications
 
 # Import von spezifischen Funktionen für die Zeiterfassung
 from time_tracking import get_locked_days_for_month
@@ -270,6 +270,34 @@ def route_get_my_notifications(current_user: dict = Depends(get_current_user)):
 def route_mark_read(nid: int, current_user: dict = Depends(get_current_user)):
     notifications.mark_as_read(nid)
     return {"status": "ok"}
+
+@app.get("/notifications/history")
+def route_get_notification_history(current_user: dict = Depends(get_current_user)):
+    """Holt die letzten 20 Benachrichtigungen (gelesen und ungelesen)."""
+    with database.get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, message, type, is_read, created_at 
+            FROM notifications 
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            ORDER BY created_at DESC LIMIT 20
+        """, (current_user["sub"],))
+        return cur.fetchall()
+
+@app.post("/time/admin/reject_day")
+async def route_admin_reject_day(data: CorrectionData, admin: dict = Depends(require_admin)):
+    """Endpunkt zum Ablehnen eines kompletten Arbeitstages durch den Admin."""
+    return time_tracking.admin_reject_day(data.emp_id, data.date, data.note)
+
+@app.get("/time/entries")
+async def route_get_time_entries(emp_id: str, current_user: dict = Depends(get_current_user)):
+    """Holt alle Zeiteinträge eines Mitarbeiters."""
+    # Wir rufen eine Funktion in time_tracking auf, die wir gleich noch erstellen
+    return time_tracking.get_entries_by_employee(emp_id)
+
+@app.get("/admin/pending_corrections")
+async def route_get_pending_corrections(admin: dict = Depends(require_admin)):
+    return time_tracking.get_pending_corrections()
 
 @app.on_event("startup")
 def on_startup():
