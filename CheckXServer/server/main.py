@@ -20,6 +20,7 @@ import templates
 import pdf_generator
 import dashboard
 import bug_system
+import notifications # Neuer Import
 
 # Import von spezifischen Funktionen für die Zeiterfassung
 from time_tracking import get_locked_days_for_month
@@ -259,6 +260,16 @@ def route_get_dashboard_stats(emp_id: str, current_user: dict = Depends(get_curr
 async def route_report_bug(data: bug_system.BugReportData):
     # Bug Reports lassen wir ohne Auth zu, falls die App mal gar nicht einloggt
     return bug_system.save_bug_report(data)
+
+# --- NOTIFICATION ---
+@app.get("/notifications/me")
+def route_get_my_notifications(current_user: dict = Depends(get_current_user)):
+    return notifications.get_unread_notifications(current_user["sub"])
+
+@app.post("/notifications/{nid}/read")
+def route_mark_read(nid: int, current_user: dict = Depends(get_current_user)):
+    notifications.mark_as_read(nid)
+    return {"status": "ok"}
 
 @app.on_event("startup")
 def on_startup():

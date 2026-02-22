@@ -1,9 +1,10 @@
 from fastapi import HTTPException
-from database import get_db_connection  # Geändert von get_db_conn auf get_db_connection
+from database import get_db_connection
 from datetime import datetime
+from notifications import add_notification
 
 def create_vacation_request(data):
-    # Nutzen des Context Managers für automatische Rückgabe zum Pool
+    """Erstellt einen neuen Urlaubsantrag in der Datenbank."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         
@@ -40,9 +41,9 @@ def create_vacation_request(data):
             raise HTTPException(status_code=500, detail=str(e))
 
 def get_pending_requests():
+    """Holt alle ausstehenden Urlaubsanträge für das Admin-Panel."""
     with get_db_connection() as conn:
         cur = conn.cursor()
-        # JOIN stellt sicher, dass nur Anträge mit existierenden Mitarbeitern geladen werden
         cur.execute("""
             SELECT a.id, e.first_name, e.last_name, e.emp_id, a.start_date, a.end_date, a.type
             FROM absences a
@@ -53,22 +54,46 @@ def get_pending_requests():
         return cur.fetchall()
 
 def update_absence_status(absence_id, new_status, admin_emp_id):
+    """Aktualisiert den Status eines Antrags und sendet eine Benachrichtigung."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         try:
+            # 1. Mitarbeiter-ID für die Benachrichtigung finden
+            cur.execute("""
+                SELECT e.emp_id 
+                FROM employees e 
+                JOIN absences a ON a.employee_id = e.id 
+                WHERE a.id = %s
+            """, (absence_id,))
+            target_emp = cur.fetchone()
+            
+            # 2. Status Update
             cur.execute("""
                 UPDATE absences 
                 SET status = %s, 
                     approved_by = (SELECT id FROM employees WHERE emp_id = %s)
                 WHERE id = %s
             """, (new_status, admin_emp_id, absence_id))
+            
+            # 3. Benachrichtigung senden (falls der Mitarbeiter gefunden wurde)
+            if target_emp:
+                status_text = "genehmigt" if new_status == "approved" else "abgelehnt"
+                add_notification(
+                    target_emp['emp_id'], 
+                    f"Dein Urlaubsantrag wurde {status_text}.", 
+                    "vacation"
+                )
+            
             conn.commit()
             return {"status": "success"}
+            
         except Exception as e:
             conn.rollback()
+            print(f"Fehler beim Update des Urlaubsstatus: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
 def get_user_absences(emp_id):
+    """Holt alle Anträge eines spezifischen Mitarbeiters."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
@@ -80,10 +105,9 @@ def get_user_absences(emp_id):
         return cur.fetchall()
 
 def get_approved_absences_in_range(year: int, month: int):
+    """Holt alle genehmigten Urlaube für die Kalenderansicht."""
     with get_db_connection() as conn:
         cur = conn.cursor()
-        
-        # Start/Ende des angefragten Monats bauen
         month_str = f"{year}-{month:02d}"
         
         cur.execute("""

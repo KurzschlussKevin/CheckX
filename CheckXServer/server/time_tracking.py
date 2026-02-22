@@ -150,28 +150,57 @@ def admin_approve_full_day(emp_id, date_str):
     """Admin bestätigt den Tag und sperrt ihn endgültig."""
     with get_db_connection() as conn:
         cur = conn.cursor()
-        cur.execute("""
-            UPDATE time_entries 
-            SET approval_status = 'approved', is_locked = TRUE 
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            AND start_time::date = %s::date
-        """, (emp_id, date_str))
-        conn.commit()
-        return {"status": "success"}
+        try:
+            cur.execute("""
+                UPDATE time_entries 
+                SET approval_status = 'approved', is_locked = TRUE 
+                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+                AND start_time::date = %s::date
+            """, (emp_id, date_str))
+            
+            # NEU: Benachrichtigung senden
+            from notifications import add_notification
+            add_notification(
+                emp_id, 
+                f"Deine Stunden für den {date_str} wurden genehmigt.", 
+                "info"
+            )
+            
+            conn.commit()
+            return {"status": "success"}
+        except Exception as e:
+            conn.rollback()
+            return {"status": "error", "message": str(e)}
 
 def request_correction(emp_id, date_str, note):
     """Setzt den Status zurück, damit der Mitarbeiter Korrekturen vornehmen kann."""
     with get_db_connection() as conn:
         cur = conn.cursor()
-        cur.execute("""
-            UPDATE time_entries 
-            SET approval_status = 'correction_requested', is_locked = FALSE, 
-                notes = notes || ' [Korrektur: ' || %s || ']'
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            AND start_time::date = %s::date
-        """, (note, emp_id, date_str))
-        conn.commit()
-        return {"status": "success", "message": "Tag zur Korrektur freigegeben."}
+        try:
+            # 1. Datenbank-Update durchführen
+            cur.execute("""
+                UPDATE time_entries 
+                SET approval_status = 'correction_requested', is_locked = FALSE, 
+                    notes = notes || ' [Korrektur: ' || %s || ']'
+                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+                AND start_time::date = %s::date
+            """, (note, emp_id, date_str))
+            
+            # 2. Benachrichtigung in die neue Tabelle schreiben
+            # Wir nutzen die emp_id (P-XXXX), da add_notification das intern auflöst
+            add_notification(
+                emp_id, 
+                f"Korrektur für den {date_str} angefordert: {note}", 
+                "correction"
+            )
+            
+            # Ein einziger Commit am Ende des Blocks reicht aus
+            conn.commit()
+            return {"status": "success", "message": "Tag zur Korrektur freigegeben."}
+            
+        except Exception as e:
+            conn.rollback()
+            return {"status": "error", "message": str(e)}
 
 def get_locked_days_for_month(emp_id, month, year):
     """Liefert eine Liste aller gesperrten Tage eines Monats."""
