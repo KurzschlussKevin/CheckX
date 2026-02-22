@@ -3,13 +3,13 @@ extends Node
 # Signale für die UI
 signal data_updated
 signal login_completed(success: bool, message: String, data: Dictionary)
-signal notification_received(message_data: Dictionary) # NEU: Signal für Toasts
+signal notification_received(message_data: Dictionary) # Signal für Toasts
 
 # Lokaler Cache für die UI und Sitzungsdaten
 var token: String = ""
 var current_user: Dictionary = {}
 var employees: Array = []
-var time_entries: Array = []
+var time_entries: Array = [] # WICHTIG: Wird nun befüllt
 var active_timer_state: Dictionary = {} 
 var current_user_data: Dictionary = {}
 
@@ -18,7 +18,7 @@ const TOKEN_PATH = "user://auth_token.dat"
 # HTTP Client Nodes
 var http_client: HTTPRequest
 var login_http: HTTPRequest
-var notification_timer: Timer # NEU: Timer für Polling
+var notification_timer: Timer # Timer für Polling
 
 func _ready() -> void:
 	# Separate Clients für parallele Anfragen
@@ -30,7 +30,7 @@ func _ready() -> void:
 	add_child(login_http)
 	login_http.request_completed.connect(_on_login_request_completed)
 	
-	# NEU: Timer für Benachrichtigungen initialisieren
+	# Timer für Benachrichtigungen initialisieren
 	notification_timer = Timer.new()
 	notification_timer.wait_time = 30.0 # Alle 30 Sekunden prüfen
 	notification_timer.timeout.connect(_check_for_notifications)
@@ -41,7 +41,7 @@ func _ready() -> void:
 	# Versuche gespeicherten Token beim Start der App zu laden
 	load_token()
 
-# --- NEU: NOTIFICATION MANAGEMENT ---
+# --- NOTIFICATION MANAGEMENT ---
 
 func _check_for_notifications() -> void:
 	if token.is_empty(): return # Nur prüfen, wenn eingeloggt
@@ -56,7 +56,7 @@ func _check_for_notifications() -> void:
 			if notes is Array:
 				for n in notes:
 					emit_signal("notification_received", n)
-					# Nachricht direkt als gelesen markieren, damit sie nicht doppelt erscheint
+					# Nachricht direkt als gelesen markieren
 					_mark_notification_as_read(n.id)
 		http.queue_free()
 	)
@@ -64,7 +64,6 @@ func _check_for_notifications() -> void:
 
 func _mark_notification_as_read(notif_id: int) -> void:
 	var url = get_api_url() + "/notifications/" + str(notif_id) + "/read"
-	# Wir nutzen ein leeres Dictionary, da die API nur den Status ändert
 	_send_post(url, {})
 
 # --- TOKEN MANAGEMENT ---
@@ -88,11 +87,14 @@ func load_token() -> void:
 			var data = file.get_var()
 			token = data.get("token", "")
 			current_user = data.get("user", {})
+			if not token.is_empty():
+				fetch_all_data() # Automatisches Laden beim Start
 			print(">>> [STORE] Sitzung geladen für: ", current_user.get("name", "Unbekannt"))
 
 func clear_session() -> void:
 	token = ""
 	current_user = {}
+	time_entries = []
 	if FileAccess.file_exists(TOKEN_PATH):
 		DirAccess.remove_absolute(TOKEN_PATH)
 	print(">>> [STORE] Sitzung gelöscht.")
@@ -109,14 +111,12 @@ func get_api_url() -> String:
 	var url = Config.get_value("system", "server_url", "http://127.0.0.1:8000")
 	return url.trim_suffix("/")
 
-# --- AUTHENTIFIZIERUNG (LOGIN & REGISTER) ---
+# --- AUTHENTIFIZIERUNG ---
 
 func login(email: String, password: String) -> void:
 	var url = get_api_url() + "/auth/login"
 	var body = JSON.stringify({"email": email, "password": password})
 	var headers = ["Content-Type: application/json"]
-	
-	print("Login Versuch bei: ", url)
 	login_http.request(url, headers, HTTPClient.METHOD_POST, body)
 
 func register(first_name: String, last_name: String, email: String, password: String) -> void:
@@ -128,8 +128,6 @@ func register(first_name: String, last_name: String, email: String, password: St
 		"password": password
 	})
 	var headers = ["Content-Type: application/json"]
-	
-	print("Registrierung Versuch bei: ", url)
 	login_http.request(url, headers, HTTPClient.METHOD_POST, body)
 
 func _on_login_request_completed(_result, response_code, _headers, body):
@@ -141,7 +139,7 @@ func _on_login_request_completed(_result, response_code, _headers, body):
 			token = json.get("access_token", "")
 			current_user = json.get("user", {})
 			save_token(token, current_user)
-			fetch_employees() 
+			fetch_all_data() # Lädt Mitarbeiter UND Zeiteinträge
 			emit_signal("login_completed", true, "Willkommen " + current_user.get("name", ""), json)
 		else:
 			emit_signal("login_completed", true, "Konto erfolgreich erstellt! Bitte einloggen.", {})
@@ -154,19 +152,49 @@ func _on_login_request_completed(_result, response_code, _headers, body):
 func get_current_user_id() -> String:
 	return current_user.get("emp_id", "")
 
-# --- DATEN LADEN ---
+# --- DATEN LADEN (ZENTRAL) ---
+
+func fetch_all_data() -> void:
+	fetch_employees()
+	fetch_time_entries()
+
 func fetch_employees() -> void:
 	var url = get_api_url() + "/employees"
-	http_client.request(url, _get_auth_headers())
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		if code == 200:
+			var json = JSON.parse_string(body.get_string_from_utf8())
+			if json is Array:
+				employees = json
+				emit_signal("data_updated")
+		http.queue_free()
+	)
+	http.request(url, _get_auth_headers())
+
+func fetch_time_entries() -> void:
+	var emp_id = get_current_user_id()
+	if emp_id.is_empty(): return
+	
+	var url = get_api_url() + "/time/entries?emp_id=" + emp_id
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		if code == 200:
+			var json = JSON.parse_string(body.get_string_from_utf8())
+			if json is Array:
+				time_entries = json
+				emit_signal("data_updated")
+		http.queue_free()
+	)
+	http.request(url, _get_auth_headers())
 
 func _on_data_request_completed(_result, response_code, _headers, body):
-	if response_code == 200:
-		var json = JSON.parse_string(body.get_string_from_utf8())
-		if json is Array:
-			employees = json
-			emit_signal("data_updated")
+	# Fallback für http_client falls nötig
+	pass
 
 # --- ZEITERFASSUNG ---
+
 func start_timer(project: String = "Allgemein") -> void:
 	var emp_id = get_current_user_id()
 	if emp_id.is_empty(): return
@@ -188,11 +216,13 @@ func _send_post(url: String, data: Dictionary) -> void:
 	var temp_client = HTTPRequest.new()
 	add_child(temp_client)
 	temp_client.request_completed.connect(func(_r, code, _h, body_bytes):
+		fetch_time_entries() # Daten nach Änderungen neu laden
 		temp_client.queue_free()
 	)
 	temp_client.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, json_str)
 
 # --- UI HELPER & ABFRAGEN ---
+
 func get_all_employees() -> Array: return employees
 func get_employee_count() -> int: return employees.size()
 func is_timer_running(emp_id: String) -> bool: return active_timer_state.has(emp_id)
@@ -234,6 +264,7 @@ func submit_day(emp_id: String, date_str: String, callback: Callable) -> void:
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body_bytes):
+		fetch_time_entries()
 		callback.call(code == 200)
 		http.queue_free()
 	)
@@ -245,13 +276,13 @@ func request_correction(emp_id: String, date_str: String, note: String, callback
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body_bytes):
+		fetch_time_entries()
 		callback.call(code == 200)
 		http.queue_free()
 	)
 	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
 
 func get_entries_by_employee(emp_id: String) -> Array:
-	# Filtert die lokal im Store gespeicherten Zeiteinträge nach der Mitarbeiter-ID
 	return time_entries.filter(func(e): 
 		return str(e.get("emp_id")) == emp_id
 	)
@@ -269,3 +300,27 @@ func get_locked_days_for_month(emp_id: String, month: int, year: int, callback: 
 		http.queue_free()
 	)
 	http.request(url, _get_auth_headers())
+
+func fetch_notification_history(callback: Callable) -> void:
+	var url = get_api_url() + "/notifications/history"
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body):
+		var history = []
+		if code == 200:
+			history = JSON.parse_string(body.get_string_from_utf8())
+		callback.call(history)
+		http.queue_free()
+	)
+	http.request(url, _get_auth_headers())
+
+func admin_reject_day(emp_id: String, date_str: String, reason: String, callback: Callable) -> void:
+	var url = get_api_url() + "/time/admin/reject_day"
+	var body = {"emp_id": emp_id, "date": date_str, "note": reason}
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, body_bytes):
+		callback.call(code == 200)
+		http.queue_free()
+	)
+	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))

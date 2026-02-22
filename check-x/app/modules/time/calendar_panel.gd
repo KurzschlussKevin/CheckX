@@ -24,6 +24,24 @@ func _ready():
 	var submit_node = get_node_or_null("%SubmitDayBtn")
 	if submit_node and not submit_node.pressed.is_connected(_on_submit_pressed):
 		submit_node.pressed.connect(_on_submit_pressed)
+	
+	# --- NEU: GLOBALEN REFRESH VERBINDEN ---
+	if Store.has_signal("notification_received"):
+		Store.notification_received.connect(_on_global_notification)
+
+# --- NEU: LOGIK FÜR AUTOMATISCHEN REFRESH ---
+func _on_global_notification(data: Dictionary) -> void:
+	# Wenn eine Korrektur-Info oder ein Erfolg vom Server kommt, 
+	# müssen wir davon ausgehen, dass sich Status-Farben geändert haben.
+	var type = data.get("type", "")
+	if type == "correction" or type == "info" or type == "success":
+		print("[Kalender] Signal erhalten: Erzwinge Daten-Refresh...")
+		# Cache leeren, damit die Farben vom Server neu bestimmt werden
+		locked_days_cache.clear()
+		
+		# Kurze Pause, damit Store.fetch_time_entries() im Hintergrund fertig wird
+		await get_tree().create_timer(0.5).timeout
+		refresh()
 
 func _setup_styles():
 	style_normal.bg_color = Color(1, 1, 1, 0.05)
@@ -86,7 +104,7 @@ func _update_cal():
 		var entries = Store.get_entries_for_date(str(uid), ds)
 		var locally_locked = false
 		for e in entries:
-			if e.get("approval_status", "") in ["submitted", "approved"] or e.get("is_locked", false) == true:
+			if e.get("approval_status", "") in ["submitted", "approved", "correction_pending"] or e.get("is_locked", false) == true:
 				locally_locked = true
 				
 		if ds in locked_days_cache or locally_locked:
@@ -198,6 +216,12 @@ func _on_correction_pressed():
 	
 	Store.request_correction(uid, sel_date, "Korrektur durch Nutzer", func(success):
 		if success:
+			# Visueller Nachweis via Toast
+			Store.emit_signal("notification_received", {
+				"message": "Korrekturantrag für den " + sel_date + " wurde erfolgreich gesendet!",
+				"type": "info"
+			})
+			# Cache nicht nur lokal löschen, sondern UI neu prüfen lassen
 			locked_days_cache.erase(sel_date)
 			_click(sel_date)
 			_update_cal() 
