@@ -102,17 +102,18 @@ func _update_cal():
 		)
 		%Grid.add_child(btn)
 
-	# Bulk-Check für Neustart
+	# Bulk-Check vom Server
 	Store.get_locked_days_for_month(uid, date.month, date.year, func(server_locked_days):
 		if not is_instance_valid(self): return 
-		for ds in server_locked_days:
-			if not (ds in locked_days_cache):
-				locked_days_cache.append(ds)
-			_paint_grid_cell_red(ds)
+		for d_str in server_locked_days:
+			if not (d_str in locked_days_cache):
+				locked_days_cache.append(d_str)
+			_paint_grid_cell_red(d_str)
 	)
 
 func _update_hist():
 	for c in %List.get_children(): c.queue_free()
+	# Ruft die Funktion im Store auf
 	var entries = Store.get_entries_by_employee(uid)
 	var count = 0
 	for i in range(entries.size()-1, -1, -1):
@@ -136,7 +137,10 @@ func _click(ds):
 		var note_text = ""
 		if e.has("notes") and e.notes != "":
 			note_text = " - " + e.notes
-		l.text = "• %s (%d min)%s" % [e.project, int(e.duration/60), note_text]
+		
+		# Berechnung der Dauer (Annahme: duration im Store sind Minuten)
+		var dur = e.get("duration", 0)
+		l.text = "• %s (%d min)%s" % [e.project, int(dur), note_text]
 		%EntryList.add_child(l)
 
 	%AddBtn.disabled = true
@@ -159,12 +163,10 @@ func _update_buttons(is_locked: bool):
 	_disconnect_all(%AddBtn)
 	
 	if is_locked:
-		# REGEL: AddBtn UNTEN RECHTS wird ROT und zur KORREKTUR
 		%AddBtn.text = "Korrektur beantragen"
 		%AddBtn.modulate = Color(1, 0.4, 0.4) 
 		%AddBtn.pressed.connect(_on_correction_pressed)
 	else:
-		# REGEL: AddBtn UNTEN RECHTS ist WEISS und NORMAL
 		%AddBtn.text = "+ Zeit manuell"
 		%AddBtn.modulate = Color(1, 1, 1) 
 		%AddBtn.pressed.connect(func(): emit_signal("request_manual", sel_date))
@@ -194,7 +196,7 @@ func _on_correction_pressed():
 	%AddBtn.disabled = true
 	%AddBtn.text = "Sende Antrag..."
 	
-	Store.request_correction(uid, sel_date, "Korrektur", func(success):
+	Store.request_correction(uid, sel_date, "Korrektur durch Nutzer", func(success):
 		if success:
 			locked_days_cache.erase(sel_date)
 			_click(sel_date)

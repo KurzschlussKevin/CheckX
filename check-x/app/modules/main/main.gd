@@ -7,8 +7,9 @@ extends Control
 @onready var nav_container = $MainLayout/Sidebar/Margin/VBox/NavButtons
 @onready var user_name_label = %UserName
 
-# Vorlage für die Buttons laden
+# Vorlagen laden
 var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
+var toast_scene = preload("res://app/core/notifications/toast.tscn") # NEU: Toast-Szene laden
 
 # Liste der Module und ihrer Pfade
 var modules = {
@@ -45,14 +46,37 @@ func _ready() -> void:
 	var tween = create_tween()
 	tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
 	
-	# --- NEU: ERROR-HANDLER VERBINDEN ---
-	# Wir verbinden das Signal vom Autoload-Singleton 'ErrorHandler'
+	# --- NEU: SIGNALE VERBINDEN ---
+	
+	# Benachrichtigungs-System vom Store verbinden
+	if Store.has_signal("notification_received"):
+		Store.notification_received.connect(_on_notification_received)
+	
+	# Error-Handler vom Autoload-Singleton 'ErrorHandler'
 	if ErrorHandler.has_signal("show_error_dialog"):
 		ErrorHandler.show_error_dialog.connect(_on_error_reported)
 	
 	# Verbindung für den Bestätigungs-Button im Popup (%BugReportPopup)
 	if has_node("%BugReportPopup"):
 		%BugReportPopup.confirmed.connect(_on_send_bug_confirmed)
+
+# --- NEU: BENACHRICHTIGUNGS-LOGIK ---
+
+func _on_notification_received(data: Dictionary) -> void:
+	# Toast instanziieren
+	var toast = toast_scene.instantiate()
+	add_child(toast)
+	
+	# Positionierung: Oben rechts mit etwas Abstand
+	# Da der Toast ein Control-Element mit Ankern ist, setzen wir die Position manuell
+	var screen_size = get_viewport_rect().size
+	toast.position = Vector2(screen_size.x - toast.custom_minimum_size.x - 20, 20)
+	
+	# Nachricht und Typ (z.B. 'correction' oder 'vacation') übergeben
+	if toast.has_method("display"):
+		toast.display(data.get("message", ""), data.get("type", "info"))
+
+# --- NAVIGATION & SIDEBAR ---
 
 func _setup_sidebar() -> void:
 	# 1. Alle alten Buttons entfernen
@@ -105,28 +129,19 @@ func load_module(path: String, title: String = "") -> void:
 		var t = create_tween()
 		t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
 	else:
-		# Falls eine Datei fehlt, melden wir das jetzt automatisch an dein neues System
 		var err_msg = "Szenen-Datei fehlt oder Pfad ungültig: " + path
 		print(err_msg)
 		ErrorHandler.report("System / Navigation", err_msg)
 
-# --- NEU: BUG-REPORTING LOGIK ---
+# --- BUG-REPORTING LOGIK ---
 
-# Diese Funktion wird aufgerufen, sobald irgendwo ErrorHandler.report(...) getriggert wird
 func _on_error_reported(module_name: String, error_msg: String) -> void:
-	# 1. Wir suchen zuerst das Popup
 	if has_node("%BugReportPopup"):
 		var popup = %BugReportPopup
-		
 		popup.title = "SYSTEM-FEHLER: " + module_name.to_upper()
 		popup.dialog_text = "Ein technisches Problem ist aufgetreten. Der Fehler wurde unten eingetragen:"
 		
-		# 2. Wir suchen das Eingabefeld INNERHALB des Popups
-		# Wir nutzen get_node_or_null auf dem Popup-Objekt selbst
 		var input_field = popup.find_child("BugNoteInput", true, false)
-		
-		# Alternativ, falls du den Unique Name im Popup-Skript hast:
-		# var input_field = popup.get_node("%BugNoteInput")
 		
 		var tech_info = "--- AUTOMATISCHER FEHLERBERICHT ---\n"
 		tech_info += "MODUL: " + module_name + "\n"
@@ -138,21 +153,16 @@ func _on_error_reported(module_name: String, error_msg: String) -> void:
 			if input_field.has_method("set_caret_line"):
 				input_field.set_caret_line(input_field.get_line_count())
 		else:
-			# Falls find_child nicht klappt, versuchen wir es über den direkten Pfad
-			# (Passe den Pfad hier an, wenn deine VBox anders heißt)
 			input_field = popup.get_node_or_null("VBox/BugNoteInput")
 			if input_field:
 				input_field.text = tech_info
 
-		# 3. Jetzt das Fenster öffnen
 		popup.popup_centered()
 
-# Wird ausgeführt, wenn der User im Popup auf 'Bug Bericht senden' klickt
 func _on_send_bug_confirmed() -> void:
 	var user_note = ""
 	if has_node("%BugNoteInput"):
 		user_note = %BugNoteInput.text
 	
-	# Finales Absenden über das ErrorHandler-Modul an das Backend
 	ErrorHandler.send_report_to_server(user_note)
 	print("Bug-Report wurde durch Benutzer bestätigt.")

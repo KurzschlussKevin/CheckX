@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://fcqkodckvux2"]
+
+[ext_resource type="Script" uid="uid://bl48gth2f7wxe" path="res://app/core/notifications/toast.gd" id="1_script"]
+
+[node name="Toast" type="Control" unique_id=452108315]
+custom_minimum_size = Vector2(300, 80)
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -320.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 100.0
+grow_horizontal = 0
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1389688578]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=990311829]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=258183220]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=2053060783]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/HBox" unique_id=818027555]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Title" type="Label" parent="Panel/Margin/HBox/VBox" unique_id=1237259457]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Benachrichtigung"
+vertical_alignment = 1
+
+[node name="Message" type="Label" parent="Panel/Margin/HBox/VBox" unique_id=1504025598]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/line_spacing = 0
+theme_override_font_sizes/font_size = 12
+text = "Deine Nachricht erscheint hier..."
+autowrap_mode = 3
+max_lines_visible = 2
