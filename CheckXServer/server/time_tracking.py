@@ -1,4 +1,4 @@
-from database import get_db_connection # Geändert von get_db_conn auf get_db_connection
+from database import get_db_connection
 from datetime import datetime
 from fastapi import HTTPException
 import psycopg2
@@ -7,7 +7,7 @@ import psycopg2
 
 def start_timer(data):
     """Startet einen neuen Timer für einen Mitarbeiter."""
-    with get_db_connection() as conn: # Automatische Pool-Verwaltung
+    with get_db_connection() as conn:
         cur = conn.cursor()
         
         # Prüfen, ob für diesen User bereits ein Timer läuft
@@ -20,8 +20,10 @@ def start_timer(data):
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Timer läuft bereits!")
 
-        start_dt = datetime.fromtimestamp(data.start_time)
-        
+    start_dt = datetime.fromtimestamp(data.start_time)
+    
+    with get_db_connection() as conn:
+        cur = conn.cursor()
         try:
             cur.execute("""
                 INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
@@ -58,7 +60,6 @@ def stop_timer(data):
 
 def add_manual_entry(emp_id, date_str, duration_mins, project):
     """Erlaubt das nachträgliche Eintragen von Arbeitszeit."""
-    # Check nutzt intern ebenfalls einen eigenen Context Manager
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 
@@ -187,3 +188,31 @@ def get_locked_days_for_month(emp_id, month, year):
         
         rows = cur.fetchall()
         return {"locked_days": [row['d'] for row in rows if row['d']]}
+
+# --- ADMIN-PANEL FUNKTION (Vervollständigt) ---
+
+def get_all_pending_submissions():
+    """Holt alle Tage, die zur Prüfung eingereicht wurden."""
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        # Wir gruppieren nach Tag und Mitarbeiter, da ein Tag mehrere Einträge haben kann
+        # Aber wir prüfen nur Einträge mit Status 'submitted'
+        cur.execute("""
+            SELECT DISTINCT e.emp_id, e.first_name, e.last_name, t.start_time::date as date
+            FROM time_entries t
+            JOIN employees e ON t.employee_id = e.id
+            WHERE t.approval_status = 'submitted'
+            ORDER BY date DESC
+        """)
+        rows = cur.fetchall()
+        
+        results = []
+        for r in rows:
+            results.append({
+                "emp_id": r['emp_id'],
+                "first_name": r['first_name'],
+                "last_name": r['last_name'],
+                "date": str(r['date']),
+                "status": "submitted"
+            })
+        return results
