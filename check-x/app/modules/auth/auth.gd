@@ -23,7 +23,6 @@ func _ready() -> void:
 	switch_button.pressed.connect(_on_switch_mode_pressed)
 	submit_button.pressed.connect(_on_submit_pressed)
 	
-	# NEU: Signal vom Store verbinden
 	if Store.has_signal("login_completed"):
 		Store.login_completed.connect(_on_server_response)
 	
@@ -31,19 +30,32 @@ func _ready() -> void:
 	_apply_ui_state()
 	_force_window_resize(true)
 	
-	# AUTO-LOGIN PRÜFUNG (Bleibt wie von dir gewünscht)
-	if Config.get_value("auth", "keep_logged_in", false):
+	# --- AUTO-LOGIN LOGIK ---
+	# 1. Prüfen, ob "Angemeldet bleiben" aktiv ist
+	var keep_logged = Config.get_value("auth", "keep_logged_in", false)
+	
+	if keep_logged:
+		# 2. Prüfen, ob der Store bereits einen Token aus der Datei geladen hat
+		if not Store.token.is_empty():
+			_show_status("Automatische Anmeldung...", false)
+			# Optional: Hier könnte man noch einen API-Test machen, 
+			# aber für den Anfang springen wir direkt zum Ladescreen
+			await get_tree().create_timer(0.5).timeout
+			get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
+			return # Beendet _ready, damit der Rest nicht ausgeführt wird
+			
+		# 3. Falls kein Token da ist, aber die Mail gespeichert war: Feld ausfüllen
 		var last_mail = Config.get_value("auth", "last_email", "")
 		if last_mail != "":
 			email_input.text = last_mail
 			keep_logged_in_check.button_pressed = true
 	
-	# Animation beim Start
+	# Animation nur zeigen, wenn kein Auto-Login stattfindet
 	login_panel.modulate.a = 0
 	var tween = create_tween()
 	tween.tween_property(login_panel, "modulate:a", 1.0, 0.4)
 
-## KERN-LOGIK: Passt das physikalische Betriebssystem-Fenster an (DEIN ORIGINAL)
+## KERN-LOGIK: Passt das physikalische Betriebssystem-Fenster an
 func _force_window_resize(instant: bool = false) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -79,7 +91,7 @@ func _on_switch_mode_pressed() -> void:
 	await fade_out.finished
 	
 	_apply_ui_state()
-	_force_window_resize(false) # Triggert die Größenänderung
+	_force_window_resize(false)
 	
 	var fade_in = create_tween()
 	fade_in.tween_property(login_panel, "modulate:a", 1.0, 0.2)
@@ -97,7 +109,6 @@ func _apply_ui_state() -> void:
 func _on_submit_pressed() -> void:
 	if is_loading: return
 	
-	# Validierung
 	if is_register_mode:
 		if first_name_input.text.is_empty() or last_name_input.text.is_empty():
 			_perform_error_shake("Vor- und Nachname erforderlich!")
@@ -120,7 +131,6 @@ func _perform_error_shake(msg: String) -> void:
 	tween.tween_property(login_panel, "position:x", pos.x - 8, 0.05)
 	tween.tween_property(login_panel, "position:x", pos.x, 0.05)
 
-# NEU: Startet den echten Netzwerk-Prozess
 func _start_auth_process() -> void:
 	is_loading = true
 	submit_button.disabled = true
@@ -131,21 +141,24 @@ func _start_auth_process() -> void:
 	else:
 		Store.login(email_input.text, password_input.text)
 
-# NEU: Antwort vom Store verarbeiten
-func _on_server_response(success: bool, message: String) -> void:
+# VERBESSERT: Verarbeitet jetzt die Daten inkl. Token
+func _on_server_response(success: bool, message: String, data: Dictionary = {}) -> void:
 	is_loading = false
 	submit_button.disabled = false
 	
 	if success:
 		_show_status(message, false)
 		
-		# EINSTELLUNG SPEICHERN (Nur beim erfolgreichen Login)
 		if !is_register_mode:
+			# Token permanent speichern (falls in der Antwort vorhanden)
+			if data.has("access_token"):
+				Store.save_token(data.access_token, data.user)
+			
+			# Config-Einstellungen für Auto-Fill
 			Config.set_value("auth", "keep_logged_in", keep_logged_in_check.button_pressed)
 			if keep_logged_in_check.button_pressed:
 				Config.set_value("auth", "last_email", email_input.text)
 		
-		# Kurze Pause für das Erfolgs-Gefühl, dann weiter
 		await get_tree().create_timer(0.6).timeout
 		get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
 	else:

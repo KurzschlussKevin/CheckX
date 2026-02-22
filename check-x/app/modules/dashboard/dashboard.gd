@@ -12,11 +12,13 @@ var current_uid = ""
 func _ready():
 	current_uid = Store.get_current_user_id()
 	
-	# Korrektur: Zugriff über das Singleton 'Store'
-	var user_data = Store.get_current_user_data()
+	# Zugriff auf das neue User-Objekt im Store
+	var user_data = Store.current_user 
 	
-	if user_data and user_data.has("first_name"):
-		welcome_label.text = "Willkommen, " + str(user_data["first_name"])
+	if user_data and user_data.has("name"):
+		welcome_label.text = "Willkommen, " + str(user_data["name"])
+	else:
+		welcome_label.text = "Willkommen, Gast"
 	
 	if refresh_btn:
 		refresh_btn.pressed.connect(fetch_stats)
