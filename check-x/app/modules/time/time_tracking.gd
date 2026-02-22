@@ -33,28 +33,30 @@ func _ready():
 	if has_node("%DateLabel"):
 		%DateLabel.text = Time.get_date_string_from_system()
 	
-	# Init
+	# Initialisierung
 	_update_ui_state()
 	_fetch_customers()
 	_update_stats()
 
 # Diese Funktion prüft beim Klick im Kalender den Sperrstatus des gewählten Tages
 func _on_calendar_request_manual(target_date):
+	# Store.is_day_locked muss intern die Header mitsenden
 	Store.is_day_locked(uid, target_date, func(is_locked):
 		if not is_locked:
 			if has_node("%ManualPopup"): 
 				%ManualPopup.open(uid, target_date)
 		else:
 			print("Manueller Eintrag verweigert: Tag " + target_date + " ist gesperrt.")
-			# Optional: Hier könnte man auch einen Error-Report triggern, 
-			# falls das UI den Button trotz Sperre erlaubt hat.
 	)
 
 # --- BUTTON LOGIK ---
 
 func _on_submit_day_pressed():
 	# Wir prüfen, ob im Kalender ein anderes Datum gewählt ist als 'heute'
-	var selected_date = %CalendarPanel.sel_date
+	var selected_date = ""
+	if has_node("%CalendarPanel"):
+		selected_date = %CalendarPanel.sel_date
+		
 	var date_today = Time.get_date_string_from_system()
 	
 	# Falls im Kalender nichts gewählt ist, nehmen wir heute
@@ -96,9 +98,10 @@ func _update_stats():
 	if uid == "": return
 	var date_today = Time.get_date_string_from_system()
 	
-	# 1. Minuten holen
+	# 1. Minuten holen (MIT HEADER)
 	var url = Store.get_api_url() + "/time/stats/daily?emp_id=" + uid + "&date=" + date_today
-	var http = HTTPRequest.new(); add_child(http)
+	var http = HTTPRequest.new()
+	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body):
 		if code == 200:
 			var json = JSON.parse_string(body.get_string_from_utf8())
@@ -114,7 +117,8 @@ func _update_stats():
 			ErrorHandler.report("TimeTracking", "API Fehler " + str(code) + " beim Abrufen der Tages-Statistiken.")
 		http.queue_free()
 	)
-	http.request(url)
+	# Hier senden wir die Auth-Header mit
+	http.request(url, Store._get_auth_headers())
 	
 	# 2. STATUS CHECKEN & FARBEN SETZEN
 	Store.is_day_locked(uid, date_today, func(is_locked):
@@ -130,9 +134,9 @@ func _update_stats():
 		
 		if is_locked:
 			# --- ZUSTAND: EINGEREICHT / GESPERRT ---
-			btn.text = "Tag einreichen"
-			btn.modulate = Color(1, 1, 1) 
-			card.modulate = Color(1, 1, 1) 
+			btn.text = "Eingereicht"
+			btn.modulate = Color(0.7, 0.7, 0.7) 
+			card.modulate = Color(0.9, 0.9, 0.9) 
 			
 			status_lbl.text = "EINGEREICHT"
 			status_lbl.modulate = Color(1, 0.3, 0.3)
@@ -169,6 +173,7 @@ func _toggle_timer():
 		if has_node("%NotesInput"):
 			notes = %NotesInput.text
 			%NotesInput.text = ""
+		# Store Methoden rufen intern APIs mit Header auf
 		Store.stop_timer("", notes)
 		_refresh_all()
 	else:
@@ -194,15 +199,19 @@ func _update_ui_state():
 
 func _fetch_customers():
 	var url = Store.get_api_url() + "/customers"
-	var http = HTTPRequest.new(); add_child(http)
+	var http = HTTPRequest.new()
+	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body):
 		if code == 200 and has_node("%CustomerOption"):
 			var customers = JSON.parse_string(body.get_string_from_utf8())
 			%CustomerOption.clear()
 			if customers is Array:
 				for c in customers: %CustomerOption.add_item(c.get("company_name", "Kunde"))
+		elif code == 401:
+			ErrorHandler.report("Network", "Sitzung abgelaufen. Bitte neu einloggen.")
 		elif code != 200:
-			ErrorHandler.report("Network", "Kundenliste konnte nicht geladen werden (HTTP " + str(code) + ")")
+			ErrorHandler.report("Network", "Kundenliste Fehler (HTTP " + str(code) + ")")
 		http.queue_free()
 	)
-	http.request(url)
+	# Auch beim Laden der Kundenliste brauchen wir den Header
+	http.request(url, Store._get_auth_headers())

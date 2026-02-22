@@ -51,7 +51,6 @@ func _on_spinner_draw():
 	spinner.draw_arc(center, radius, 0, TAU, 64, Color(1, 1, 1, 0.1), width)
 	
 	# 2. Lade-Bogen (ca. 75% des Kreises)
-	# Da sich der Node selbst dreht, zeichnen wir hier einen statischen Bogen
 	spinner.draw_arc(center, radius, 0, PI * 1.5, 64, col, width)
 
 func _on_window_resize():
@@ -63,12 +62,10 @@ func _set_loading(active: bool):
 	grid.visible = !active 
 	
 	if active:
-		# PIVOT-FIX: Exakte Mitte setzen
 		spinner.pivot_offset = spinner.size / 2
 		
 		if rotation_tween: rotation_tween.kill()
 		rotation_tween = create_tween().set_loops()
-		# Rotation um 360 Grad
 		rotation_tween.tween_property(spinner, "rotation", TAU, 1.0).from(0.0)
 	else:
 		if rotation_tween: rotation_tween.kill()
@@ -80,8 +77,6 @@ func _fetch_team_data():
 	
 	_set_loading(true)
 	stats_label.text = "Aktualisiere..."
-	
-	# await get_tree().create_timer(1.0).timeout # Test-Delay einkommentieren zum Sehen
 	
 	var url = Store.get_api_url() + "/absences/calendar?year=%d&month=%d" % [current_date.year, current_date.month]
 	
@@ -111,17 +106,19 @@ func _fetch_team_data():
 				_update_stats()
 			else:
 				info_label.text = "[color=red]Datenfehler[/color]"
+		elif code == 401:
+			info_label.text = "[color=red]Sitzung abgelaufen. Bitte neu anmelden.[/color]"
+			ErrorHandler.report("TeamCalendar", "401 Unauthorized: JWT Token ungültig.")
 		else:
 			info_label.text = "[color=red]Fehler: %d[/color]" % code
+			ErrorHandler.report("TeamCalendar", "API Fehler: " + str(code))
 	)
 	
-	var err = current_request.request(url)
+	# --- ÄNDERUNG: AUTH-HEADER HINZUGEFÜGT ---
+	var err = current_request.request(url, Store._get_auth_headers())
 	if err != OK:
 		_set_loading(false)
 		info_label.text = "[color=red]Verbindungsfehler[/color]"
-
-# ... (Restlicher Code: _setup_nav_dropdowns, _build_month_grid etc. bleibt gleich wie zuvor)
-# ... Bitte den restlichen Teil aus dem vorherigen Schritt beibehalten!
 
 func _setup_nav_dropdowns():
 	year_opt.clear()
@@ -154,11 +151,16 @@ func _build_month_grid():
 	var today = Time.get_date_dict_from_system()
 	var current_holidays = _get_holidays_for_year(current_date.year)
 	
+	# Grid leeren bevor neu aufgebaut wird
+	for n in grid.get_children():
+		grid.remove_child(n)
+		n.queue_free()
+	
 	var available_width = get_viewport_rect().size.x * 0.6 
 	var btn_size = clamp(available_width / 8, 80, 160)
 	var btn_vec = Vector2(btn_size, btn_size)
 	
-	while grid.get_child_count() < days_in_month:
+	for i in range(days_in_month):
 		var btn = Button.new()
 		btn.add_theme_font_size_override("font_size", 20)
 		var info_box = VBoxContainer.new()
@@ -173,13 +175,8 @@ func _build_month_grid():
 		status_label.add_theme_font_size_override("font_size", 10)
 		info_box.add_child(status_label)
 		grid.add_child(btn)
-	
-	for i in range(grid.get_child_count()):
-		var btn = grid.get_child(i)
-		if i >= days_in_month: btn.visible = false; continue
-		btn.visible = true
+		
 		btn.custom_minimum_size = btn_vec
-		if btn.pressed.is_connected(_on_day_selected): btn.pressed.disconnect(_on_day_selected)
 		var day_num = i + 1
 		_configure_day_button(btn, day_num, today, current_holidays)
 

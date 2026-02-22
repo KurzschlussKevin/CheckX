@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://b2qv1dlbvgvqy"]
+[gd_scene load_steps=2 format=3 uid="uid://b2qv1dlbvgvqy"]
 
 [ext_resource type="Script" uid="uid://dg0vr488qvuw1" path="res://app/modules/admin/admin_panel.gd" id="1_admin_script"]
 
-[node name="AdminPanel" type="Control" unique_id=1354104170]
+[node name="AdminPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_admin_script")
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=82283477]
+[node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,21 +23,73 @@ theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=2054212126]
+[node name="VBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="Margin/VBox" unique_id=227144004]
+[node name="Header" type="HBoxContainer" parent="Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Admin-Bereich: Offene Anträge"
 
-[node name="Scroll" type="ScrollContainer" parent="Margin/VBox" unique_id=1274383154]
+[node name="Title" type="Label" parent="Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Admin-Zentrale"
+
+[node name="RefreshAllBtn" type="Button" parent="Margin/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Alle Daten aktualisieren "
+
+[node name="TabContainer" type="TabContainer" parent="Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 0
 
-[node name="RequestList" type="VBoxContainer" parent="Margin/VBox/Scroll" unique_id=1347930584]
+[node name="Urlaubsanträge" type="ScrollContainer" parent="Margin/VBox/TabContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+metadata/_tab_index = 0
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/TabContainer/Urlaubsanträge"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="RequestList" type="VBoxContainer" parent="Margin/VBox/TabContainer/Urlaubsanträge/Margin"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
+
+[node name="Stundenfreigabe" type="ScrollContainer" parent="Margin/VBox/TabContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+metadata/_tab_index = 1
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/TabContainer/Stundenfreigabe"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TimeApprovalList" type="VBoxContainer" parent="Margin/VBox/TabContainer/Stundenfreigabe/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Mitarbeiter-Info" type="ScrollContainer" parent="Margin/VBox/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="Label" type="Label" parent="Margin/VBox/TabContainer/Mitarbeiter-Info"]
+layout_mode = 2
+text = "Hier könnten später Mitarbeiter-Statistiken stehen..."

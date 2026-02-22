@@ -34,9 +34,12 @@ func fetch_stats():
 			var data = JSON.parse_string(body.get_string_from_utf8())
 			if data:
 				_update_ui(data)
+		else:
+			print("Fehler beim Laden der Stats: ", c)
 		http.queue_free()
 	)
-	http.request(url)
+	# NEU: Hier werden die Auth-Header mit dem Token übergeben
+	http.request(url, Store._get_auth_headers())
 
 func _update_ui(data):
 	if lbl_revenue:

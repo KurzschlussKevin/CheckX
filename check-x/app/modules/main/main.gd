@@ -55,23 +55,31 @@ func _ready() -> void:
 		%BugReportPopup.confirmed.connect(_on_send_bug_confirmed)
 
 func _setup_sidebar() -> void:
-	# Alle alten Kinder im Container löschen
+	# 1. Alle alten Buttons entfernen
 	for child in nav_container.get_children():
 		child.queue_free()
 	
-	# Aktuelle Rolle aus dem Store abrufen
-	var user_role = Store.current_user.get("role", "Prüfer")
+	# 2. Kurze Sicherheitspause, damit der Store die Rolle sicher geladen hat
+	if Store.token != "" and Store.current_user.is_empty():
+		await get_tree().create_timer(0.1).timeout
 	
-	# Für jeden Eintrag in 'modules' einen Button erstellen
+	# 3. Aktuelle Rolle abrufen
+	var user_role = "Prüfer" # Standardwert
+	if Store.current_user.has("role"):
+		user_role = Store.current_user["role"]
+	
+	print("Sidebar-Setup: Erkenne Rolle - ", user_role)
+	
+	# 4. Buttons basierend auf der Rolle erstellen
 	for module_name in modules:
-		# ADMIN-CHECK: Das Admin-Panel nur anzeigen, wenn die Rolle 'Admin' ist
+		# ADMIN-CHECK: Das Admin-Panel wird nur erstellt, wenn die Rolle 'Admin' ist
 		if module_name == "Admin-Panel" and user_role != "Admin":
 			continue
 			
 		var btn = nav_button_scene.instantiate()
 		btn.text = "  " + module_name
 		
-		# Verbindet den Klick auf den Button mit der Lade-Funktion
+		# Klick-Event verbinden
 		btn.pressed.connect(func(): load_module(modules[module_name], module_name))
 		
 		nav_container.add_child(btn)
