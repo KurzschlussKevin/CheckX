@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.responses import FileResponse
-from fastapi.security import OAuth2PasswordBearer
+# oauth2_scheme wird jetzt aus auth importiert
 from jose import jwt, JWTError
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 import os
 import uvicorn
@@ -22,26 +22,14 @@ import dashboard
 import bug_system
 import notifications
 
+# Import der zentralen Auth-Funktionen aus dem auth-Modul
+from auth import get_current_user, oauth2_scheme
 # Import von spezifischen Funktionen für die Zeiterfassung
 from time_tracking import get_locked_days_for_month
 
 app = FastAPI(title="CheckX API")
 
-# Konfiguration für OAuth2 / JWT
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-
 # --- AUTH-HILFSFUNKTIONEN ---
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    """Validiert den JWT-Token und gibt die Payload zurück."""
-    try:
-        payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
-        emp_id: str = payload.get("sub")
-        if emp_id is None:
-            raise HTTPException(status_code=401, detail="Ungültiger Token")
-        return payload
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Sitzung abgelaufen oder ungültig")
 
 def require_admin(current_user: dict = Depends(get_current_user)):
     """Prüft, ob der aktuelle Nutzer Admin-Rechte hat."""
@@ -60,6 +48,19 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+# NEU: Modell für das Profil-Update
+class UserUpdate(BaseModel):
+    name: str
+    email: EmailStr
+    job_title: Optional[str] = ""
 
 class TimerData(BaseModel):
     emp_id: str
@@ -99,11 +100,36 @@ def route_register(user: UserRegister):
 def route_login(user: UserLogin):
     return auth.login_user(user)
 
-# --- ROUTEN: MITARBEITER ---
+@app.post("/auth/forgot-password")
+async def route_forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    with database.get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT email FROM employees WHERE email = %s", (request.email,))
+        user = cur.fetchone()
+    
+    if not user:
+        return {"status": "success", "message": "Falls die Email existiert, wurde ein Link versendet."}
+
+    token = auth.create_password_reset_token(request.email)
+    background_tasks.add_task(auth.send_reset_email, request.email, token)
+    return {"status": "success", "message": "Email mit Reset-Link wurde versendet."}
+
+@app.post("/auth/reset-password")
+def route_reset_password(data: ResetPasswordRequest):
+    return auth.reset_password_in_db(data.token, data.new_password)
+
+# --- ROUTEN: MITARBEITER (PROFILDATEN) ---
 
 @app.get("/employees")
-def route_get_employees(current_user: dict = Depends(get_current_user)):
-    return employees.list_all_employees()
+async def route_get_employees(current_user: dict = Depends(get_current_user)):
+    # Das 'async' oben und das 'await' hier müssen zusammenpassen
+    return await employees.list_employees()
+
+# Endpunkt zum Aktualisieren des eigenen Profils
+@app.put("/employees/{emp_id}")
+async def route_update_profile(emp_id: str, data: UserUpdate, current_user: dict = Depends(get_current_user)):
+    # Das hier war schon perfekt
+    return await employees.update_employee_profile(emp_id, data.dict(), current_user)
 
 # --- ROUTEN: SERVICES (KATALOG) ---
 
@@ -224,12 +250,10 @@ def route_get_pending(admin: dict = Depends(require_admin)):
 
 @app.post("/admin/approve_absence")
 def route_approve(absence_id: int, status: str, admin: dict = Depends(require_admin)):
-    # Wir nehmen die admin_id aus dem Token (sub)
     return absences.update_absence_status(absence_id, status, admin["sub"])
 
 @app.get("/admin/pending_times")
 def route_get_pending_times(admin: dict = Depends(require_admin)):
-    """Holt alle eingereichten Arbeitstage, die auf Freigabe warten."""
     return time_tracking.get_all_pending_submissions()
 
 @app.post("/time/admin/approve_day")
@@ -258,7 +282,6 @@ def route_get_dashboard_stats(emp_id: str, current_user: dict = Depends(get_curr
 
 @app.post("/system/report_bug")
 async def route_report_bug(data: bug_system.BugReportData):
-    # Bug Reports lassen wir ohne Auth zu, falls die App mal gar nicht einloggt
     return bug_system.save_bug_report(data)
 
 # --- NOTIFICATION ---
@@ -273,7 +296,6 @@ def route_mark_read(nid: int, current_user: dict = Depends(get_current_user)):
 
 @app.get("/notifications/history")
 def route_get_notification_history(current_user: dict = Depends(get_current_user)):
-    """Holt die letzten 20 Benachrichtigungen (gelesen und ungelesen)."""
     with database.get_db_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
@@ -286,18 +308,17 @@ def route_get_notification_history(current_user: dict = Depends(get_current_user
 
 @app.post("/time/admin/reject_day")
 async def route_admin_reject_day(data: CorrectionData, admin: dict = Depends(require_admin)):
-    """Endpunkt zum Ablehnen eines kompletten Arbeitstages durch den Admin."""
     return time_tracking.admin_reject_day(data.emp_id, data.date, data.note)
 
 @app.get("/time/entries")
 async def route_get_time_entries(emp_id: str, current_user: dict = Depends(get_current_user)):
-    """Holt alle Zeiteinträge eines Mitarbeiters."""
-    # Wir rufen eine Funktion in time_tracking auf, die wir gleich noch erstellen
     return time_tracking.get_entries_by_employee(emp_id)
 
 @app.get("/admin/pending_corrections")
 async def route_get_pending_corrections(admin: dict = Depends(require_admin)):
     return time_tracking.get_pending_corrections()
+
+# --- STARTUP ---
 
 @app.on_event("startup")
 def on_startup():
