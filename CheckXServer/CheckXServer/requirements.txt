@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+psycopg2
+passlib
+bcrypt
+pydantic
+reportlab
+python-multipart
+python-jose[cryptography]
+python-multipart
+fastapi-mail
