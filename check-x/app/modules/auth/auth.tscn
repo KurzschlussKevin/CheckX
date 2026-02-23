@@ -116,6 +116,14 @@ layout_mode = 2
 placeholder_text = "••••••••"
 secret = true
 
+[node name="ForgotPasswordButton" type="LinkButton" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.701961, 0.701961, 0.701961, 1)
+theme_override_font_sizes/font_size = 14
+text = "Passwort vergessen?"
+
 [node name="ConfirmPasswordBox" type="VBoxContainer" parent="CenterContainer/LoginPanel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false

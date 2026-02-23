@@ -9,6 +9,7 @@ extends Control
 @onready var last_name_input: LineEdit = %LastNameInput
 @onready var email_input: LineEdit = %EmailInput
 @onready var password_input: LineEdit = %PasswordInput
+@onready var forgot_password_button: LinkButton = %ForgotPasswordButton
 @onready var confirm_box: VBoxContainer = %ConfirmPasswordBox
 @onready var confirm_input: LineEdit = %ConfirmPasswordInput
 @onready var keep_logged_in_check: CheckBox = %KeepLoggedInCheck
@@ -22,6 +23,7 @@ var is_loading: bool = false
 func _ready() -> void:
 	switch_button.pressed.connect(_on_switch_mode_pressed)
 	submit_button.pressed.connect(_on_submit_pressed)
+	forgot_password_button.pressed.connect(_on_forgot_password_pressed)
 	
 	if Store.has_signal("login_completed"):
 		Store.login_completed.connect(_on_server_response)
@@ -31,26 +33,20 @@ func _ready() -> void:
 	_force_window_resize(true)
 	
 	# --- AUTO-LOGIN LOGIK ---
-	# 1. Prüfen, ob "Angemeldet bleiben" aktiv ist
 	var keep_logged = Config.get_value("auth", "keep_logged_in", false)
 	
 	if keep_logged:
-		# 2. Prüfen, ob der Store bereits einen Token aus der Datei geladen hat
 		if not Store.token.is_empty():
 			_show_status("Automatische Anmeldung...", false)
-			# Optional: Hier könnte man noch einen API-Test machen, 
-			# aber für den Anfang springen wir direkt zum Ladescreen
 			await get_tree().create_timer(0.5).timeout
 			get_tree().change_scene_to_file("res://app/modules/loadingscreen/loadingscreen.tscn")
-			return # Beendet _ready, damit der Rest nicht ausgeführt wird
+			return
 			
-		# 3. Falls kein Token da ist, aber die Mail gespeichert war: Feld ausfüllen
 		var last_mail = Config.get_value("auth", "last_email", "")
 		if last_mail != "":
 			email_input.text = last_mail
 			keep_logged_in_check.button_pressed = true
 	
-	# Animation nur zeigen, wenn kein Auto-Login stattfindet
 	login_panel.modulate.a = 0
 	var tween = create_tween()
 	tween.tween_property(login_panel, "modulate:a", 1.0, 0.4)
@@ -100,6 +96,7 @@ func _apply_ui_state() -> void:
 	register_fields.visible = is_register_mode
 	confirm_box.visible = is_register_mode
 	keep_logged_in_check.visible = !is_register_mode
+	forgot_password_button.visible = !is_register_mode # Nur im Login-Modus zeigen
 	
 	title.text = "Registrieren" if is_register_mode else "Login"
 	submit_button.text = "Konto erstellen" if is_register_mode else "Anmelden"
@@ -123,6 +120,43 @@ func _on_submit_pressed() -> void:
 
 	_start_auth_process()
 
+func _on_forgot_password_pressed() -> void:
+	if is_loading: return
+	if email_input.text.is_empty():
+		_perform_error_shake("Bitte E-Mail Adresse eingeben!")
+		return
+		
+	is_loading = true
+	_show_status("Sende Reset-Link...", false)
+	
+	# HTTP Request vorbereiten
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(self._on_forgot_password_received)
+	
+	var url = Config.API_URL + "/auth/forgot-password"
+	var body = JSON.stringify({"email": email_input.text})
+	var headers = ["Content-Type: application/json"]
+	
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	
+	# Zusätzlich: Öffne das Reset-Fenster, damit der User den Token eingeben kann
+	var reset_scene = load("res://app/modules/auth/password_reset_popup.tscn")
+	var popup = reset_scene.instantiate()
+	add_child(popup)
+
+func _on_forgot_password_received(_result, response_code, _headers, body) -> void:
+	is_loading = false
+	var response = JSON.parse_string(body.get_string_from_utf8())
+	
+	if response_code == 200:
+		_show_status("E-Mail versendet! Bitte Postfach prüfen.", false)
+	else:
+		var error_msg = "Fehler beim Senden."
+		if response and response.has("detail"):
+			error_msg = response.detail
+		_perform_error_shake(error_msg)
+
 func _perform_error_shake(msg: String) -> void:
 	_show_status(msg, true)
 	var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_IN_OUT)
@@ -141,7 +175,6 @@ func _start_auth_process() -> void:
 	else:
 		Store.login(email_input.text, password_input.text)
 
-# VERBESSERT: Verarbeitet jetzt die Daten inkl. Token
 func _on_server_response(success: bool, message: String, data: Dictionary = {}) -> void:
 	is_loading = false
 	submit_button.disabled = false
@@ -150,11 +183,9 @@ func _on_server_response(success: bool, message: String, data: Dictionary = {}) 
 		_show_status(message, false)
 		
 		if !is_register_mode:
-			# Token permanent speichern (falls in der Antwort vorhanden)
 			if data.has("access_token"):
 				Store.save_token(data.access_token, data.user)
 			
-			# Config-Einstellungen für Auto-Fill
 			Config.set_value("auth", "keep_logged_in", keep_logged_in_check.button_pressed)
 			if keep_logged_in_check.button_pressed:
 				Config.set_value("auth", "last_email", email_input.text)

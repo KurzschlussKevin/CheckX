@@ -1,5 +1,9 @@
 extends Node
 
+# --- SERVER KONFIGURATION ---
+# Die Basis-URL für alle API-Anfragen an das FastAPI-Backend
+const API_URL = "http://127.0.0.1:8000"
+
 # Pfad zur Speicherdatei
 const SAVE_PATH = "user://settings.cfg"
 
@@ -10,6 +14,10 @@ var settings = {
 		"ui_scale": 1.0,
 		"font_size": 16,
 		"auto_login": false
+	},
+	"network": {
+		"api_url": API_URL, # Hier wird die Konstante als Standardwert genutzt
+		"request_timeout": 30
 	},
 	"dashboard": {
 		"show_welcome": true,
@@ -25,6 +33,10 @@ var settings = {
 		"name": "",
 		"job_title": "",
 		"email": ""
+	},
+	"auth": {
+		"keep_logged_in": false,
+		"last_email": ""
 	}
 }
 
