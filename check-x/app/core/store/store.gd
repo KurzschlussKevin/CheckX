@@ -108,8 +108,10 @@ func _get_auth_headers() -> Array:
 
 # --- URL MANAGEMENT ---
 func get_api_url() -> String:
-	var url = Config.get_value("system", "server_url", "http://127.0.0.1:8000")
-	return url.trim_suffix("/")
+	# Nutzt die neue API_URL Konstante aus Config, falls vorhanden, sonst Fallback
+	if "API_URL" in Config:
+		return Config.API_URL
+	return Config.get_value("network", "api_url", "http://127.0.0.1:8000").trim_suffix("/")
 
 # --- AUTHENTIFIZIERUNG ---
 
@@ -192,6 +194,44 @@ func fetch_time_entries() -> void:
 func _on_data_request_completed(_result, response_code, _headers, body):
 	# Fallback für http_client falls nötig
 	pass
+
+# --- PROFIL & EINSTELLUNGEN ---
+
+func update_profile(updated_data: Dictionary) -> void:
+	"""
+	Sendet Profil-Updates an das Backend und aktualisiert den lokalen Cache.
+	"""
+	var emp_id = get_current_user_id()
+	if emp_id.is_empty(): return
+	
+	# Hier gehen wir davon aus, dass es einen Endpunkt /employees/update gibt
+	# Falls dieser noch nicht existiert, aktualisieren wir vorerst nur lokal
+	var url = get_api_url() + "/employees/" + str(emp_id)
+	
+	# Lokale Aktualisierung im Store
+	for key in updated_data:
+		current_user[key] = updated_data[key]
+	
+	# Update permanent speichern
+	save_token(token, current_user)
+	
+	# API Call vorbereiten (PUT Methode für Updates)
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(func(_r, code, _h, _b):
+		if code == 200:
+			print("Profil-Update auf Server erfolgreich.")
+		http.queue_free()
+	)
+	http.request(url, _get_auth_headers(), HTTPClient.METHOD_PUT, JSON.stringify(updated_data))
+
+func update_employee(emp_dict: Dictionary, new_values: Dictionary) -> void:
+	"""
+	Hilfsfunktion zum lokalen Aktualisieren von Mitarbeiterlisten.
+	"""
+	for key in new_values:
+		emp_dict[key] = new_values[key]
+	emit_signal("data_updated")
 
 # --- ZEITERFASSUNG ---
 

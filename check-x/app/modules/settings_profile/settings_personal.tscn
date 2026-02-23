@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://settings_part_personal_full"]
+[gd_scene format=3 uid="uid://d3se2roabt0w2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
 bg_color = Color(0.1, 0.1, 0.12, 1)
@@ -16,7 +16,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="PersonalSettings" type="TabContainer"]
+[node name="PersonalSettings" type="TabContainer" unique_id=998973661]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -25,11 +25,11 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
 
-[node name="Profil" type="ScrollContainer" parent="."]
+[node name="Profil" type="ScrollContainer" parent="." unique_id=1356697163]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="M" type="MarginContainer" parent="Profil"]
+[node name="M" type="MarginContainer" parent="Profil" unique_id=150319070]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -38,136 +38,88 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Profil/M"]
+[node name="V" type="VBoxContainer" parent="Profil/M" unique_id=1712635495]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Personal" type="PanelContainer" parent="Profil/M/V"]
+[node name="Card_Personal" type="PanelContainer" parent="Profil/M/V" unique_id=831763491]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Personal"]
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Personal" unique_id=1886619097]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Profil/M/V/Card_Personal/V"]
+[node name="Label" type="Label" parent="Profil/M/V/Card_Personal/V" unique_id=838653689]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
 text = "Stammdaten"
 
-[node name="NameInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+[node name="NameInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=2055843544]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Vorname Nachname"
 
-[node name="JobTitleInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+[node name="JobTitleInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=580903350]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Jobtitel / Rolle"
 
-[node name="EmpIdInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+[node name="EmpIdInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=881169394]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Personalnummer (P-XXXX)"
 editable = false
 
-[node name="DeptInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V"]
+[node name="DeptInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=187264377]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Abteilung"
 
-[node name="Card_Contact" type="PanelContainer" parent="Profil/M/V"]
+[node name="Card_Contact" type="PanelContainer" parent="Profil/M/V" unique_id=114137091]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Contact"]
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Contact" unique_id=487916749]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Profil/M/V/Card_Contact/V"]
+[node name="Label" type="Label" parent="Profil/M/V/Card_Contact/V" unique_id=649507704]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.8, 0.5, 1)
 text = "Kontakt & Zeit"
 
-[node name="EmailInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V"]
+[node name="EmailInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=726663618]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "E-Mail Adresse"
 
-[node name="PhoneInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V"]
+[node name="PhoneInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=178020583]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Telefon / Mobil"
 
-[node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V"]
+[node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V" unique_id=1258689018]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Europe/Berlin (UTC+1)"
 popup/item_0/id = 0
 popup/item_1/text = "Europe/London (UTC+0)"
 popup/item_1/id = 1
 
-[node name="Card_Status" type="PanelContainer" parent="Profil/M/V"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
-
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Status"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Profil/M/V/Card_Status/V"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.8, 0.5, 1)
-text = "Status & Verfügbarkeit"
-
-[node name="StatusMsgInput" type="LineEdit" parent="Profil/M/V/Card_Status/V"]
-layout_mode = 2
-placeholder_text = "Aktueller Status (z.B. Homeoffice)"
-
-[node name="ShareStatusCheck" type="CheckBox" parent="Profil/M/V/Card_Status/V"]
-layout_mode = 2
-button_pressed = true
-text = "Status im Team teilen"
-
-[node name="VacationRepOption" type="OptionButton" parent="Profil/M/V/Card_Status/V"]
-layout_mode = 2
-item_count = 1
-selected = 0
-popup/item_0/text = "Urlaubsvertretung wählen..."
-popup/item_0/id = 0
-
-[node name="Card_Signatur" type="PanelContainer" parent="Profil/M/V"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
-
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Signatur"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Profil/M/V/Card_Signatur/V"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-text = "E-Mail Signatur"
-
-[node name="SignaturEdit" type="TextEdit" parent="Profil/M/V/Card_Signatur/V"]
-custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
-placeholder_text = "Mit freundlichen Grüßen..."
-
-[node name="SaveProfileBtn" type="Button" parent="Profil/M"]
+[node name="SaveProfileBtn" type="Button" parent="Profil/M/V" unique_id=234543394]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-size_flags_vertical = 8
 text = "ÄNDERUNGEN SPEICHERN"
 
-[node name="Darstellung" type="ScrollContainer" parent="."]
+[node name="Darstellung" type="ScrollContainer" parent="." unique_id=494443076]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="M" type="MarginContainer" parent="Darstellung"]
+[node name="M" type="MarginContainer" parent="Darstellung" unique_id=672047182]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -176,130 +128,130 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M"]
+[node name="V" type="VBoxContainer" parent="Darstellung/M" unique_id=139840990]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Theme" type="PanelContainer" parent="Darstellung/M/V"]
+[node name="Card_Theme" type="PanelContainer" parent="Darstellung/M/V" unique_id=1755593694]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Theme"]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Theme" unique_id=1118747752]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Theme/V"]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Theme/V" unique_id=1176847086]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.4, 0.8, 1)
 text = "Interface"
 
-[node name="DarkModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+[node name="DarkModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=107887249]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 text = "Dark Mode aktivieren"
 
-[node name="SystemThemeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+[node name="SystemThemeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=840581663]
 layout_mode = 2
 text = "Thema an System anpassen"
 
-[node name="CompactModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+[node name="CompactModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=1288802835]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Kompakte Listenansicht"
 
-[node name="ShowAvatarsCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V"]
+[node name="ShowAvatarsCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=955821894]
 layout_mode = 2
 button_pressed = true
 text = "Avatare anzeigen"
 
-[node name="Card_Format" type="PanelContainer" parent="Darstellung/M/V"]
+[node name="Card_Format" type="PanelContainer" parent="Darstellung/M/V" unique_id=1786205930]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Format"]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Format" unique_id=2027644715]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Format/V"]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Format/V" unique_id=96541728]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
 text = "Formate"
 
-[node name="DateFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+[node name="DateFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=1161392195]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "DD.MM.YYYY"
 popup/item_0/id = 0
 popup/item_1/text = "YYYY-MM-DD"
 popup/item_1/id = 1
 
-[node name="NumberFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+[node name="NumberFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=613079642]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "1.000,00 (DE)"
 popup/item_0/id = 0
 popup/item_1/text = "1,000.00 (US)"
 popup/item_1/id = 1
 
-[node name="WeekStartOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V"]
+[node name="WeekStartOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=1003070652]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Wochenstart: Montag"
 popup/item_0/id = 0
 popup/item_1/text = "Wochenstart: Sonntag"
 popup/item_1/id = 1
 
-[node name="Card_Access" type="PanelContainer" parent="Darstellung/M/V"]
+[node name="Card_Access" type="PanelContainer" parent="Darstellung/M/V" unique_id=2041916824]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Access"]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Access" unique_id=216717119]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Access/V"]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=232867288]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
 text = "Barrierefreiheit"
 
-[node name="FontSizeSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V"]
+[node name="FontSizeSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V" unique_id=1465716187]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 10.0
 max_value = 30.0
 value = 16.0
 
-[node name="Label2" type="Label" parent="Darstellung/M/V/Card_Access/V"]
+[node name="Label2" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=1991900154]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Schriftgröße"
 horizontal_alignment = 2
 
-[node name="UIScaleSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V"]
+[node name="UIScaleSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V" unique_id=1307689489]
 layout_mode = 2
 min_value = 0.8
 max_value = 1.5
 step = 0.1
 value = 1.0
 
-[node name="HighContrastCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V"]
+[node name="HighContrastCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V" unique_id=552337943]
 layout_mode = 2
 text = "Hoher Kontrast"
 
-[node name="ReducedMotionCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V"]
+[node name="ReducedMotionCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V" unique_id=426054807]
 layout_mode = 2
 text = "Animationen reduzieren"
 
-[node name="Dashboard" type="ScrollContainer" parent="."]
+[node name="Dashboard" type="ScrollContainer" parent="." unique_id=152434961]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="M" type="MarginContainer" parent="Dashboard"]
+[node name="M" type="MarginContainer" parent="Dashboard" unique_id=2128805753]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -308,71 +260,71 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M"]
+[node name="V" type="VBoxContainer" parent="Dashboard/M" unique_id=2123387048]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Widgets" type="PanelContainer" parent="Dashboard/M/V"]
+[node name="Card_Widgets" type="PanelContainer" parent="Dashboard/M/V" unique_id=1088658000]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Widgets"]
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Widgets" unique_id=1847448354]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1004165709]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
 text = "Sichtbare Kacheln"
 
-[node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1024811691]
 layout_mode = 2
 button_pressed = true
 text = "Begrüßung & Datum"
 
-[node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=51388522]
 layout_mode = 2
 button_pressed = true
 text = "Umsatz-Statistik"
 
-[node name="Check3" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Check3" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=954552930]
 layout_mode = 2
 button_pressed = true
 text = "Mitarbeiter-Status"
 
-[node name="Check4" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Check4" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1774940485]
 layout_mode = 2
 button_pressed = true
 text = "Offene Tickets"
 
-[node name="Check5" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V"]
+[node name="Check5" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1377409564]
 layout_mode = 2
 button_pressed = true
 text = "Mini-Timer"
 
-[node name="Card_Layout" type="PanelContainer" parent="Dashboard/M/V"]
+[node name="Card_Layout" type="PanelContainer" parent="Dashboard/M/V" unique_id=939233616]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Layout"]
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Layout" unique_id=1242170311]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dashboard/M/V/Card_Layout/V"]
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Layout/V" unique_id=970078781]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
 text = "Verhalten"
 
-[node name="ColOption" type="OptionButton" parent="Dashboard/M/V/Card_Layout/V"]
+[node name="ColOption" type="OptionButton" parent="Dashboard/M/V/Card_Layout/V" unique_id=1671087954]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Spalten: Automatisch"
 popup/item_0/id = 0
 popup/item_1/text = "Spalten: 3 Fest"
 popup/item_1/id = 1
 
-[node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V"]
+[node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V" unique_id=1257395433]
 layout_mode = 2
-prefix = "Refresh (Sek):"
 value = 30.0
+prefix = "Refresh (Sek):"

@@ -1,15 +1,28 @@
 extends Control
 
-# Da wir die Szenen instanziiert haben, greifen wir auf die Werte über den Pfad zu
-@onready var lbl_revenue = $ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox/Value
-@onready var lbl_hours = $ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox/Value
-@onready var lbl_tasks = $ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox/Value
+# --- UI REFERENZEN (Statistiken) ---
+@onready var lbl_revenue = find_child("Value", true, false) if find_child("StatRevenue", true, false) else null
+@onready var lbl_hours = find_child("Value", true, false) if find_child("StatHours", true, false) else null
+@onready var lbl_tasks = find_child("Value", true, false) if find_child("StatTasks", true, false) else null
 @onready var welcome_label = %WelcomeLabel
 @onready var refresh_btn = %RefreshBtn
+
+# --- UI REFERENZEN (Container für Sichtbarkeit) ---
+# Wir suchen die Nodes jetzt dynamisch, um "Node not found" Fehler zu vermeiden
+@onready var welcome_box = find_child("WelcomeBox", true, false)
+@onready var card_revenue = find_child("StatRevenue", true, false)
+@onready var card_hours = find_child("StatHours", true, false)
+@onready var card_tasks = find_child("StatTasks", true, false)
 
 var current_uid = ""
 
 func _ready():
+	# Kurz warten, falls Nodes noch nicht ganz bereit sind
+	await get_tree().process_frame
+	
+	# Pfade für Labels manuell nachjustieren, falls find_child zu ungenau war
+	_setup_labels()
+	
 	current_uid = Store.get_current_user_id()
 	
 	# Zugriff auf das neue User-Objekt im Store
@@ -23,7 +36,39 @@ func _ready():
 	if refresh_btn:
 		refresh_btn.pressed.connect(fetch_stats)
 	
+	# LIVE-UPDATE DER EINSTELLUNGEN
+	if Config.has_signal("settings_changed"):
+		Config.settings_changed.connect(_on_config_updated)
+	
+	# Initial die Sichtbarkeit anwenden
+	_apply_visibility()
+	
 	fetch_stats()
+
+func _setup_labels():
+	# Präzisere Suche für die Labels innerhalb ihrer Karten
+	if card_revenue: lbl_revenue = card_revenue.find_child("Value", true, false)
+	if card_hours: lbl_hours = card_hours.find_child("Value", true, false)
+	if card_tasks: lbl_tasks = card_tasks.find_child("Value", true, false)
+
+# Reagiert auf Änderungen in den Einstellungen
+func _on_config_updated(section: String, _key: String, _value: Variant):
+	if section == "dashboard":
+		_apply_visibility()
+
+# Steuert die Sichtbarkeit der einzelnen Dashboard-Module
+func _apply_visibility():
+	if welcome_box:
+		welcome_box.visible = Config.get_value("dashboard", "show_welcome", true)
+	
+	if card_revenue:
+		card_revenue.visible = Config.get_value("dashboard", "show_revenue", true)
+		
+	if card_hours:
+		card_hours.visible = Config.get_value("dashboard", "show_employees", true)
+		
+	if card_tasks:
+		card_tasks.visible = Config.get_value("dashboard", "show_tasks", true)
 
 func fetch_stats():
 	var url = Store.get_api_url() + "/dashboard/stats?emp_id=" + str(current_uid)
@@ -38,7 +83,6 @@ func fetch_stats():
 			print("Fehler beim Laden der Stats: ", c)
 		http.queue_free()
 	)
-	# NEU: Hier werden die Auth-Header mit dem Token übergeben
 	http.request(url, Store._get_auth_headers())
 
 func _update_ui(data):
