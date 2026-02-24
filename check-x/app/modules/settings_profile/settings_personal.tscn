@@ -16,7 +16,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="PersonalSettings" type="TabContainer" unique_id=998973661]
+[node name="PersonalSettings" type="TabContainer" unique_id=1728889471]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -25,11 +25,11 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
 
-[node name="Profil" type="ScrollContainer" parent="." unique_id=1356697163]
+[node name="Profil" type="ScrollContainer" parent="." unique_id=52898497]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="M" type="MarginContainer" parent="Profil" unique_id=150319070]
+[node name="M" type="MarginContainer" parent="Profil" unique_id=637484714]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -38,68 +38,68 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Profil/M" unique_id=1712635495]
+[node name="V" type="VBoxContainer" parent="Profil/M" unique_id=249848632]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Personal" type="PanelContainer" parent="Profil/M/V" unique_id=831763491]
+[node name="Card_Personal" type="PanelContainer" parent="Profil/M/V" unique_id=1620620924]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Personal" unique_id=1886619097]
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Personal" unique_id=1806401735]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Profil/M/V/Card_Personal/V" unique_id=838653689]
+[node name="Label" type="Label" parent="Profil/M/V/Card_Personal/V" unique_id=376280745]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
 text = "Stammdaten"
 
-[node name="NameInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=2055843544]
+[node name="NameInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=491004592]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Vorname Nachname"
 
-[node name="JobTitleInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=580903350]
+[node name="JobTitleInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=1160768137]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Jobtitel / Rolle"
 
-[node name="EmpIdInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=881169394]
+[node name="EmpIdInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=822752549]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Personalnummer (P-XXXX)"
 editable = false
 
-[node name="DeptInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=187264377]
+[node name="DeptInput" type="LineEdit" parent="Profil/M/V/Card_Personal/V" unique_id=1313920946]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Abteilung"
 
-[node name="Card_Contact" type="PanelContainer" parent="Profil/M/V" unique_id=114137091]
+[node name="Card_Contact" type="PanelContainer" parent="Profil/M/V" unique_id=978743512]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Contact" unique_id=487916749]
+[node name="V" type="VBoxContainer" parent="Profil/M/V/Card_Contact" unique_id=556950223]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Profil/M/V/Card_Contact/V" unique_id=649507704]
+[node name="Label" type="Label" parent="Profil/M/V/Card_Contact/V" unique_id=331428663]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.8, 0.5, 1)
 text = "Kontakt & Zeit"
 
-[node name="EmailInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=726663618]
+[node name="EmailInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=419740200]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "E-Mail Adresse"
 
-[node name="PhoneInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=178020583]
+[node name="PhoneInput" type="LineEdit" parent="Profil/M/V/Card_Contact/V" unique_id=77049064]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Telefon / Mobil"
 
-[node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V" unique_id=1258689018]
+[node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V" unique_id=1359924467]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -108,18 +108,18 @@ popup/item_0/id = 0
 popup/item_1/text = "Europe/London (UTC+0)"
 popup/item_1/id = 1
 
-[node name="SaveProfileBtn" type="Button" parent="Profil/M/V" unique_id=234543394]
+[node name="SaveProfileBtn" type="Button" parent="Profil/M/V" unique_id=372426658]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "ÄNDERUNGEN SPEICHERN"
 
-[node name="Darstellung" type="ScrollContainer" parent="." unique_id=494443076]
+[node name="Darstellung" type="ScrollContainer" parent="." unique_id=225143131]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="M" type="MarginContainer" parent="Darstellung" unique_id=672047182]
+[node name="M" type="MarginContainer" parent="Darstellung" unique_id=1929518802]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -128,57 +128,58 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M" unique_id=139840990]
+[node name="V" type="VBoxContainer" parent="Darstellung/M" unique_id=1755331867]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Theme" type="PanelContainer" parent="Darstellung/M/V" unique_id=1755593694]
+[node name="Card_Theme" type="PanelContainer" parent="Darstellung/M/V" unique_id=464159801]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Theme" unique_id=1118747752]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Theme" unique_id=1553469398]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Theme/V" unique_id=1176847086]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Theme/V" unique_id=1300736444]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.4, 0.8, 1)
 text = "Interface"
 
-[node name="DarkModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=107887249]
+[node name="LanguageOption" type="OptionButton" parent="Darstellung/M/V/Card_Theme/V" unique_id=6142399]
 unique_name_in_owner = true
 layout_mode = 2
-button_pressed = true
-text = "Dark Mode aktivieren"
+selected = 0
+item_count = 2
+popup/item_0/text = "Deutsch (DE)"
+popup/item_0/id = 0
+popup/item_1/text = "English (EN)"
+popup/item_1/id = 1
 
-[node name="SystemThemeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=840581663]
-layout_mode = 2
-text = "Thema an System anpassen"
-
-[node name="CompactModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=1288802835]
+[node name="CompactModeCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=1943828439]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Kompakte Listenansicht"
 
-[node name="ShowAvatarsCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=955821894]
+[node name="SoundEffectsCheck" type="CheckBox" parent="Darstellung/M/V/Card_Theme/V" unique_id=506368063]
+unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
-text = "Avatare anzeigen"
+text = "Sound-Effekte aktivieren"
 
-[node name="Card_Format" type="PanelContainer" parent="Darstellung/M/V" unique_id=1786205930]
+[node name="Card_Format" type="PanelContainer" parent="Darstellung/M/V" unique_id=1868223089]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Format" unique_id=2027644715]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Format" unique_id=1823247002]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Format/V" unique_id=96541728]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Format/V" unique_id=2046734615]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
 text = "Formate"
 
-[node name="DateFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=1161392195]
+[node name="DateFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=871855429]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -187,16 +188,7 @@ popup/item_0/id = 0
 popup/item_1/text = "YYYY-MM-DD"
 popup/item_1/id = 1
 
-[node name="NumberFormatOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=613079642]
-layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "1.000,00 (DE)"
-popup/item_0/id = 0
-popup/item_1/text = "1,000.00 (US)"
-popup/item_1/id = 1
-
-[node name="WeekStartOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=1003070652]
+[node name="WeekStartOption" type="OptionButton" parent="Darstellung/M/V/Card_Format/V" unique_id=1007095943]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -205,53 +197,44 @@ popup/item_0/id = 0
 popup/item_1/text = "Wochenstart: Sonntag"
 popup/item_1/id = 1
 
-[node name="Card_Access" type="PanelContainer" parent="Darstellung/M/V" unique_id=2041916824]
+[node name="Card_Access" type="PanelContainer" parent="Darstellung/M/V" unique_id=466530864]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Access" unique_id=216717119]
+[node name="V" type="VBoxContainer" parent="Darstellung/M/V/Card_Access" unique_id=1833775301]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=232867288]
+[node name="Label" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=797668672]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
 text = "Barrierefreiheit"
 
-[node name="FontSizeSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V" unique_id=1465716187]
+[node name="UIScaleSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V" unique_id=1618669396]
 unique_name_in_owner = true
-layout_mode = 2
-min_value = 10.0
-max_value = 30.0
-value = 16.0
-
-[node name="Label2" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=1991900154]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Schriftgröße"
-horizontal_alignment = 2
-
-[node name="UIScaleSlider" type="HSlider" parent="Darstellung/M/V/Card_Access/V" unique_id=1307689489]
 layout_mode = 2
 min_value = 0.8
 max_value = 1.5
 step = 0.1
 value = 1.0
 
-[node name="HighContrastCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V" unique_id=552337943]
+[node name="Label2" type="Label" parent="Darstellung/M/V/Card_Access/V" unique_id=1608146238]
 layout_mode = 2
-text = "Hoher Kontrast"
+theme_override_font_sizes/font_size = 12
+text = "UI Skalierung"
+horizontal_alignment = 2
 
-[node name="ReducedMotionCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V" unique_id=426054807]
+[node name="ReducedMotionCheck" type="CheckBox" parent="Darstellung/M/V/Card_Access/V" unique_id=829409199]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Animationen reduzieren"
 
-[node name="Dashboard" type="ScrollContainer" parent="." unique_id=152434961]
+[node name="Dashboard" type="ScrollContainer" parent="." unique_id=445893886]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="M" type="MarginContainer" parent="Dashboard" unique_id=2128805753]
+[node name="M" type="MarginContainer" parent="Dashboard" unique_id=30471633]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -260,62 +243,62 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M" unique_id=2123387048]
+[node name="V" type="VBoxContainer" parent="Dashboard/M" unique_id=1574044429]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Widgets" type="PanelContainer" parent="Dashboard/M/V" unique_id=1088658000]
+[node name="Card_Widgets" type="PanelContainer" parent="Dashboard/M/V" unique_id=242247032]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Widgets" unique_id=1847448354]
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Widgets" unique_id=732598981]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1004165709]
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Widgets/V" unique_id=432011801]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
 text = "Sichtbare Kacheln"
 
-[node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1024811691]
+[node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=701571951]
 layout_mode = 2
 button_pressed = true
 text = "Begrüßung & Datum"
 
-[node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=51388522]
+[node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1553266414]
 layout_mode = 2
 button_pressed = true
 text = "Umsatz-Statistik"
 
-[node name="Check3" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=954552930]
+[node name="Check3" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=2037339982]
 layout_mode = 2
 button_pressed = true
 text = "Mitarbeiter-Status"
 
-[node name="Check4" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1774940485]
+[node name="Check4" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1037512836]
 layout_mode = 2
 button_pressed = true
 text = "Offene Tickets"
 
-[node name="Check5" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1377409564]
+[node name="Check5" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1082251730]
 layout_mode = 2
 button_pressed = true
 text = "Mini-Timer"
 
-[node name="Card_Layout" type="PanelContainer" parent="Dashboard/M/V" unique_id=939233616]
+[node name="Card_Layout" type="PanelContainer" parent="Dashboard/M/V" unique_id=1579592660]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Layout" unique_id=1242170311]
+[node name="V" type="VBoxContainer" parent="Dashboard/M/V/Card_Layout" unique_id=37028737]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dashboard/M/V/Card_Layout/V" unique_id=970078781]
+[node name="Label" type="Label" parent="Dashboard/M/V/Card_Layout/V" unique_id=151970839]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
 text = "Verhalten"
 
-[node name="ColOption" type="OptionButton" parent="Dashboard/M/V/Card_Layout/V" unique_id=1671087954]
+[node name="ColOption" type="OptionButton" parent="Dashboard/M/V/Card_Layout/V" unique_id=209618602]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -324,7 +307,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Spalten: 3 Fest"
 popup/item_1/id = 1
 
-[node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V" unique_id=1257395433]
+[node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V" unique_id=1286822600]
 layout_mode = 2
 value = 30.0
 prefix = "Refresh (Sek):"

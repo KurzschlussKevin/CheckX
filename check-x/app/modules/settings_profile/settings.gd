@@ -9,17 +9,21 @@ extends Control
 @onready var inp_mail = find_child("EmailInput", true, false)
 @onready var inp_dept = find_child("DeptInput", true, false)
 @onready var inp_phone = find_child("PhoneInput", true, false) 
-@onready var inp_empid = find_child("EmpIdInput", true, false) # NEU: Referenz für Personalnummer
+@onready var inp_empid = find_child("EmpIdInput", true, false) # Referenz für Personalnummer
 
-# Dashboard Konfig (Checkboxen aus settings_personal.tscn)
+# Darstellung
+@onready var opt_lang = find_child("LanguageOption", true, false)
+@onready var check_compact = find_child("CompactModeCheck", true, false)
+@onready var check_sounds = find_child("SoundEffectsCheck", true, false)
+@onready var slider_scale = find_child("UIScaleSlider", true, false)
+@onready var check_reduced_motion = find_child("ReducedMotionCheck", true, false)
+
+# Dashboard Konfig
 @onready var check_welcome = find_child("Check1", true, false)
 @onready var check_revenue = find_child("Check2", true, false)
 @onready var check_emp = find_child("Check3", true, false)
 @onready var check_tasks = find_child("Check4", true, false)
 @onready var check_timer = find_child("Check5", true, false)
-
-# Darstellung
-@onready var slider_scale = find_child("UIScaleSlider", true, false)
 
 func _ready() -> void:
 	# Warten bis alle Sub-Szenen geladen sind
@@ -33,81 +37,134 @@ func _load_values() -> void:
 	var user_data = Store.current_user 
 	
 	if not user_data.is_empty():
-		# PERSONALNUMMER FORMATIEREN: Personalnummer (P-8964)
+		# PERSONALNUMMER FORMATIEREN
 		if inp_empid:
 			var raw_id = user_data.get("emp_id", "XXXX")
 			inp_empid.text = "Personalnummer (" + str(raw_id) + ")"
 			inp_empid.editable = false
-			inp_empid.modulate = Color(0.6, 0.6, 0.6, 0.8) # Deutlich als inaktiv markiert
+			inp_empid.modulate = Color(0.6, 0.6, 0.6, 0.8)
 
 		# Name und Email setzen
 		if inp_name: inp_name.text = user_data.get("name", "")
 		if inp_mail: inp_mail.text = user_data.get("email", "")
 		
-		# Rolle/Jobtitel Logik (System-Rolle)
+		# Rolle/Jobtitel Logik
 		if inp_job:
 			var user_role = user_data.get("role", "Prüfer")
 			inp_job.text = user_role
-			
-			# Admin-Check: Nur Admins dürfen die System-Rolle bearbeiten
 			if user_role == "Admin":
 				inp_job.editable = true
 				inp_job.modulate = Color.WHITE
 			else:
 				inp_job.editable = false
-				inp_job.modulate = Color(0.7, 0.7, 0.7, 0.8) # Ausgegraut
+				inp_job.modulate = Color(0.7, 0.7, 0.7, 0.8)
 		
-		# Abteilung/Tätigkeit (Freitext)
-		if inp_dept:
-			inp_dept.text = user_data.get("dept", "")
-			inp_dept.editable = true 
-			inp_dept.modulate = Color.WHITE
-			
-		# Mobilnummer setzen
-		if inp_phone:
-			inp_phone.text = user_data.get("phone", "")
-			inp_phone.editable = true
-			inp_phone.modulate = Color.WHITE
+		if inp_dept: inp_dept.text = user_data.get("dept", "")
+		if inp_phone: inp_phone.text = user_data.get("phone", "")
 
-	# 2. Checkboxen für Dashboard-Module setzen (aus lokaler Config)
+	# 2. Darstellungswerte laden UND ANWENDEN
+	if opt_lang:
+		var lang = Config.get_value("appearance", "language", "de")
+		opt_lang.selected = 0 if lang == "de" else 1
+		TranslationServer.set_locale(lang)
+
+	if check_compact:
+		var is_compact = Config.get_value("appearance", "compact_mode", false)
+		check_compact.button_pressed = is_compact
+		_apply_compact_mode(is_compact)
+	
+	if check_sounds:
+		var sounds_on = Config.get_value("appearance", "sound_enabled", true)
+		check_sounds.button_pressed = sounds_on
+		if "sound_enabled" in Store: Store.sound_enabled = sounds_on
+		
+	if check_reduced_motion:
+		var reduced = Config.get_value("appearance", "reduced_motion", false)
+		check_reduced_motion.button_pressed = reduced
+		_apply_reduced_motion(reduced)
+
+	# UI Skalierung beim Start anwenden
+	if slider_scale: 
+		var scale_val = Config.get_value("general", "ui_scale", 1.0)
+		slider_scale.value = scale_val
+		get_window().content_scale_factor = scale_val
+
+	# 3. Dashboard-Module
 	if check_welcome: check_welcome.button_pressed = Config.get_value("dashboard", "show_welcome", true)
 	if check_revenue: check_revenue.button_pressed = Config.get_value("dashboard", "show_revenue", true)
 	if check_emp: check_emp.button_pressed = Config.get_value("dashboard", "show_employees", true)
 	if check_tasks: check_tasks.button_pressed = Config.get_value("dashboard", "show_tasks", true)
 	if check_timer: check_timer.button_pressed = Config.get_value("dashboard", "show_timer", true)
 	
-	# UI Skalierung setzen
-	if slider_scale: slider_scale.value = Config.get_value("general", "ui_scale", 1.0)
-	
 func _connect_signals() -> void:
 	if save_btn: 
 		if not save_btn.pressed.is_connected(_on_save):
 			save_btn.pressed.connect(_on_save)
 	
-	# Live-Update Signale für Dashboard
-	if check_welcome: check_welcome.toggled.connect(func(v): Config.set_value("dashboard", "show_welcome", v))
-	if check_revenue: check_revenue.toggled.connect(func(v): Config.set_value("dashboard", "show_revenue", v))
-	if check_emp: check_emp.toggled.connect(func(v): Config.set_value("dashboard", "show_employees", v))
-	if check_tasks: check_tasks.toggled.connect(func(v): Config.set_value("dashboard", "show_tasks", v))
-	if check_timer: check_timer.toggled.connect(func(v): Config.set_value("dashboard", "show_timer", v))
+	# --- DARSTELLUNG LIVE UPDATES ---
+	if opt_lang:
+		opt_lang.item_selected.connect(_on_language_selected)
+		
+	if check_compact:
+		check_compact.toggled.connect(func(v): 
+			Config.set_value("appearance", "compact_mode", v)
+			_apply_compact_mode(v)
+		)
+		
+	if check_sounds:
+		check_sounds.toggled.connect(func(v): 
+			Config.set_value("appearance", "sound_enabled", v)
+			if "sound_enabled" in Store: Store.sound_enabled = v
+		)
+		
+	if check_reduced_motion:
+		check_reduced_motion.toggled.connect(func(v): 
+			Config.set_value("appearance", "reduced_motion", v)
+			_apply_reduced_motion(v)
+		)
 	
-	# Live-Update für die UI Skalierung
 	if slider_scale: 
 		slider_scale.value_changed.connect(func(v): 
 			Config.set_value("general", "ui_scale", v)
 			get_window().content_scale_factor = v
 		)
 
+	# --- DASHBOARD LIVE UPDATES ---
+	if check_welcome: check_welcome.toggled.connect(func(v): Config.set_value("dashboard", "show_welcome", v))
+	if check_revenue: check_revenue.toggled.connect(func(v): Config.set_value("dashboard", "show_revenue", v))
+	if check_emp: check_emp.toggled.connect(func(v): Config.set_value("dashboard", "show_employees", v))
+	if check_tasks: check_tasks.toggled.connect(func(v): Config.set_value("dashboard", "show_tasks", v))
+	if check_timer: check_timer.toggled.connect(func(v): Config.set_value("dashboard", "show_timer", v))
+
+# --- HILFSFUNKTIONEN FÜR LIVE-REAKTION ---
+
+func _apply_reduced_motion(active: bool):
+	# Wir setzen eine globale Variable im Store, damit Tweens/Animationen
+	# in der ganzen App wissen, ob sie sofort zum Ende springen sollen
+	if "reduced_motion" in Store:
+		Store.reduced_motion = active
+	# Optional: Toast zur Bestätigung
+	# _send_toast("Animationen: " + ("Aus" if active else "An"), "info")
+
+func _apply_compact_mode(active: bool):
+	# Wir emitten ein Signal, das z.B. die Mitarbeiterliste hört
+	# um die Abstände (Separation) zu verringern
+	if Store.has_signal("ui_layout_changed"):
+		Store.ui_layout_changed.emit("compact" if active else "normal")
+
+func _on_language_selected(index: int) -> void:
+	var lang_code = "de" if index == 0 else "en"
+	Config.set_value("appearance", "language", lang_code)
+	TranslationServer.set_locale(lang_code)
+	_send_toast("Sprache geändert / Language changed", "info")
+
 func _on_save() -> void:
 	if not save_btn: return
 	
-	# UI Feedback Start
 	var old_text = save_btn.text
 	save_btn.text = "SPEICHERT..."
 	save_btn.disabled = true
 	
-	# 1. Daten für das Profil-Update sammeln
-	# Wichtig: Keys müssen exakt mit employees.py übereinstimmen!
 	var updated_profile = {
 		"name": inp_name.text if inp_name else Store.current_user.get("name", ""),
 		"email": inp_mail.text if inp_mail else Store.current_user.get("email", ""),
@@ -116,23 +173,16 @@ func _on_save() -> void:
 		"phone": inp_phone.text if inp_phone else "" 
 	}
 	
-	# Lokale Config für Jobtitel (optionaler Cache)
 	if inp_job: Config.set_value("user", "job_title", inp_job.text)
 	
-	# 2. Profil-Update an Store senden
 	if Store.has_method("update_profile"):
 		Store.update_profile(updated_profile)
 	
-	# Kurze Verzögerung für das UI-Gefühl
 	await get_tree().create_timer(0.4).timeout
-	
-	# Erfolg-Toast anzeigen
 	_send_toast("Profil erfolgreich gespeichert!", "success")
 	
-	# Button Animation Erfolg
 	save_btn.text = "GESPEICHERT ✔"
 	save_btn.modulate = Color.GREEN
-	
 	await get_tree().create_timer(1.0).timeout
 	
 	if is_instance_valid(save_btn):
