@@ -13,10 +13,15 @@ var progress = []
 var display_progress = 0.0
 
 func _ready() -> void:
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
+	
 	# 1. Alles initial verstecken für Fade-in
-	modulate.a = 0
-	var f_tween = create_tween()
-	f_tween.tween_property(self, "modulate:a", 1.0, 0.5)
+	if reduced_motion:
+		modulate.a = 1.0
+	else:
+		modulate.a = 0
+		var f_tween = create_tween()
+		f_tween.tween_property(self, "modulate:a", 1.0, 0.5)
 	
 	# 2. Fenster-Morphing von klein auf 1080p starten
 	_morph_window_to_full()
@@ -46,6 +51,13 @@ func _process(delta: float) -> void:
 		_finish_loading()
 
 func _start_bg_pulse() -> void:
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
+	
+	if reduced_motion:
+		# Wenn Animationen reduziert sind, einfach hell lassen und stoppen
+		background.self_modulate = Color(1, 1, 1, 1.0)
+		return
+		
 	# Lässt den Hintergrund dezent hell und dunkel werden (Atmen)
 	var tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE)
 	tween.tween_property(background, "self_modulate", Color(1, 1, 1, 0.6), 2.5)
@@ -62,11 +74,17 @@ func _update_status_texts() -> void:
 	]
 	
 	if is_inside_tree() and display_progress < 100:
-		var t = create_tween()
-		t.tween_property(status_label, "modulate:a", 0.0, 0.25)
-		t.set_trans(Tween.TRANS_LINEAR)
-		t.tween_callback(func(): status_label.text = texts.pick_random())
-		t.tween_property(status_label, "modulate:a", 1.0, 0.25)
+		var reduced_motion = Config.get_value("general", "reduced_motion", false)
+		
+		if reduced_motion:
+			# Text sofort ohne Fade-In/Out umschalten
+			status_label.text = texts.pick_random()
+		else:
+			var t = create_tween()
+			t.tween_property(status_label, "modulate:a", 0.0, 0.25)
+			t.set_trans(Tween.TRANS_LINEAR)
+			t.tween_callback(func(): status_label.text = texts.pick_random())
+			t.tween_property(status_label, "modulate:a", 1.0, 0.25)
 		
 		# Alle 1.5 Sekunden Text wechseln
 		await get_tree().create_timer(1.5).timeout
@@ -76,15 +94,23 @@ func _morph_window_to_full() -> void:
 	var win = get_window()
 	var target_res = Vector2i(1920, 1080)
 	
-	# Physikalische Transformation des Betriebssystem-Fensters
-	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(win, "size", target_res, 0.8)
-	tween.tween_property(win, "content_scale_size", target_res, 0.8)
-	
-	# Fenster während der Vergrößerung zentriert halten
+	# Zentrum berechnen
 	var screen_rect = DisplayServer.screen_get_usable_rect(win.current_screen)
 	var center_pos = Vector2(screen_rect.position) + (Vector2(screen_rect.size) / 2.0) - (Vector2(target_res) / 2.0)
-	tween.tween_property(win, "position", Vector2i(center_pos), 0.8)
+	
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
+	
+	if reduced_motion:
+		# Sofortiges Vergrößern und Zentrieren, kein sanftes Skalieren
+		win.size = target_res
+		win.content_scale_size = target_res
+		win.position = Vector2i(center_pos)
+	else:
+		# Physikalische Transformation des Betriebssystem-Fensters
+		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(win, "size", target_res, 0.8)
+		tween.tween_property(win, "content_scale_size", target_res, 0.8)
+		tween.tween_property(win, "position", Vector2i(center_pos), 0.8)
 
 func _finish_loading() -> void:
 	# Letzte Anzeige vor dem Wechsel
@@ -93,10 +119,13 @@ func _finish_loading() -> void:
 	loading_label.text = "SYSTEM BEREIT"
 	status_label.text = "Starte Module..."
 	
-	# Sanftes Ausblenden des gesamten Ladescreens
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, 0.4)
-	await tween.finished
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
+	
+	if not reduced_motion:
+		# Sanftes Ausblenden des gesamten Ladescreens nur wenn Animationen aktiv sind
+		var tween = create_tween()
+		tween.tween_property(self, "modulate:a", 0.0, 0.4)
+		await tween.finished
 	
 	# Szene wechseln
 	var packed_scene = ResourceLoader.load_threaded_get(target_scene_path)

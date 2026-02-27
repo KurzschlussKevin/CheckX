@@ -29,6 +29,7 @@ extends Control
 @onready var spin_refresh = find_child("RefreshIntervalSpinBox", true, false)
 
 func _ready() -> void:
+	print("⚙️ HAUPT-EINSTELLUNGEN WURDEN GELADEN!")
 	# Warten bis alle Sub-Szenen geladen sind
 	await get_tree().process_frame
 	

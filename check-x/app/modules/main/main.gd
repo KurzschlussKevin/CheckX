@@ -41,10 +41,14 @@ func _ready() -> void:
 	# 3. Das Dashboard als Startseite laden
 	load_module(modules["Dashboard"], "Dashboard")
 	
-	# 4. Sanftes Einblenden der UI
-	main_layout.modulate.a = 0
-	var tween = create_tween()
-	tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
+	# 4. Einblenden der UI (mit Rücksicht auf reduzierte Animationen)
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
+	if reduced_motion:
+		main_layout.modulate.a = 1.0 # Sofort sichtbar
+	else:
+		main_layout.modulate.a = 0
+		var tween = create_tween()
+		tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
 	
 	# --- NEU: SIGNALE VERBINDEN ---
 	
@@ -63,8 +67,6 @@ func _ready() -> void:
 	# Verbindung für den Bestätigungs-Button im Popup (%BugReportPopup)
 	if has_node("%BugReportPopup"):
 		%BugReportPopup.confirmed.connect(_on_send_bug_confirmed)
-
-# --- NEU: BENACHRICHTIGUNGS-LOGIK ---
 
 func _on_notification_received(data: Dictionary) -> void:
 	# Toast instanziieren
@@ -211,9 +213,13 @@ func load_module(path: String, title: String = "") -> void:
 		module_container.add_child(instance)
 		
 		# Einblend-Animation für das Modul
-		instance.modulate.a = 0
-		var t = create_tween()
-		t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+		var reduced_motion = Config.get_value("general", "reduced_motion", false)
+		if reduced_motion:
+			instance.modulate.a = 1.0 # Sofort einblenden
+		else:
+			instance.modulate.a = 0
+			var t = create_tween()
+			t.tween_property(instance, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
 	else:
 		var err_msg = "Szenen-Datei fehlt oder Pfad ungültig: " + path
 		print(err_msg)

@@ -44,18 +44,29 @@ func display(message: String, type: String = "info") -> void:
 	_animate_toast()
 
 func _animate_toast() -> void:
-	var tween = create_tween().set_parallel(true)
+	var reduced_motion = Config.get_value("general", "reduced_motion", false)
 	
-	# 1. Einblenden und Einfliegen
-	tween.tween_property(self, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
-	tween.tween_property(self, "position:x", position.x - 50, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	
-	# 2. Warten und dann Ausblenden
-	await get_tree().create_timer(5.0).timeout
-	
-	var fade_out = create_tween().set_parallel(true)
-	fade_out.tween_property(self, "modulate:a", 0.0, 0.5)
-	fade_out.tween_property(self, "position:y", position.y - 20, 0.5)
-	
-	# 3. Objekt entfernen
-	fade_out.chain().tween_callback(queue_free)
+	if reduced_motion:
+		# Ohne Animation: Sofort sichtbar machen und Endposition setzen
+		modulate.a = 1.0
+		position.x -= 50
+		
+		# Warten und dann direkt löschen
+		await get_tree().create_timer(5.0).timeout
+		queue_free()
+	else:
+		var tween = create_tween().set_parallel(true)
+		
+		# 1. Einblenden und Einfliegen
+		tween.tween_property(self, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+		tween.tween_property(self, "position:x", position.x - 50, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		
+		# 2. Warten und dann Ausblenden
+		await get_tree().create_timer(5.0).timeout
+		
+		var fade_out = create_tween().set_parallel(true)
+		fade_out.tween_property(self, "modulate:a", 0.0, 0.5)
+		fade_out.tween_property(self, "position:y", position.y - 20, 0.5)
+		
+		# 3. Objekt entfernen
+		fade_out.chain().tween_callback(queue_free)

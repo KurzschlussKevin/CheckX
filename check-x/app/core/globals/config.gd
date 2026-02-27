@@ -83,4 +83,8 @@ func _apply_global_settings() -> void:
 	var scale = get_value("general", "ui_scale", 1.0)
 	get_window().content_scale_factor = scale
 	
-	# Hier könnte man später auch Themes umschalten
+func apply_sound_setting(is_active: bool) -> void:
+	# Sucht den Haupt-Audio-Bus (Master) und schaltet ihn stumm (mute), 
+	# wenn is_active "false" ist.
+	var bus_idx = AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(bus_idx, not is_active)

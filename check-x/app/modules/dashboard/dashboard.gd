@@ -4,8 +4,8 @@ extends Control
 @onready var lbl_revenue = find_child("Value", true, false) if find_child("StatRevenue", true, false) else null
 @onready var lbl_hours = find_child("Value", true, false) if find_child("StatHours", true, false) else null
 @onready var lbl_tasks = find_child("Value", true, false) if find_child("StatTasks", true, false) else null
-@onready var welcome_label = %WelcomeLabel
-@onready var refresh_btn = %RefreshBtn
+@onready var welcome_label = %WelcomeLabel if find_child("WelcomeLabel", true, false) else null
+@onready var refresh_btn = %RefreshBtn if find_child("RefreshBtn", true, false) else null
 
 # --- UI REFERENZEN (Container für Sichtbarkeit) ---
 # Wir suchen die Nodes jetzt dynamisch, um "Node not found" Fehler zu vermeiden
@@ -14,8 +14,11 @@ extends Control
 @onready var card_hours = find_child("StatHours", true, false)
 @onready var card_tasks = find_child("StatTasks", true, false)
 
+# NEU: Optionaler GridContainer für die Spalten-Option ("column_mode")
+@onready var dashboard_grid = find_child("GridContainer", true, false)
+
 var current_uid = ""
-var refresh_timer: Timer # NEU: Dedizierter Timer für den Statistik-Refresh
+var refresh_timer: Timer # Dedizierter Timer für den Statistik-Refresh
 
 func _ready():
 	# Kurz warten, falls Nodes noch nicht ganz bereit sind
@@ -24,7 +27,7 @@ func _ready():
 	# Pfade für Labels manuell nachjustieren, falls find_child zu ungenau war
 	_setup_labels()
 	
-	# NEU: Timer initialisieren
+	# Timer initialisieren
 	_setup_refresh_timer()
 	
 	current_uid = Store.get_current_user_id()
@@ -32,24 +35,30 @@ func _ready():
 	# Zugriff auf das neue User-Objekt im Store
 	var user_data = Store.current_user 
 	
-	if user_data and user_data.has("name"):
-		welcome_label.text = "Willkommen, " + str(user_data["name"])
-	else:
-		welcome_label.text = "Willkommen, Gast"
+	if welcome_label:
+		if user_data and user_data.has("name"):
+			welcome_label.text = "Willkommen, " + str(user_data["name"])
+		else:
+			welcome_label.text = "Willkommen, Gast"
 	
 	if refresh_btn:
-		refresh_btn.pressed.connect(fetch_stats)
+		# Verhindern doppelter Verbindungen
+		if not refresh_btn.pressed.is_connected(fetch_stats):
+			refresh_btn.pressed.connect(fetch_stats)
 	
 	# LIVE-UPDATE DER EINSTELLUNGEN
 	if Config.has_signal("settings_changed"):
-		Config.settings_changed.connect(_on_config_updated)
+		if not Config.settings_changed.is_connected(_on_config_updated):
+			Config.settings_changed.connect(_on_config_updated)
 	
-	# NEU: Spezielles Signal für das Intervall (falls in settings.gd definiert)
+	# Spezielles Signal für das Intervall (falls in Store.gd definiert)
 	if Store.has_signal("dashboard_refresh_updated"):
-		Store.dashboard_refresh_updated.connect(_update_refresh_interval)
+		if not Store.dashboard_refresh_updated.is_connected(_update_refresh_interval):
+			Store.dashboard_refresh_updated.connect(_update_refresh_interval)
 	
-	# Initial die Sichtbarkeit anwenden
+	# Initial die Sichtbarkeit und das Layout anwenden
 	_apply_visibility()
+	_apply_layout()
 	
 	fetch_stats()
 
@@ -59,30 +68,36 @@ func _setup_labels():
 	if card_hours: lbl_hours = card_hours.find_child("Value", true, false)
 	if card_tasks: lbl_tasks = card_tasks.find_child("Value", true, false)
 
-# NEU: Timer-Logik aufbauen
+# Timer-Logik aufbauen
 func _setup_refresh_timer():
 	refresh_timer = Timer.new()
 	refresh_timer.name = "DashboardRefreshTimer"
 	add_child(refresh_timer)
 	refresh_timer.timeout.connect(fetch_stats)
 	
-	# Start-Intervall aus Config laden (Standard 60s, falls nichts gesetzt)
-	var saved_interval = Config.get_value("dashboard", "refresh_interval", 60)
+	# Start-Intervall aus Config laden (In config.gd ist der Schlüssel "refresh_rate", nicht "refresh_interval")
+	var saved_interval = Config.get_value("dashboard", "refresh_rate", 30)
 	_update_refresh_interval(saved_interval)
 
-# NEU: Funktion zum Ändern des Intervalls (30s bis 600s/10min)
+# Funktion zum Ändern des Intervalls (30s bis 600s/10min)
 func _update_refresh_interval(seconds: int):
 	if refresh_timer:
 		refresh_timer.wait_time = clamp(seconds, 30, 600) # Sicherstellen des Bereichs
 		refresh_timer.start()
 		print("Dashboard-Refresh auf " + str(refresh_timer.wait_time) + " Sekunden gesetzt.")
 
-# Reagiert auf Änderungen in den Einstellungen
+# Reagiert auf Änderungen in den Einstellungen (Wird aus settings_personal.gd getriggert)
 func _on_config_updated(section: String, key: String, value: Variant):
 	if section == "dashboard":
+		# Wenn sich eine Checkbox ändert, Sichtbarkeit aktualisieren
 		_apply_visibility()
-		# Falls das Intervall in der Config geändert wurde, Timer anpassen
-		if key == "refresh_interval":
+		
+		# Wenn sich das Layout (Spalten) ändert
+		if key == "column_mode":
+			_apply_layout()
+			
+		# Falls das Intervall in der Config geändert wurde, Timer sofort anpassen
+		if key == "refresh_rate":
 			_update_refresh_interval(int(value))
 
 # Steuert die Sichtbarkeit der einzelnen Dashboard-Module
@@ -98,6 +113,20 @@ func _apply_visibility():
 		
 	if card_tasks:
 		card_tasks.visible = Config.get_value("dashboard", "show_tasks", true)
+
+# NEU: Steuert das Layout der Kacheln (Automatisch vs. 3 Spalten)
+func _apply_layout():
+	var col_mode = Config.get_value("dashboard", "column_mode", 0)
+	
+	if dashboard_grid:
+		if col_mode == 1:
+			# 1 = 3 Spalten Fest
+			dashboard_grid.columns = 3
+		else:
+			# 0 = Automatisch
+			# Hier könntest du bei einem GridContainer z.B. columns = 2 setzen
+			# oder wenn du eine andere Logik für "Automatisch" nutzt, diese hier einbauen.
+			dashboard_grid.columns = 2 
 
 func fetch_stats():
 	var url = Store.get_api_url() + "/dashboard/stats?emp_id=" + str(current_uid)

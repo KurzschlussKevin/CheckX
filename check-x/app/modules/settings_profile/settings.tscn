@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dl2hrgupumeys"]
 
 [ext_resource type="Script" uid="uid://b5mp6tkn2mbe5" path="res://app/modules/settings_profile/settings.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_personal.tscn" id="2_personal"]
+[ext_resource type="PackedScene" uid="uid://d3se2roabt0w2" path="res://app/modules/settings_profile/settings_personal.tscn" id="2_personal"]
 [ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_business.tscn" id="3_business"]
 [ext_resource type="PackedScene" path="res://app/modules/settings_profile/settings_tech.tscn" id="4_tech"]
 

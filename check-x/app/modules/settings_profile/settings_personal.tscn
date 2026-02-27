@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://d3se2roabt0w2"]
 
+[ext_resource type="Script" uid="uid://uh56r150b26o" path="res://app/modules/settings_profile/settings_personal.gd" id="1_rbyi2"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
 bg_color = Color(0.1, 0.1, 0.12, 1)
 border_width_top = 2
@@ -24,6 +26,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
+script = ExtResource("1_rbyi2")
 
 [node name="Profil" type="ScrollContainer" parent="." unique_id=52898497]
 layout_mode = 2
