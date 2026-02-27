@@ -101,6 +101,7 @@ placeholder_text = "Telefon / Mobil"
 
 [node name="TimezoneOption" type="OptionButton" parent="Profil/M/V/Card_Contact/V" unique_id=1359924467]
 layout_mode = 2
+disabled = true
 selected = 0
 item_count = 2
 popup/item_0/text = "Europe/Berlin (UTC+1)"
@@ -148,6 +149,7 @@ text = "Interface"
 [node name="LanguageOption" type="OptionButton" parent="Darstellung/M/V/Card_Theme/V" unique_id=6142399]
 unique_name_in_owner = true
 layout_mode = 2
+disabled = true
 selected = 0
 item_count = 2
 popup/item_0/text = "Deutsch (DE)"
@@ -309,5 +311,7 @@ popup/item_1/id = 1
 
 [node name="RefreshSpin" type="SpinBox" parent="Dashboard/M/V/Card_Layout/V" unique_id=1286822600]
 layout_mode = 2
-value = 30.0
+min_value = 30.0
+max_value = 600.0
+value = 60.0
 prefix = "Refresh (Sek):"

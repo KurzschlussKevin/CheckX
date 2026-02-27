@@ -25,6 +25,9 @@ extends Control
 @onready var check_tasks = find_child("Check4", true, false)
 @onready var check_timer = find_child("Check5", true, false)
 
+# NEU: Dashboard Verhalten (Refresh)
+@onready var spin_refresh = find_child("RefreshIntervalSpinBox", true, false)
+
 func _ready() -> void:
 	# Warten bis alle Sub-Szenen geladen sind
 	await get_tree().process_frame
@@ -66,6 +69,8 @@ func _load_values() -> void:
 	if opt_lang:
 		var lang = Config.get_value("appearance", "language", "de")
 		opt_lang.selected = 0 if lang == "de" else 1
+		opt_lang.disabled = true # Vorerst deaktiviert wie gewünscht
+		opt_lang.modulate = Color(0.5, 0.5, 0.5, 0.7)
 		TranslationServer.set_locale(lang)
 
 	if check_compact:
@@ -95,6 +100,13 @@ func _load_values() -> void:
 	if check_emp: check_emp.button_pressed = Config.get_value("dashboard", "show_employees", true)
 	if check_tasks: check_tasks.button_pressed = Config.get_value("dashboard", "show_tasks", true)
 	if check_timer: check_timer.button_pressed = Config.get_value("dashboard", "show_timer", true)
+	
+	# NEU: Dashboard Refresh-Intervall laden
+	if spin_refresh:
+		var saved_interval = Config.get_value("dashboard", "refresh_interval", 60)
+		spin_refresh.min_value = 30
+		spin_refresh.max_value = 600
+		spin_refresh.value = clamp(saved_interval, 30, 600)
 	
 func _connect_signals() -> void:
 	if save_btn: 
@@ -135,24 +147,31 @@ func _connect_signals() -> void:
 	if check_emp: check_emp.toggled.connect(func(v): Config.set_value("dashboard", "show_employees", v))
 	if check_tasks: check_tasks.toggled.connect(func(v): Config.set_value("dashboard", "show_tasks", v))
 	if check_timer: check_timer.toggled.connect(func(v): Config.set_value("dashboard", "show_timer", v))
+	
+	# NEU: Refresh Intervall Update
+	if spin_refresh:
+		spin_refresh.value_changed.connect(_on_refresh_changed)
 
 # --- HILFSFUNKTIONEN FÜR LIVE-REAKTION ---
 
+func _on_refresh_changed(value: float) -> void:
+	var safe_val = int(clamp(value, 30, 600))
+	Config.set_value("dashboard", "refresh_interval", safe_val)
+	
+	# Das Dashboard über Store-Signal informieren
+	if Store.has_signal("dashboard_refresh_updated"):
+		Store.dashboard_refresh_updated.emit(safe_val)
+
 func _apply_reduced_motion(active: bool):
-	# Wir setzen eine globale Variable im Store, damit Tweens/Animationen
-	# in der ganzen App wissen, ob sie sofort zum Ende springen sollen
 	if "reduced_motion" in Store:
 		Store.reduced_motion = active
-	# Optional: Toast zur Bestätigung
-	# _send_toast("Animationen: " + ("Aus" if active else "An"), "info")
 
 func _apply_compact_mode(active: bool):
-	# Wir emitten ein Signal, das z.B. die Mitarbeiterliste hört
-	# um die Abstände (Separation) zu verringern
 	if Store.has_signal("ui_layout_changed"):
 		Store.ui_layout_changed.emit("compact" if active else "normal")
 
 func _on_language_selected(index: int) -> void:
+	# Bleibt im Code, auch wenn Button oben deaktiviert ist
 	var lang_code = "de" if index == 0 else "en"
 	Config.set_value("appearance", "language", lang_code)
 	TranslationServer.set_locale(lang_code)
