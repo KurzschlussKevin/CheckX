@@ -14,8 +14,8 @@ extends Control
 @onready var card_hours = find_child("StatHours", true, false)
 @onready var card_tasks = find_child("StatTasks", true, false)
 
-# NEU: Optionaler GridContainer für die Spalten-Option ("column_mode")
-@onready var dashboard_grid = find_child("GridContainer", true, false)
+# KORREKTUR: Suche nach dem echten Namen "TileGrid" aus der tscn
+@onready var dashboard_grid = find_child("TileGrid", true, false)
 
 var current_uid = ""
 var refresh_timer: Timer # Dedizierter Timer für den Statistik-Refresh
@@ -32,14 +32,8 @@ func _ready():
 	
 	current_uid = Store.get_current_user_id()
 	
-	# Zugriff auf das neue User-Objekt im Store
-	var user_data = Store.current_user 
-	
-	if welcome_label:
-		if user_data and user_data.has("name"):
-			welcome_label.text = "Willkommen, " + str(user_data["name"])
-		else:
-			welcome_label.text = "Willkommen, Gast"
+	# Begrüßungstext initial laden (Name + formatiertes Datum)
+	_update_welcome_text()
 	
 	if refresh_btn:
 		# Verhindern doppelter Verbindungen
@@ -55,6 +49,11 @@ func _ready():
 	if Store.has_signal("dashboard_refresh_updated"):
 		if not Store.dashboard_refresh_updated.is_connected(_update_refresh_interval):
 			Store.dashboard_refresh_updated.connect(_update_refresh_interval)
+			
+	# Das Raster beobachtet jetzt live, wenn sich die Fenstergröße ändert!
+	if dashboard_grid:
+		if not dashboard_grid.resized.is_connected(_on_grid_resized):
+			dashboard_grid.resized.connect(_on_grid_resized)
 	
 	# Initial die Sichtbarkeit und das Layout anwenden
 	_apply_visibility()
@@ -68,6 +67,29 @@ func _setup_labels():
 	if card_hours: lbl_hours = card_hours.find_child("Value", true, false)
 	if card_tasks: lbl_tasks = card_tasks.find_child("Value", true, false)
 
+# Baut den Text aus Name und formatiertem Datum
+func _update_welcome_text():
+	if welcome_label:
+		var user_data = Store.current_user 
+		var user_name = user_data.get("name", "Gast") if user_data else "Gast"
+		
+		# Abfragen, ob das Datum überhaupt angezeigt werden soll
+		var show_date = Config.get_value("dashboard", "show_welcome", true)
+		
+		if show_date:
+			var date_str = ""
+			# Prüfen ob die neue Funktion in config.gd schon existiert
+			if Config.has_method("get_today_formatted"):
+				date_str = Config.get_today_formatted()
+			else:
+				# Fallback, falls du den Code in config.gd noch nicht drin hast
+				var date = Time.get_date_dict_from_system()
+				date_str = "%02d.%02d.%d" % [date.day, date.month, date.year]
+			
+			welcome_label.text = "Willkommen, " + str(user_name) + "  |  " + date_str
+		else:
+			welcome_label.text = "Willkommen, " + str(user_name)
+
 # Timer-Logik aufbauen
 func _setup_refresh_timer():
 	refresh_timer = Timer.new()
@@ -75,18 +97,18 @@ func _setup_refresh_timer():
 	add_child(refresh_timer)
 	refresh_timer.timeout.connect(fetch_stats)
 	
-	# Start-Intervall aus Config laden (In config.gd ist der Schlüssel "refresh_rate", nicht "refresh_interval")
+	# Start-Intervall aus Config laden
 	var saved_interval = Config.get_value("dashboard", "refresh_rate", 30)
 	_update_refresh_interval(saved_interval)
 
-# Funktion zum Ändern des Intervalls (30s bis 600s/10min)
+# Funktion zum Ändern des Intervalls
 func _update_refresh_interval(seconds: int):
 	if refresh_timer:
 		refresh_timer.wait_time = clamp(seconds, 30, 600) # Sicherstellen des Bereichs
 		refresh_timer.start()
 		print("Dashboard-Refresh auf " + str(refresh_timer.wait_time) + " Sekunden gesetzt.")
 
-# Reagiert auf Änderungen in den Einstellungen (Wird aus settings_personal.gd getriggert)
+# Reagiert auf Änderungen in den Einstellungen
 func _on_config_updated(section: String, key: String, value: Variant):
 	if section == "dashboard":
 		# Wenn sich eine Checkbox ändert, Sichtbarkeit aktualisieren
@@ -99,12 +121,17 @@ func _on_config_updated(section: String, key: String, value: Variant):
 		# Falls das Intervall in der Config geändert wurde, Timer sofort anpassen
 		if key == "refresh_rate":
 			_update_refresh_interval(int(value))
+			
+		# Wenn die Checkbox für "Begrüßung & Datum" geklickt wird, Text anpassen
+		if key == "show_welcome":
+			_update_welcome_text()
+			
+	# Wenn das Datumsformat geändert wurde, Begrüßungstext live aktualisieren!
+	if section == "general" and key == "date_format":
+		_update_welcome_text()
 
 # Steuert die Sichtbarkeit der einzelnen Dashboard-Module
 func _apply_visibility():
-	if welcome_box:
-		welcome_box.visible = Config.get_value("dashboard", "show_welcome", true)
-	
 	if card_revenue:
 		card_revenue.visible = Config.get_value("dashboard", "show_revenue", true)
 		
@@ -113,20 +140,50 @@ func _apply_visibility():
 		
 	if card_tasks:
 		card_tasks.visible = Config.get_value("dashboard", "show_tasks", true)
+		
+	# Wir lösen hier ein Layout-Update aus, wenn sich Kacheln ein/ausblenden
+	_apply_layout()
 
-# NEU: Steuert das Layout der Kacheln (Automatisch vs. 3 Spalten)
+# --- Smarte Layout-Logik ---
+
 func _apply_layout():
+	# call_deferred stellt sicher, dass Godot die Größenberechnung erst nach dem Zeichnen macht
+	call_deferred("_on_grid_resized")
+
+# Diese Funktion berechnet live die Spalten anhand der Fensterbreite!
+func _on_grid_resized():
+	if not dashboard_grid or not (dashboard_grid is GridContainer):
+		return
+		
 	var col_mode = Config.get_value("dashboard", "column_mode", 0)
 	
-	if dashboard_grid:
-		if col_mode == 1:
-			# 1 = 3 Spalten Fest
-			dashboard_grid.columns = 3
-		else:
-			# 0 = Automatisch
-			# Hier könntest du bei einem GridContainer z.B. columns = 2 setzen
-			# oder wenn du eine andere Logik für "Automatisch" nutzt, diese hier einbauen.
-			dashboard_grid.columns = 2 
+	if col_mode == 1:
+		# MODUS "3 FEST": Immer genau 3 Spalten erzwingen
+		dashboard_grid.columns = 3
+	else:
+		# MODUS "AUTOMATISCH": 
+		# 1. Wir zählen, wie viele Kacheln überhaupt sichtbar sind
+		var visible_cards = 0
+		for child in dashboard_grid.get_children():
+			if child.visible:
+				visible_cards += 1
+				
+		if visible_cards == 0:
+			visible_cards = 1 # Sicherheits-Fallback
+		
+		# 2. Wir berechnen, wie viel Platz überhaupt da ist
+		var available_width = dashboard_grid.size.x
+		if available_width == 0:
+			available_width = get_viewport_rect().size.x - 60 # Fallback für Initialisierung
+			
+		var card_width = 340 # Mindestbreite pro Kachel für sicheren Umbruch
+		var max_fitting_cols = max(1, int(available_width / card_width))
+		
+		# 3. Die Spaltenanzahl ist das Minimum aus sichtbaren Kacheln und dem maximalen Platz
+		var auto_cols = min(visible_cards, max_fitting_cols)
+		
+		if dashboard_grid.columns != auto_cols:
+			dashboard_grid.columns = auto_cols
 
 func fetch_stats():
 	var url = Store.get_api_url() + "/dashboard/stats?emp_id=" + str(current_uid)

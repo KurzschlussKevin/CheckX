@@ -23,8 +23,17 @@ extends Control
 @onready var date_format_option = $Darstellung/M/V/Card_Format/V/DateFormatOption
 @onready var week_start_option = $Darstellung/M/V/Card_Format/V/WeekStartOption
 
-# (Hinweis: TimezoneOption und LanguageOption sind im Inspector auf disabled = true gesetzt, 
-# weshalb sie hier vorerst kein Event bekommen, aber geladen werden können.)
+# ==========================================
+# NEU: UI ELEMENTE: DASHBOARD (Pfad-basiert)
+# ==========================================
+@onready var check_welcome = $Dashboard/M/V/Card_Widgets/V/Check1
+@onready var check_revenue = $Dashboard/M/V/Card_Widgets/V/Check2
+@onready var check_employees = $Dashboard/M/V/Card_Widgets/V/Check3
+@onready var check_tasks = $Dashboard/M/V/Card_Widgets/V/Check4
+@onready var check_timer = $Dashboard/M/V/Card_Widgets/V/Check5
+
+@onready var col_option = $Dashboard/M/V/Card_Layout/V/ColOption
+@onready var refresh_spin = $Dashboard/M/V/Card_Layout/V/RefreshSpin
 
 func _ready() -> void:
 	print("🟢 SETTINGS_PERSONAL WURDE GELADEN!")
@@ -45,17 +54,24 @@ func _load_settings() -> void:
 	phone_input.text = Config.get_value("user", "phone", "")
 
 	# -- Tab: Darstellung --
-	# Checkboxen
 	compact_mode_check.button_pressed = Config.get_value("general", "compact_mode", false)
 	sound_effects_check.button_pressed = Config.get_value("general", "sound_effects", true)
 	reduced_motion_check.button_pressed = Config.get_value("general", "reduced_motion", false)
 	
-	# Slider
 	ui_scale_slider.value = Config.get_value("general", "ui_scale", 1.0)
 	
-	# OptionButtons (Dropdowns)
 	date_format_option.selected = Config.get_value("general", "date_format", 0)
 	week_start_option.selected = Config.get_value("general", "week_start", 0)
+	
+	# -- NEU: Tab: Dashboard --
+	check_welcome.button_pressed = Config.get_value("dashboard", "show_welcome", true)
+	check_revenue.button_pressed = Config.get_value("dashboard", "show_revenue", true)
+	check_employees.button_pressed = Config.get_value("dashboard", "show_employees", true)
+	check_tasks.button_pressed = Config.get_value("dashboard", "show_tasks", true)
+	check_timer.button_pressed = Config.get_value("dashboard", "show_timer", true)
+	
+	col_option.selected = Config.get_value("dashboard", "column_mode", 0)
+	refresh_spin.value = Config.get_value("dashboard", "refresh_rate", 60)
 
 
 # ---------------------------------------------------------
@@ -73,6 +89,16 @@ func _connect_signals() -> void:
 	
 	date_format_option.item_selected.connect(_on_date_format_selected)
 	week_start_option.item_selected.connect(_on_week_start_selected)
+	
+	# -- NEU: Dashboard --
+	check_welcome.toggled.connect(_on_check_welcome_toggled)
+	check_revenue.toggled.connect(_on_check_revenue_toggled)
+	check_employees.toggled.connect(_on_check_employees_toggled)
+	check_tasks.toggled.connect(_on_check_tasks_toggled)
+	check_timer.toggled.connect(_on_check_timer_toggled)
+	
+	col_option.item_selected.connect(_on_col_option_selected)
+	refresh_spin.value_changed.connect(_on_refresh_spin_changed)
 
 
 # ---------------------------------------------------------
@@ -86,24 +112,21 @@ func _on_save_profile_pressed() -> void:
 	Config.set_value("user", "department", dept_input.text)
 	Config.set_value("user", "email", email_input.text)
 	Config.set_value("user", "phone", phone_input.text)
-	# Emp_id überspringen wir absichtlich, da es Read-Only ist
 	
 	print("Persönliches Profil wurde erfolgreich gespeichert!")
-	# Falls du das Toast-System nutzen möchtest (laut deinen Dateien existiert eins):
-	# Toast.show_success("Profil gespeichert")
 
-# --- Darstellung Callbacks (Speichern direkt on-the-fly) ---
+# --- Darstellung Callbacks ---
 
 func _on_compact_mode_toggled(toggled_on: bool) -> void:
 	Config.set_value("general", "compact_mode", toggled_on)
 
 func _on_sound_effects_toggled(toggled_on: bool) -> void:
 	Config.set_value("general", "sound_effects", toggled_on)
-	Config.apply_sound_setting(toggled_on) # <-- Sound sofort an/aus
+	if Config.has_method("apply_sound_setting"):
+		Config.apply_sound_setting(toggled_on)
 
 func _on_ui_scale_changed(value: float) -> void:
 	Config.set_value("general", "ui_scale", value)
-	# Wende die Skalierung sofort visuell an!
 	get_window().content_scale_factor = value
 
 func _on_reduced_motion_toggled(toggled_on: bool) -> void:
@@ -114,3 +137,26 @@ func _on_date_format_selected(index: int) -> void:
 
 func _on_week_start_selected(index: int) -> void:
 	Config.set_value("general", "week_start", index)
+
+# --- NEU: Dashboard Callbacks ---
+
+func _on_check_welcome_toggled(toggled_on: bool) -> void:
+	Config.set_value("dashboard", "show_welcome", toggled_on)
+
+func _on_check_revenue_toggled(toggled_on: bool) -> void:
+	Config.set_value("dashboard", "show_revenue", toggled_on)
+
+func _on_check_employees_toggled(toggled_on: bool) -> void:
+	Config.set_value("dashboard", "show_employees", toggled_on)
+
+func _on_check_tasks_toggled(toggled_on: bool) -> void:
+	Config.set_value("dashboard", "show_tasks", toggled_on)
+
+func _on_check_timer_toggled(toggled_on: bool) -> void:
+	Config.set_value("dashboard", "show_timer", toggled_on)
+
+func _on_col_option_selected(index: int) -> void:
+	Config.set_value("dashboard", "column_mode", index)
+
+func _on_refresh_spin_changed(value: float) -> void:
+	Config.set_value("dashboard", "refresh_rate", value)

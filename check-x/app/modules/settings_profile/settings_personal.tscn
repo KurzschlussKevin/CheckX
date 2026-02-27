@@ -268,7 +268,7 @@ text = "Sichtbare Kacheln"
 [node name="Check1" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=701571951]
 layout_mode = 2
 button_pressed = true
-text = "Begrüßung & Datum"
+text = "Datum anzeigen"
 
 [node name="Check2" type="CheckBox" parent="Dashboard/M/V/Card_Widgets/V" unique_id=1553266414]
 layout_mode = 2

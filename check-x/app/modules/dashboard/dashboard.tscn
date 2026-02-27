@@ -1,9 +1,9 @@
-[gd_scene format=3 uid="uid://b6p2x8q8y4n2p"]
+[gd_scene format=3 uid="uid://blsg42rmhsvyt"]
 
-[ext_resource type="Script" path="res://app/modules/dashboard/dashboard.gd" id="1_dash_script"]
+[ext_resource type="Script" uid="uid://baxtb6vxpp8ac" path="res://app/modules/dashboard/dashboard.gd" id="1_dash_script"]
 [ext_resource type="PackedScene" uid="uid://cpsydjtw1cbwx" path="res://app/modules/dashboard/stat_card.tscn" id="2_stat_card"]
 
-[node name="Dashboard" type="Control"]
+[node name="Dashboard" type="Control" unique_id=2016033157]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_dash_script")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=786429385]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,7 +21,7 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="Margin" type="MarginContainer" parent="ScrollContainer"]
+[node name="Margin" type="MarginContainer" parent="ScrollContainer" unique_id=1464913384]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 30
@@ -29,81 +29,46 @@ theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="VBox" type="VBoxContainer" parent="ScrollContainer/Margin"]
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer/Margin" unique_id=351586553]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="HeaderBox" type="HBoxContainer" parent="ScrollContainer/Margin/VBox"]
+[node name="HeaderBox" type="HBoxContainer" parent="ScrollContainer/Margin/VBox" unique_id=959099002]
 layout_mode = 2
 
-[node name="Header" type="VBoxContainer" parent="ScrollContainer/Margin/VBox/HeaderBox"]
+[node name="Header" type="VBoxContainer" parent="ScrollContainer/Margin/VBox/HeaderBox" unique_id=679823896]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="WelcomeLabel" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header"]
+[node name="WelcomeLabel" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header" unique_id=324076771]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Willkommen im System"
 
-[node name="Subline" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header"]
+[node name="Subline" type="Label" parent="ScrollContainer/Margin/VBox/HeaderBox/Header" unique_id=772696201]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "Hier ist die aktuelle Übersicht Ihres Unternehmens."
 
-[node name="RefreshBtn" type="Button" parent="ScrollContainer/Margin/VBox/HeaderBox"]
+[node name="RefreshBtn" type="Button" parent="ScrollContainer/Margin/VBox/HeaderBox" unique_id=1616200134]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 size_flags_vertical = 4
 text = "Aktualisieren ↻"
 
-[node name="TileGrid" type="HFlowContainer" parent="ScrollContainer/Margin/VBox"]
+[node name="TileGrid" type="GridContainer" parent="ScrollContainer/Margin/VBox" unique_id=297026217]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 
-[node name="StatRevenue" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+[node name="StatRevenue" parent="ScrollContainer/Margin/VBox/TileGrid" unique_id=1853183851 instance=ExtResource("2_stat_card")]
 layout_mode = 2
 
-[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="0"]
-text = "UMSATZ DIESE WOCHE"
-
-[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="1"]
-unique_name_in_owner = true
-text = "0,00 €"
-
-[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatRevenue/Margin/VBox" index="2"]
-text = "Aktuelle Erfassung"
-
-[node name="StatHours" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+[node name="StatHours" parent="ScrollContainer/Margin/VBox/TileGrid" unique_id=611098197 instance=ExtResource("2_stat_card")]
 layout_mode = 2
 
-[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="0"]
-text = "STUNDEN DIESE WOCHE"
-
-[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="1"]
-unique_name_in_owner = true
-text = "0,0 Std."
-
-[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatHours/Margin/VBox" index="2"]
-text = "Zeiterfassung"
-
-[node name="StatTasks" parent="ScrollContainer/Margin/VBox/TileGrid" instance=ExtResource("2_stat_card")]
+[node name="StatTasks" parent="ScrollContainer/Margin/VBox/TileGrid" unique_id=464507134 instance=ExtResource("2_stat_card")]
 layout_mode = 2
-
-[node name="Title" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="0"]
-text = "OFFENE AUFGABEN"
-
-[node name="Value" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="1"]
-unique_name_in_owner = true
-text = "0"
-
-[node name="Trend" parent="ScrollContainer/Margin/VBox/TileGrid/StatTasks/Margin/VBox" index="2"]
-text = "To-Do Liste"
-
-# Damit das Skript die internen Labels findet, mappen wir sie im Skript um
-[editable path="ScrollContainer/Margin/VBox/TileGrid/StatRevenue"]
-[editable path="ScrollContainer/Margin/VBox/TileGrid/StatHours"]
-[editable path="ScrollContainer/Margin/VBox/TileGrid/StatTasks"]
