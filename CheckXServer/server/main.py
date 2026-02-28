@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.responses import FileResponse
-# oauth2_scheme wird jetzt aus auth importiert
 from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
@@ -56,7 +55,6 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
-# NEU: Modell für das Profil-Update
 class UserUpdate(BaseModel):
     name: str
     email: EmailStr
@@ -68,12 +66,15 @@ class TimerData(BaseModel):
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     notes: Optional[str] = ""
+    # NEU: Feld für die Pause beim Stoppen des Timers
+    break_minutes: Optional[int] = 0
 
 class ManualEntryData(BaseModel):
     emp_id: str
     date: str
-    duration: int
+    duration_minutes: int # KORREKTUR: Umbenannt von duration passend zu Store.gd
     project: str
+    break_minutes: Optional[int] = 0 # NEU: Für die manuelle Pause
 
 class SubmitDayData(BaseModel):
     emp_id: str
@@ -118,17 +119,14 @@ async def route_forgot_password(request: ForgotPasswordRequest, background_tasks
 def route_reset_password(data: ResetPasswordRequest):
     return auth.reset_password_in_db(data.token, data.new_password)
 
-# --- ROUTEN: MITARBEITER (PROFILDATEN) ---
+# --- ROUTEN: MITARBEITER ---
 
 @app.get("/employees")
 async def route_get_employees(current_user: dict = Depends(get_current_user)):
-    # Das 'async' oben und das 'await' hier müssen zusammenpassen
     return await employees.list_employees()
 
-# Endpunkt zum Aktualisieren des eigenen Profils
 @app.put("/employees/{emp_id}")
 async def route_update_profile(emp_id: str, data: UserUpdate, current_user: dict = Depends(get_current_user)):
-    # Das hier war schon perfekt
     return await employees.update_employee_profile(emp_id, data.dict(), current_user)
 
 # --- ROUTEN: SERVICES (KATALOG) ---
@@ -220,7 +218,8 @@ async def route_time_stop(entry: TimerData, current_user: dict = Depends(get_cur
 
 @app.post("/time/manual")
 async def route_add_manual(data: ManualEntryData, current_user: dict = Depends(get_current_user)):
-    return time_tracking.add_manual_entry(data.emp_id, data.date, data.duration, data.project)
+    # KORREKTUR: Nutze duration_minutes und break_minutes passend zum neuen ManualEntryData Modell
+    return time_tracking.add_manual_entry(data.emp_id, data.date, data.duration_minutes, data.project, data.break_minutes)
 
 @app.get("/time/stats/daily")
 async def route_daily_stats(emp_id: str, date: str, current_user: dict = Depends(get_current_user)):
@@ -260,7 +259,7 @@ def route_get_pending_times(admin: dict = Depends(require_admin)):
 async def route_admin_approve_day(data: SubmitDayData, admin: dict = Depends(require_admin)):
     return time_tracking.admin_approve_full_day(data.emp_id, data.date)
 
-# --- ROUTEN: URLAUB (Nutzer) ---
+# --- ROUTEN: URLAUB ---
 
 @app.post("/time/request_vacation")
 def route_request_vacation(req: VacationRequest, current_user: dict = Depends(get_current_user)):
@@ -284,7 +283,8 @@ def route_get_dashboard_stats(emp_id: str, current_user: dict = Depends(get_curr
 async def route_report_bug(data: bug_system.BugReportData):
     return bug_system.save_bug_report(data)
 
-# --- NOTIFICATION ---
+# --- NOTIFICATIONS ---
+
 @app.get("/notifications/me")
 def route_get_my_notifications(current_user: dict = Depends(get_current_user)):
     return notifications.get_unread_notifications(current_user["sub"])

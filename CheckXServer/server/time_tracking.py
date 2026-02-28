@@ -9,7 +9,6 @@ import psycopg2
 def start_timer(data):
     """Startet einen neuen Timer für einen Mitarbeiter."""
     with get_db_connection() as conn:
-        # Hier RealDictCursor nutzen, damit row['id'] funktioniert
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         cur.execute("""
@@ -37,30 +36,43 @@ def start_timer(data):
             raise HTTPException(status_code=400, detail="Sicherheitsstopp: Timer wurde bereits anderweitig gestartet.")
 
 def stop_timer(data):
-    """Beendet den laufenden Timer und berechnet die Dauer."""
+    """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         end_dt = datetime.fromtimestamp(data.end_time)
         
+        # Pause aus den Daten holen (Standard 0)
+        break_min = getattr(data, 'break_minutes', 0)
+        
+        # Notiz-Update falls Pause abgezogen wurde
+        final_notes = data.notes
+        if break_min > 0:
+            pause_info = f" [Auto-Pause: {break_min} Min abgezogen]"
+            final_notes = (final_notes + pause_info) if final_notes else pause_info
+
         cur.execute("""
             UPDATE time_entries 
-            SET end_time = %s, notes = %s, status = 'open',
-                duration_minutes = EXTRACT(EPOCH FROM (%s - start_time))/60
+            SET end_time = %s, 
+                notes = %s, 
+                status = 'open',
+                duration_minutes = (EXTRACT(EPOCH FROM (%s - start_time))/60) - %s,
+                break_minutes = %s
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
             AND status = 'running'
-        """, (end_dt, data.notes, end_dt, data.emp_id))
+        """, (end_dt, final_notes, end_dt, break_min, break_min, data.emp_id))
         
         if cur.rowcount == 0:
             conn.rollback()
             return {"status": "error", "message": "Kein aktiver Timer zum Stoppen gefunden."}
             
         conn.commit()
-        return {"status": "stopped"}
+        return {"status": "stopped", "applied_break": break_min}
 
 # --- MANUELLE EINGABE ---
 
-def add_manual_entry(emp_id, date_str, duration_mins, project):
-    """Erlaubt das nachträgliche Eintragen von Arbeitszeit."""
+# KORREKTUR: break_min als 5. Argument hinzugefügt
+def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0):
+    """Erlaubt das nachträgliche Eintragen von Arbeitszeit inkl. Pause."""
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 
@@ -70,7 +82,11 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
         cur = conn.cursor()
         try:
             cur.execute("""
-                INSERT INTO time_entries (employee_id, project, start_time, end_time, notes, status, duration_minutes, approval_status, is_locked)
+                INSERT INTO time_entries (
+                    employee_id, project, start_time, end_time, 
+                    notes, status, duration_minutes, break_minutes, 
+                    approval_status, is_locked
+                )
                 VALUES (
                     (SELECT id FROM employees WHERE emp_id = %s), 
                     %s, 
@@ -79,10 +95,11 @@ def add_manual_entry(emp_id, date_str, duration_mins, project):
                     'Manuelle Nacherfassung',
                     'open',
                     %s,
+                    %s,
                     'open',
                     FALSE
                 )
-            """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins))
+            """, (emp_id, project, start_ts_str, start_ts_str, duration_mins, duration_mins, break_min))
             conn.commit()
             return {"status": "success"}
         except Exception as e:
@@ -195,7 +212,6 @@ def request_correction(emp_id, date_str, note):
     with get_db_connection() as conn:
         cur = conn.cursor()
         try:
-            # KORREKTUR: Status auf 'correction_pending' vereinheitlicht
             cur.execute("""
                 UPDATE time_entries 
                 SET approval_status = 'correction_pending',
@@ -203,9 +219,6 @@ def request_correction(emp_id, date_str, note):
                 WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
                 AND start_time::date = %s::date
             """, (note, emp_id, date_str))
-            
-            from notifications import add_notification
-            # Optional: Hier könnte man eine Benachrichtigung an den Admin senden
             
             conn.commit()
             return {"status": "success", "message": "Anfrage an Admin gesendet."}
