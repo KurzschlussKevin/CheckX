@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://c8j4n2v6r3x1q"]
+[gd_scene format=3 uid="uid://dqbhsvjsgpnhi"]
 
-[ext_resource type="Script" uid="uid://cv78uobw1lcrg" path="res://app/modules/time/time_tracking.gd" id="1_time_script"]
+[ext_resource type="Script" uid="uid://djkc7epm5bhmg" path="res://app/modules/time/time_tracking.gd" id="1_time_script"]
 
 [sub_resource type="Gradient" id="Gradient_particles"]
 colors = PackedColorArray(1, 1, 1, 0.05, 1, 1, 1, 0)

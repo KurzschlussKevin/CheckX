@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://djkc7epm5bhmg" path="res://app/modules/time/time_tracking.gd" id="1_script_new"]
 [ext_resource type="PackedScene" uid="uid://dqb17e6f7kvtn" path="res://app/modules/time/calendar_panel.tscn" id="2_cal"]
-[ext_resource type="PackedScene" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
+[ext_resource type="PackedScene" uid="uid://2a47dq0amdi" path="res://app/modules/time/manual_popup.tscn" id="3_man"]
 [ext_resource type="PackedScene" uid="uid://8xuqgd0a5s72" path="res://app/modules/time/vacation_popup.tscn" id="4_vac"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
@@ -184,6 +184,15 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 64
 text = "00:00:00"
+horizontal_alignment = 1
+
+[node name="PauseInfoLabel" type="Label" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=992837465]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "ℹ️ 30 Min. Pause werden automatisch abgezogen"
 horizontal_alignment = 1
 
 [node name="Bar" type="ProgressBar" parent="MainLayout/VBox/ContentSplit/LeftPanel/TimerCard/M/V" unique_id=1570616063]

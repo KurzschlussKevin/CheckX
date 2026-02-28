@@ -1,5 +1,7 @@
 extends Control
 
+signal entry_saved
+
 var uid = "" 
 var blink_timer = 0.0
 var current_day_locked = false
@@ -33,10 +35,39 @@ func _ready():
 	if has_node("%DateLabel"):
 		%DateLabel.text = Time.get_date_string_from_system()
 	
+	# --- NEU: Validierung für Pflichtbeschreibung ---
+	if has_node("%NotesInput"):
+		%NotesInput.text_changed.connect(_check_stop_button_validity)
+	
 	# Initialisierung
 	_update_ui_state()
 	_fetch_customers()
 	_update_stats()
+	_set_default_project()
+
+# --- NEUE FUNKTION: Standardprojekt setzen ---
+func _set_default_project():
+	if not Store.is_timer_running(uid) and has_node("%CustomerOption"):
+		var default_proj = Config.get_value("business", "default_project", "Allgemein")
+		for i in range(%CustomerOption.get_item_count()):
+			if %CustomerOption.get_item_text(i) == default_proj:
+				%CustomerOption.selected = i
+				break
+
+# --- NEUE FUNKTION: Validierung Stopp-Button ---
+func _check_stop_button_validity():
+	if not Store.is_timer_running(uid): 
+		if has_node("%StartBtn"): %StartBtn.disabled = false
+		return
+		
+	var require_desc = Config.get_value("business", "require_description", false)
+	if require_desc and has_node("%NotesInput") and has_node("%StartBtn"):
+		var has_text = %NotesInput.text.strip_edges().length() > 0
+		%StartBtn.disabled = not has_text
+		if not has_text:
+			%StartBtn.tooltip_text = "Beschreibung ist erforderlich um zu stoppen."
+		else:
+			%StartBtn.tooltip_text = ""
 
 # Diese Funktion prüft beim Klick im Kalender den Sperrstatus des gewählten Tages
 func _on_calendar_request_manual(target_date):
@@ -117,7 +148,7 @@ func _update_stats():
 			ErrorHandler.report("TimeTracking", "API Fehler " + str(code) + " beim Abrufen der Tages-Statistiken.")
 		http.queue_free()
 	)
-	# Hier senden wir die Auth-Header mit
+	# Hier senden wir die Auth-Header mitsenden
 	http.request(url, Store._get_auth_headers())
 	
 	# 2. STATUS CHECKEN & FARBEN SETZEN
@@ -160,12 +191,18 @@ func _process(delta):
 		var h = int(dur / 3600); var m = int(fmod(dur, 3600) / 60); var s = int(fmod(dur, 60))
 		if has_node("%TimerLabel"): %TimerLabel.text = "%02d:%02d:%02d" % [h, m, s]
 		
+		# --- NEU: Live Pausen-Warnung ---
+		if has_node("%PauseInfoLabel"):
+			var auto_enabled = Config.get_value("business", "auto_break_after_6h", true)
+			%PauseInfoLabel.visible = auto_enabled and (dur / 3600.0) >= 6.0
+		
 		blink_timer += delta
 		if has_node("%PulseDot"):
 			%PulseDot.visible = true
 			%PulseDot.modulate.a = 0.3 + abs(sin(blink_timer * 4.0)) * 0.7
 	else:
 		if has_node("%PulseDot"): %PulseDot.visible = false
+		if has_node("%PauseInfoLabel"): %PauseInfoLabel.visible = false
 
 func _toggle_timer():
 	if Store.is_timer_running(uid):
@@ -190,7 +227,9 @@ func _toggle_timer():
 		var cust = "Allgemein"
 		if has_node("%CustomerOption"): cust = %CustomerOption.get_item_text(%CustomerOption.selected)
 		Store.start_timer(cust)
+	
 	_update_stats()
+	_update_ui_state()
 
 # HILFSFUNKTION für Pausenlogik
 func _calculate_auto_break(dur_sec: float) -> int:
@@ -213,8 +252,9 @@ func _update_ui_state():
 	var running = Store.is_timer_running(uid)
 	if has_node("%StartBtn"):
 		%StartBtn.text = "STOPP" if running else "START"
-		%StartBtn.disabled = false
 		%StartBtn.modulate = Color(1, 1, 1)
+		_check_stop_button_validity() # Validierung beim Umschalten prüfen
+		
 	if has_node("%CustomerOption"): %CustomerOption.disabled = running
 	if has_node("%StatusLabel"): %StatusLabel.text = "AKTIV" if running else "BEREIT"
 
@@ -228,6 +268,7 @@ func _fetch_customers():
 			%CustomerOption.clear()
 			if customers is Array:
 				for c in customers: %CustomerOption.add_item(c.get("company_name", "Kunde"))
+			_set_default_project() # Nach dem Laden Standard setzen
 		elif code == 401:
 			ErrorHandler.report("Network", "Sitzung abgelaufen. Bitte neu einloggen.")
 		elif code != 200:

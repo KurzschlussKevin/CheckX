@@ -26,7 +26,10 @@ var settings = {
 		"core_time_end": 15,
 		"vacation_days_quota": 30,
 		"auto_break_after_6h": true,
-		"holiday_region": 0
+		"holiday_region": 0,
+		"default_project": "",
+		"auto_stop_on_exit": false,
+		"require_description": false
 	},
 	"dashboard": {
 		"show_welcome": true,
