@@ -19,6 +19,15 @@ var settings = {
 		"api_url": API_URL, # Hier wird die Konstante als Standardwert genutzt
 		"request_timeout": 30
 	},
+	"business": {
+		"daily_work_hours": 8.0,
+		"daily_break_minutes": 30,
+		"core_time_start": 9,
+		"core_time_end": 15,
+		"vacation_days_quota": 30,
+		"auto_break_after_6h": true,
+		"holiday_region": 0
+	},
 	"dashboard": {
 		"show_welcome": true,
 		"show_revenue": true,
@@ -116,3 +125,20 @@ func get_today_formatted() -> String:
 func is_sunday_first() -> bool:
 	# 0 = Montag, 1 = Sonntag
 	return get_value("general", "week_start", 0) == 1
+
+# Berechnet die Netto-Arbeitszeit basierend auf der Brutto-Dauer (in Sekunden)
+func calculate_net_work_time(total_seconds: float) -> Dictionary:
+	var total_hours = total_seconds / 3600.0
+	var break_seconds = 0.0
+	
+	# Regel: Auto-Pause nach 6 Stunden (aus deinen Business-Settings)
+	var auto_break_enabled = get_value("business", "auto_break_after_6h", true)
+	var standard_break_min = get_value("business", "daily_break_minutes", 30)
+	
+	if auto_break_enabled and total_hours >= 6.0:
+		break_seconds = standard_break_min * 60.0
+		
+	return {
+		"net_seconds": max(0, total_seconds - break_seconds),
+		"break_seconds": break_seconds
+	}

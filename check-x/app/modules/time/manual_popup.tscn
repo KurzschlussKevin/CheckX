@@ -1,20 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://manual_popup_v2"]
+[gd_scene format=3 uid="uid://2a47dq0amdi"]
 
-[ext_resource type="Script" path="res://app/modules/time/manual_popup.gd" id="1_logic"]
+[ext_resource type="Script" uid="uid://c1dx6uyhv40dd" path="res://app/modules/time/manual_popup.gd" id="1_logic"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.1, 0.1, 0.12, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+bg_color = Color(0.09, 0.09, 0.1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.5, 1, 0.4)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 25
 
-[node name="ManualPopup" type="Control"]
+[node name="ManualPopup" type="Control" unique_id=1497162234]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,72 +25,135 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_logic")
 
-[node name="Bg" type="ColorRect" parent="."]
+[node name="Overlay" type="ColorRect" parent="." unique_id=1267577111]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.7)
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=809496157]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(400, 300)
+[node name="MainPanel" type="PanelContainer" parent="Center" unique_id=2103706682]
+custom_minimum_size = Vector2(500, 580)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="M" type="MarginContainer" parent="Center/Panel"]
+[node name="M" type="MarginContainer" parent="Center/MainPanel" unique_id=1208744620]
 layout_mode = 2
-theme_override_constants/margin_left = 25
-theme_override_constants/margin_top = 25
-theme_override_constants/margin_right = 25
-theme_override_constants/margin_bottom = 25
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
 
-[node name="VBox" type="VBoxContainer" parent="Center/Panel/M"]
+[node name="Content" type="VBoxContainer" parent="Center/MainPanel/M" unique_id=584951639]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 25
+alignment = 1
 
-[node name="Label" type="Label" parent="Center/Panel/M/VBox"]
+[node name="Header" type="Label" parent="Center/MainPanel/M/Content" unique_id=1265200517]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.2, 0.5, 1, 1)
+theme_override_font_sizes/font_size = 28
 text = "ZEIT NACHTRAGEN"
 horizontal_alignment = 1
 
-[node name="ProjectInput" type="LineEdit" parent="Center/Panel/M/VBox"]
+[node name="ProjectInput" type="LineEdit" parent="Center/MainPanel/M/Content" unique_id=277784048]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 placeholder_text = "Projekt / Tätigkeit"
+alignment = 1
 
-[node name="TimeInput" type="SpinBox" parent="Center/Panel/M/VBox"]
+[node name="Sep" type="HSeparator" parent="Center/MainPanel/M/Content" unique_id=877244592]
+layout_mode = 2
+
+[node name="StartGroup" type="VBoxContainer" parent="Center/MainPanel/M/Content" unique_id=543320729]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="H" type="HBoxContainer" parent="Center/MainPanel/M/Content/StartGroup" unique_id=678960022]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Center/MainPanel/M/Content/StartGroup/H" unique_id=1839614586]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Arbeitsbeginn"
+
+[node name="StartTimeInput" type="LineEdit" parent="Center/MainPanel/M/Content/StartGroup/H" unique_id=1330866408]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "08:00"
+alignment = 1
+max_length = 5
+
+[node name="StartSlider" type="HSlider" parent="Center/MainPanel/M/Content/StartGroup" unique_id=263572204]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+max_value = 23.99
+step = 0.01
+value = 8.0
+
+[node name="EndGroup" type="VBoxContainer" parent="Center/MainPanel/M/Content" unique_id=652222059]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="H" type="HBoxContainer" parent="Center/MainPanel/M/Content/EndGroup" unique_id=821063913]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Center/MainPanel/M/Content/EndGroup/H" unique_id=1197124578]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Arbeitsende"
+
+[node name="EndTimeInput" type="LineEdit" parent="Center/MainPanel/M/Content/EndGroup/H" unique_id=304667854]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "16:30"
+alignment = 1
+max_length = 5
+
+[node name="EndSlider" type="HSlider" parent="Center/MainPanel/M/Content/EndGroup" unique_id=1983934461]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+max_value = 23.99
+step = 0.01
+value = 16.5
+
+[node name="DateInfo" type="Label" parent="Center/MainPanel/M/Content" unique_id=283990183]
 unique_name_in_owner = true
 layout_mode = 2
-max_value = 1440.0
-prefix = "Minuten:"
-
-[node name="DateInfo" type="Label" parent="Center/Panel/M/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "Datum: -"
 horizontal_alignment = 1
 
-[node name="Btns" type="HBoxContainer" parent="Center/Panel/M/VBox"]
+[node name="Actions" type="HBoxContainer" parent="Center/MainPanel/M/Content" unique_id=1984985249]
 layout_mode = 2
+theme_override_constants/separation = 25
 alignment = 1
-theme_override_constants/separation = 20
 
-[node name="SaveBtn" type="Button" parent="Center/Panel/M/VBox/Btns"]
+[node name="SaveBtn" type="Button" parent="Center/MainPanel/M/Content/Actions" unique_id=681016954]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 40)
+custom_minimum_size = Vector2(160, 55)
 layout_mode = 2
 text = "Speichern"
 
-[node name="CancelBtn" type="Button" parent="Center/Panel/M/VBox/Btns"]
+[node name="CancelBtn" type="Button" parent="Center/MainPanel/M/Content/Actions" unique_id=1696562867]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 40)
+custom_minimum_size = Vector2(160, 55)
 layout_mode = 2
 text = "Abbrechen"

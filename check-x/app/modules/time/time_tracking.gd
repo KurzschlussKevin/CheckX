@@ -173,14 +173,35 @@ func _toggle_timer():
 		if has_node("%NotesInput"):
 			notes = %NotesInput.text
 			%NotesInput.text = ""
+		
+		# --- NEU: Automatische Pausenberechnung beim Stoppen ---
+		var start_time = Store.get_timer_start(uid)
+		var end_time = Time.get_unix_time_from_system()
+		var duration_seconds = end_time - start_time
+		
+		# Berechne Pause (Standardmäßig 0)
+		var break_min = _calculate_auto_break(duration_seconds)
+		
 		# Store Methoden rufen intern APIs mit Header auf
-		Store.stop_timer("", notes)
+		# Wir geben die berechnete Pause an den Store weiter
+		Store.stop_timer("", notes, break_min)
 		_refresh_all()
 	else:
 		var cust = "Allgemein"
 		if has_node("%CustomerOption"): cust = %CustomerOption.get_item_text(%CustomerOption.selected)
 		Store.start_timer(cust)
 	_update_stats()
+
+# HILFSFUNKTION für Pausenlogik
+func _calculate_auto_break(dur_sec: float) -> int:
+	var hours = dur_sec / 3600.0
+	var auto_enabled = Config.get_value("business", "auto_break_after_6h", true)
+	var break_val = Config.get_value("business", "daily_break_minutes", 30)
+	
+	if auto_enabled and hours >= 6.0:
+		print("Auto-Pause angewendet: " + str(break_val) + " Minuten.")
+		return int(break_val)
+	return 0
 
 func _refresh_all():
 	if has_node("%CalendarPanel"): %CalendarPanel.refresh()

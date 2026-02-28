@@ -243,13 +243,26 @@ func start_timer(project: String = "Allgemein") -> void:
 	var body = {"emp_id": emp_id, "project": project, "start_time": active_timer_state[emp_id]}
 	_send_post(url, body)
 
-func stop_timer(_project: String, notes: String = "") -> void:
-	var emp_id = get_current_user_id()
-	if emp_id.is_empty(): return
-	active_timer_state.erase(emp_id)
+# Erweitert um das Argument 'break_min'
+func stop_timer(project: String = "", notes: String = "", break_min: int = 0):
 	var url = get_api_url() + "/time/stop"
-	var body = {"emp_id": emp_id, "end_time": Time.get_unix_time_from_system(), "notes": notes}
-	_send_post(url, body)
+	var http = HTTPRequest.new()
+	add_child(http)
+	
+	var payload = {
+		"emp_id": get_current_user_id(),
+		"project": project,
+		"notes": notes,
+		"break_minutes": break_min # Die berechnete Pause mitschicken!
+	}
+	
+	var json_payload = JSON.stringify(payload)
+	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, json_payload)
+	
+	# Lokalen Status zurücksetzen
+	if current_user:
+		current_user["timer_running"] = false
+		current_user["timer_start"] = 0
 
 func _send_post(url: String, data: Dictionary) -> void:
 	var json_str = JSON.stringify(data)
@@ -279,9 +292,19 @@ func request_vacation(emp_id: String, start_date: String, end_date: String, type
 	var body = {"emp_id": emp_id, "start_date": start_date, "end_date": end_date, "vacation_type": type}
 	_send_post(url, body)
 
-func add_manual_entry(emp_id: String, date_str: String, minutes: int, project: String, type: String = "Manuell") -> void:
+func add_manual_entry(emp_id: String, date_str: String, minutes: int, project: String, break_min: int = 0, type: String = "Manuell") -> void:
 	var url = get_api_url() + "/time/manual"
-	var body = {"emp_id": emp_id, "date": date_str, "duration": minutes, "project": project, "type": type}
+	
+	# Der Payload enthält nun auch die break_minutes für die neue Datenbank-Spalte
+	var body = {
+		"emp_id": emp_id, 
+		"date": date_str, 
+		"duration_minutes": minutes, 
+		"project": project, 
+		"break_minutes": break_min,
+		"type": type
+	}
+	
 	_send_post(url, body)
 
 func is_day_locked(emp_id: String, date_str: String, callback: Callable) -> void:

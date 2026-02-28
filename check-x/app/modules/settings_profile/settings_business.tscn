@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://settings_part_business_full"]
+[gd_scene format=3 uid="uid://tb4g4bqrmd8b"]
+
+[ext_resource type="Script" uid="uid://er4m4sebh7bo" path="res://app/modules/settings_profile/settings_business.gd" id="1_dreel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
 bg_color = Color(0.1, 0.1, 0.12, 1)
@@ -16,7 +18,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="BusinessSettings" type="TabContainer"]
+[node name="BusinessSettings" type="TabContainer" unique_id=298217812]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -24,12 +26,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
+script = ExtResource("1_dreel")
 
-[node name="Arbeitszeit" type="ScrollContainer" parent="."]
+[node name="Arbeitszeit" type="ScrollContainer" parent="." unique_id=700688394]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="M" type="MarginContainer" parent="Arbeitszeit"]
+[node name="M" type="MarginContainer" parent="Arbeitszeit" unique_id=1838623833]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -38,113 +41,121 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Arbeitszeit/M"]
+[node name="V" type="VBoxContainer" parent="Arbeitszeit/M" unique_id=1258534590]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Rules" type="PanelContainer" parent="Arbeitszeit/M/V"]
+[node name="Card_Rules" type="PanelContainer" parent="Arbeitszeit/M/V" unique_id=1099702509]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Rules"]
+[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Rules" unique_id=142039358]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=1154547175]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
 text = "Regeln & Limits"
 
-[node name="CoreTimeStart" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="WorkHoursSpin" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=1447913387]
+unique_name_in_owner = true
 layout_mode = 2
-prefix = "Kernzeit Start:"
+step = 0.5
+value = 8.0
+prefix = "Arbeitszeit pro Tag:"
+suffix = "Std."
+
+[node name="BreakTimeSpin" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=355422186]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 120.0
+value = 30.0
+prefix = "Pause pro Tag:"
+suffix = "Min."
+
+[node name="CoreTimeStart" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=586278242]
+layout_mode = 2
 value = 9.0
+update_on_text_changed = true
+prefix = "Kernzeit Start:"
 suffix = "Uhr"
 
-[node name="CoreTimeEnd" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="CoreTimeEnd" type="SpinBox" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=1783653077]
 layout_mode = 2
-prefix = "Kernzeit Ende:"
+step = 0.5
 value = 15.0
+prefix = "Kernzeit Ende:"
 suffix = "Uhr"
 
-[node name="BreakRuleCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="BreakRuleCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=1222935799]
 layout_mode = 2
 text = "Auto-Pause nach 6 Std."
 
-[node name="GracePeriodCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Rules/V"]
-layout_mode = 2
-text = "5 Min Kulanzzeit"
-
-[node name="Label2" type="Label" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="Label2" type="Label" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=246432320]
 layout_mode = 2
 text = "Feiertagskalender:"
 
-[node name="HolidayOption" type="OptionButton" parent="Arbeitszeit/M/V/Card_Rules/V"]
+[node name="HolidayOption" type="OptionButton" parent="Arbeitszeit/M/V/Card_Rules/V" unique_id=1221167104]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Bundesweit (DE)"
 popup/item_0/id = 0
 popup/item_1/text = "Bayern"
 popup/item_1/id = 1
 
-[node name="Card_Tracking" type="PanelContainer" parent="Arbeitszeit/M/V"]
+[node name="Card_Tracking" type="PanelContainer" parent="Arbeitszeit/M/V" unique_id=1219874716]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Tracking"]
+[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Tracking" unique_id=565563080]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Tracking/V"]
+[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Tracking/V" unique_id=2114863097]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 0.6, 1)
 text = "Erfassung"
 
-[node name="DefaultProjectInput" type="LineEdit" parent="Arbeitszeit/M/V/Card_Tracking/V"]
+[node name="DefaultProjectInput" type="LineEdit" parent="Arbeitszeit/M/V/Card_Tracking/V" unique_id=1822555766]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Standard-Projekt (z.B. Allgemein)"
 
-[node name="AutoStopCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Tracking/V"]
+[node name="AutoStopCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Tracking/V" unique_id=90893790]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Timer stoppen bei App-Ende"
 
-[node name="RequireDescCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Tracking/V"]
+[node name="RequireDescCheck" type="CheckBox" parent="Arbeitszeit/M/V/Card_Tracking/V" unique_id=454661309]
 layout_mode = 2
 text = "Beschreibungstext erzwingen"
 
-[node name="HomeOfficeSpin" type="SpinBox" parent="Arbeitszeit/M/V/Card_Tracking/V"]
-layout_mode = 2
-prefix = "Homeoffice Tage/Woche:"
-max_value = 5.0
-value = 2.0
-
-[node name="Card_Quota" type="PanelContainer" parent="Arbeitszeit/M/V"]
+[node name="Card_Quota" type="PanelContainer" parent="Arbeitszeit/M/V" unique_id=858312067]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Quota"]
+[node name="V" type="VBoxContainer" parent="Arbeitszeit/M/V/Card_Quota" unique_id=2047255606]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Quota/V"]
+[node name="Label" type="Label" parent="Arbeitszeit/M/V/Card_Quota/V" unique_id=1507506810]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
 text = "Kontingente"
 
-[node name="VacationQuotaSpin" type="SpinBox" parent="Arbeitszeit/M/V/Card_Quota/V"]
+[node name="VacationQuotaSpin" type="SpinBox" parent="Arbeitszeit/M/V/Card_Quota/V" unique_id=1700826200]
 layout_mode = 2
-prefix = "Urlaubstage:"
 value = 30.0
+prefix = "Urlaubstage:"
 
-[node name="Abrechnung" type="ScrollContainer" parent="."]
+[node name="Abrechnung" type="ScrollContainer" parent="." unique_id=1750087310]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="M" type="MarginContainer" parent="Abrechnung"]
+[node name="M" type="MarginContainer" parent="Abrechnung" unique_id=1948811561]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -153,81 +164,81 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Abrechnung/M"]
+[node name="V" type="VBoxContainer" parent="Abrechnung/M" unique_id=1543993421]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Finance" type="PanelContainer" parent="Abrechnung/M/V"]
+[node name="Card_Finance" type="PanelContainer" parent="Abrechnung/M/V" unique_id=1342018628]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Abrechnung/M/V/Card_Finance"]
+[node name="V" type="VBoxContainer" parent="Abrechnung/M/V/Card_Finance" unique_id=734497535]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Abrechnung/M/V/Card_Finance/V"]
+[node name="Label" type="Label" parent="Abrechnung/M/V/Card_Finance/V" unique_id=267819380]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
 text = "Sätze & Währung"
 
-[node name="HourlyRateSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V"]
+[node name="HourlyRateSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V" unique_id=1656084626]
 layout_mode = 2
-prefix = "Stundensatz:"
 value = 85.0
+prefix = "Stundensatz:"
 suffix = "EUR"
 
-[node name="OvertimeSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V"]
+[node name="OvertimeSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V" unique_id=1146120420]
 layout_mode = 2
-prefix = "Überstunden-Zuschlag:"
 value = 25.0
+prefix = "Überstunden-Zuschlag:"
 suffix = "%"
 
-[node name="TaxSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V"]
+[node name="TaxSpin" type="SpinBox" parent="Abrechnung/M/V/Card_Finance/V" unique_id=1988509688]
 layout_mode = 2
-prefix = "MwSt:"
 value = 19.0
+prefix = "MwSt:"
 suffix = "%"
 
-[node name="CurrencyOption" type="OptionButton" parent="Abrechnung/M/V/Card_Finance/V"]
+[node name="CurrencyOption" type="OptionButton" parent="Abrechnung/M/V/Card_Finance/V" unique_id=1920097817]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Währung: Euro (€)"
 popup/item_0/id = 0
 popup/item_1/text = "Währung: Dollar ($)"
 popup/item_1/id = 1
 
-[node name="Card_Banking" type="PanelContainer" parent="Abrechnung/M/V"]
+[node name="Card_Banking" type="PanelContainer" parent="Abrechnung/M/V" unique_id=926044320]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Abrechnung/M/V/Card_Banking"]
+[node name="V" type="VBoxContainer" parent="Abrechnung/M/V/Card_Banking" unique_id=1771181440]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Abrechnung/M/V/Card_Banking/V"]
+[node name="Label" type="Label" parent="Abrechnung/M/V/Card_Banking/V" unique_id=947780567]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 text = "Bankdaten"
 
-[node name="IbanInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V"]
+[node name="IbanInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V" unique_id=1594971111]
 layout_mode = 2
 placeholder_text = "IBAN"
 
-[node name="TaxIdInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V"]
+[node name="TaxIdInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V" unique_id=1033202191]
 layout_mode = 2
 placeholder_text = "Steuer-ID"
 
-[node name="CostCenterInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V"]
+[node name="CostCenterInput" type="LineEdit" parent="Abrechnung/M/V/Card_Banking/V" unique_id=1165810491]
 layout_mode = 2
 placeholder_text = "Kostenstelle"
 
-[node name="Dokumente" type="ScrollContainer" parent="."]
+[node name="Dokumente" type="ScrollContainer" parent="." unique_id=1337301606]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="M" type="MarginContainer" parent="Dokumente"]
+[node name="M" type="MarginContainer" parent="Dokumente" unique_id=1661082329]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -236,79 +247,79 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Dokumente/M"]
+[node name="V" type="VBoxContainer" parent="Dokumente/M" unique_id=1664810151]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Layout" type="PanelContainer" parent="Dokumente/M/V"]
+[node name="Card_Layout" type="PanelContainer" parent="Dokumente/M/V" unique_id=309173479]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Layout"]
+[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Layout" unique_id=1425308037]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dokumente/M/V/Card_Layout/V"]
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Layout/V" unique_id=1283974845]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
 text = "PDF Layout"
 
-[node name="PageSizeOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V"]
+[node name="PageSizeOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=1099315427]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Format: A4"
 popup/item_0/id = 0
 popup/item_1/text = "Format: Letter"
 popup/item_1/id = 1
 
-[node name="OrientationOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V"]
+[node name="OrientationOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=41482281]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Hochformat"
 popup/item_0/id = 0
 popup/item_1/text = "Querformat"
 popup/item_1/id = 1
 
-[node name="FontOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V"]
+[node name="FontOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=1586123330]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Schrift: Open Sans"
 popup/item_0/id = 0
 popup/item_1/text = "Schrift: Times"
 popup/item_1/id = 1
 
-[node name="Card_Content" type="PanelContainer" parent="Dokumente/M/V"]
+[node name="Card_Content" type="PanelContainer" parent="Dokumente/M/V" unique_id=480554249]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Content"]
+[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Content" unique_id=1786622218]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dokumente/M/V/Card_Content/V"]
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Content/V" unique_id=528963482]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.4, 0.9, 1)
 text = "Inhalt"
 
-[node name="CoverPageCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V"]
+[node name="CoverPageCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V" unique_id=299032467]
 layout_mode = 2
 text = "Deckblatt generieren"
 
-[node name="TocCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V"]
+[node name="TocCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V" unique_id=1147456374]
 layout_mode = 2
 text = "Inhaltsverzeichnis"
 
-[node name="WatermarkInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V"]
+[node name="WatermarkInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V" unique_id=363712922]
 layout_mode = 2
 placeholder_text = "Wasserzeichen (Optional)"
 
-[node name="FooterInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V"]
+[node name="FooterInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V" unique_id=901940553]
 layout_mode = 2
 placeholder_text = "Fußzeile"
 
-[node name="LogoUploadBtn" type="Button" parent="Dokumente/M/V/Card_Content/V"]
+[node name="LogoUploadBtn" type="Button" parent="Dokumente/M/V/Card_Content/V" unique_id=578427531]
 layout_mode = 2
 text = "Logo hochladen..."
