@@ -109,11 +109,14 @@ def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0):
 # --- STATISTIKEN & CHECK ---
 
 def get_daily_stats(emp_id, date_str):
-    """Summiert die gearbeiteten Minuten eines Tages."""
+    """Summiert die gearbeiteten Minuten eines Tages (Sekundengenau aus den Timestamps)."""
     with get_db_connection() as conn:
         cur = conn.cursor(cursor_factory=RealDictCursor)
+        # Wir berechnen die genaue Zeit aus Start- und End-Timestamp, statt die gerundete Spalte zu nutzen!
         cur.execute("""
-            SELECT COALESCE(SUM(duration_minutes), 0) as total_mins
+            SELECT COALESCE(SUM(
+                (EXTRACT(EPOCH FROM (end_time - start_time)) / 60.0) - break_minutes
+            ), 0) as total_mins
             FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             AND start_time::date = %s::date
@@ -121,7 +124,7 @@ def get_daily_stats(emp_id, date_str):
         """, (emp_id, date_str))
         
         row = cur.fetchone()
-        return {"total_minutes": int(row['total_mins']) if row else 0}
+        return {"total_minutes": float(row['total_mins']) if row else 0.0}
 
 def check_is_locked(emp_id, date_str):
     """Prüft, ob ein Tag für Bearbeitung gesperrt ist."""
@@ -279,8 +282,9 @@ def get_entries_by_employee(emp_id):
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT id, project, start_time, end_time, duration_minutes as duration, 
-                   notes, approval_status, is_locked, 
-                   TO_CHAR(start_time, 'YYYY-MM-DD') as date
+                   notes, approval_status, status, is_locked, 
+                   TO_CHAR(start_time, 'YYYY-MM-DD') as date,
+                   EXTRACT(EPOCH FROM start_time) as start_unix
             FROM time_entries
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             ORDER BY start_time DESC
