@@ -23,6 +23,9 @@ var modules = {
 }
 
 func _ready() -> void:
+	# --- NEU: Standard-Beenden abfangen für Auto-Stop ---
+	get_tree().set_auto_accept_quit(false) 
+	
 	# 1. FENSTER MAXIMIEREN
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 	
@@ -261,3 +264,42 @@ func _on_send_bug_confirmed() -> void:
 	
 	ErrorHandler.send_report_to_server(user_note)
 	print("Bug-Report wurde durch Benutzer bestätigt.")
+
+# --- NEU: FENSTER-SCHLIESSEN ABFANGEN ---
+func _notification(what: int) -> void:
+	# Wenn der User auf das "X" klickt oder Alt+F4 drückt
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_check_auto_stop_and_quit()
+
+func _check_auto_stop_and_quit() -> void:
+	var auto_stop = Config.get_value("business", "auto_stop_on_exit", false)
+	var uid = Store.get_current_user_id() if Store.has_method("get_current_user_id") else Store.current_user.get("id", "")
+	
+	if auto_stop and uid != "" and Store.is_timer_running(uid):
+		print("Auto-Stop aktiv! Timer wird vor dem Beenden gestoppt...")
+		
+		# 1. FENSTER UNSICHTBAR MACHEN (App wirkt für den User "geschlossen")
+		get_window().hide()
+		
+		# 2. Pausen berechnen
+		var start_time = Store.get_timer_start(uid)
+		var dur_sec = Time.get_unix_time_from_system() - start_time
+		var auto_enabled = Config.get_value("business", "auto_break_after_6h", true)
+		var break_val = Config.get_value("business", "daily_break_minutes", 30)
+		
+		var break_min = 0
+		if auto_enabled and (dur_sec / 3600.0) >= 6.0:
+			break_min = int(break_val)
+			
+		# 3. Timer lokal und auf dem Server stoppen
+		Store.stop_timer("", "Automatisch gestoppt (App-Ende)", break_min)
+		
+		# 4. SERVER GENUG ZEIT GEBEN! (2 Sekunden im Hintergrund warten)
+		# Da das Fenster schon unsichtbar ist, merkt der Nutzer davon nichts.
+		await get_tree().create_timer(2.0).timeout
+		
+		# 5. App jetzt endgültig beenden
+		get_tree().quit()
+	else:
+		# Timer lief nicht oder Auto-Stop ist aus -> Sofort beenden
+		get_tree().quit()

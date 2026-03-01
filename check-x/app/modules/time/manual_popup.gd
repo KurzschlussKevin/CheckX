@@ -32,7 +32,11 @@ func open(uid: String, date_str: String):
 	
 	start_slider.value = 8.0
 	end_slider.value = 16.5
-	if has_node("%ProjectInput"): project_input.text = ""
+	
+	# --- NEU: Standard-Projekt aus der Config laden ---
+	if has_node("%ProjectInput"): 
+		var default_proj = Config.get_value("business", "default_project", "Allgemein")
+		project_input.text = default_proj
 	
 	_update_input_from_slider(start_input, start_slider.value)
 	_update_input_from_slider(end_input, end_slider.value)

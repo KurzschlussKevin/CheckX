@@ -5,6 +5,7 @@ signal entry_saved
 var uid = "" 
 var blink_timer = 0.0
 var current_day_locked = false
+var daily_completed_seconds = 0 # <-- NEU: Speichert die bereits gearbeitete Zeit von heute
 
 func _ready():
 	uid = Store.get_current_user_id()
@@ -16,7 +17,14 @@ func _ready():
 	# Dieser Button übernimmt jetzt BEIDE Funktionen (Einreichen & Korrektur)
 	if has_node("%SubmitDayBtn"):
 		%SubmitDayBtn.pressed.connect(_on_submit_day_pressed)
-		
+	
+	# --- NEU: Auf Updates vom Server hören (wichtig beim App-Neustart) ---
+	if Store.has_signal("data_updated"):
+		Store.data_updated.connect(func():
+			_update_ui_state()
+			_update_stats()
+		)
+	
 	if has_node("%VacBtn"):
 		%VacBtn.pressed.connect(func(): if has_node("%VacationPopup"): %VacationPopup.open(uid))
 	
@@ -137,23 +145,33 @@ func _update_stats():
 		if code == 200:
 			var json = JSON.parse_string(body.get_string_from_utf8())
 			if json and json.has("total_minutes"):
-				var total = int(json["total_minutes"])
-				var h = total / 60
-				var m = total % 60
+				# --- NEU: Float nutzen, um die exakte Zeit mit Sekunden zu erhalten! ---
+				var total = float(json["total_minutes"])
+				
+				# Abgeschlossene Zeit in Sekunden für die Live-Uhr speichern
+				daily_completed_seconds = int(round(total * 60.0))
+				
+				# Zeit für die große Anzeige aus den gesammelten Sekunden berechnen
+				var h = daily_completed_seconds / 3600
+				var m = (daily_completed_seconds % 3600) / 60
+				var s = daily_completed_seconds % 60
+				
 				if has_node("%StatTodayLabel"):
 					%StatTodayLabel.text = str(h) + "h " + str(m).pad_zeros(2) + "m"
 				if has_node("%Bar"):
 					%Bar.value = total / 60.0
+					
+				# --- NEU: Große Uhr zeigt jetzt exakt Stunden, Minuten UND Sekunden an ---
+				if not Store.is_timer_running(uid) and has_node("%TimerLabel"):
+					%TimerLabel.text = "%02d:%02d:%02d" % [h, m, s]
 		else:
 			ErrorHandler.report("TimeTracking", "API Fehler " + str(code) + " beim Abrufen der Tages-Statistiken.")
 		http.queue_free()
 	)
-	# Hier senden wir die Auth-Header mitsenden
 	http.request(url, Store._get_auth_headers())
 	
 	# 2. STATUS CHECKEN & FARBEN SETZEN
 	Store.is_day_locked(uid, date_today, func(is_locked):
-		# Wir speichern den Lock-Status NUR für das aktuelle System-Datum
 		current_day_locked = is_locked
 		
 		var btn = %SubmitDayBtn
@@ -164,7 +182,6 @@ func _update_stats():
 		btn.disabled = false
 		
 		if is_locked:
-			# --- ZUSTAND: EINGEREICHT / GESPERRT ---
 			btn.text = "Eingereicht"
 			btn.modulate = Color(0.7, 0.7, 0.7) 
 			card.modulate = Color(0.9, 0.9, 0.9) 
@@ -172,12 +189,10 @@ func _update_stats():
 			status_lbl.text = "EINGEREICHT"
 			status_lbl.modulate = Color(1, 0.3, 0.3)
 			
-			# Timer-Button für heute komplett sperren
 			start_btn.disabled = true
 			start_btn.text = "GESPERRT"
 			start_btn.modulate = Color(0.5, 0.5, 0.5)
 		else:
-			# --- ZUSTAND: OFFEN ---
 			btn.text = "Tag einreichen"
 			btn.modulate = Color(1, 1, 1)
 			card.modulate = Color(1, 1, 1)
@@ -187,14 +202,24 @@ func _update_stats():
 
 func _process(delta):
 	if Store.is_timer_running(uid):
-		var dur = Time.get_unix_time_from_system() - Store.get_timer_start(uid)
-		var h = int(dur / 3600); var m = int(fmod(dur, 3600) / 60); var s = int(fmod(dur, 60))
-		if has_node("%TimerLabel"): %TimerLabel.text = "%02d:%02d:%02d" % [h, m, s]
+		# Dauer der JETZIGEN Sitzung
+		var current_session_dur = Time.get_unix_time_from_system() - Store.get_timer_start(uid)
 		
-		# --- NEU: Live Pausen-Warnung ---
+		# --- NEU: Gesamtdauer = Abgeschlossene Zeit heute + Jetzige Sitzung ---
+		var total_dur = daily_completed_seconds + current_session_dur
+		
+		# Stunden, Minuten und Sekunden der Gesamtdauer berechnen
+		var h = int(total_dur / 3600)
+		var m = int(fmod(total_dur, 3600) / 60)
+		var s = int(fmod(total_dur, 60))
+		
+		if has_node("%TimerLabel"): 
+			%TimerLabel.text = "%02d:%02d:%02d" % [h, m, s]
+		
+		# --- Live Pausen-Warnung (prüft jetzt auch die Gesamtarbeitszeit!) ---
 		if has_node("%PauseInfoLabel"):
 			var auto_enabled = Config.get_value("business", "auto_break_after_6h", true)
-			%PauseInfoLabel.visible = auto_enabled and (dur / 3600.0) >= 6.0
+			%PauseInfoLabel.visible = auto_enabled and (total_dur / 3600.0) >= 6.0
 		
 		blink_timer += delta
 		if has_node("%PulseDot"):
@@ -203,7 +228,6 @@ func _process(delta):
 	else:
 		if has_node("%PulseDot"): %PulseDot.visible = false
 		if has_node("%PauseInfoLabel"): %PauseInfoLabel.visible = false
-
 func _toggle_timer():
 	if Store.is_timer_running(uid):
 		var notes = ""
@@ -219,16 +243,18 @@ func _toggle_timer():
 		# Berechne Pause (Standardmäßig 0)
 		var break_min = _calculate_auto_break(duration_seconds)
 		
-		# Store Methoden rufen intern APIs mit Header auf
-		# Wir geben die berechnete Pause an den Store weiter
+		# Timer beim Server stoppen
 		Store.stop_timer("", notes, break_min)
-		_refresh_all()
+		
+		# HINWEIS: _refresh_all() wurde hier gelöscht, da der Store 
+		# nach dem erfolgreichen Stoppen automatisch das "data_updated" Signal sendet!
 	else:
 		var cust = "Allgemein"
 		if has_node("%CustomerOption"): cust = %CustomerOption.get_item_text(%CustomerOption.selected)
 		Store.start_timer(cust)
 	
-	_update_stats()
+	# HINWEIS: _update_stats() wurde hier ebenfalls gelöscht.
+	# Wir aktualisieren nur noch sofort die UI (z.B. Button-Text auf "START" ändern).
 	_update_ui_state()
 
 # HILFSFUNKTION für Pausenlogik

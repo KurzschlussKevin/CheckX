@@ -186,6 +186,21 @@ func fetch_time_entries() -> void:
 			var json = JSON.parse_string(body.get_string_from_utf8())
 			if json is Array:
 				time_entries = json
+				
+				# --- NEU: Prüfen, ob ein Timer serverseitig noch läuft ---
+				var found_running = false
+				for entry in time_entries:
+					if entry.get("status") == "running":
+						var start_unix = entry.get("start_unix", 0)
+						if start_unix > 0:
+							active_timer_state[emp_id] = start_unix
+							found_running = true
+							break
+							
+				# Wenn lokal einer lief, aber auf dem Server nicht mehr:
+				if not found_running and active_timer_state.has(emp_id):
+					active_timer_state.erase(emp_id)
+					
 				emit_signal("data_updated")
 		http.queue_free()
 	)
@@ -243,23 +258,34 @@ func start_timer(project: String = "Allgemein") -> void:
 	var body = {"emp_id": emp_id, "project": project, "start_time": active_timer_state[emp_id]}
 	_send_post(url, body)
 
-# Erweitert um das Argument 'break_min'
+# Erweitert um das Argument 'break_min' und 'end_time'
 func stop_timer(project: String = "", notes: String = "", break_min: int = 0):
+	var emp_id = get_current_user_id()
 	var url = get_api_url() + "/time/stop"
 	var http = HTTPRequest.new()
 	add_child(http)
 	
 	var payload = {
-		"emp_id": get_current_user_id(),
+		"emp_id": emp_id,
 		"project": project,
 		"notes": notes,
-		"break_minutes": break_min # Die berechnete Pause mitschicken!
+		"break_minutes": break_min,
+		"end_time": Time.get_unix_time_from_system() # <-- DAS HAT GEFEHLT!
 	}
+	
+	# --- NEU: Sobald der Server den Stopp bestätigt hat, Liste neu laden ---
+	http.request_completed.connect(func(_r, code, _h, _b):
+		fetch_time_entries() # Holt die brandaktuellen Daten vom Server
+		http.queue_free()
+	)
 	
 	var json_payload = JSON.stringify(payload)
 	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, json_payload)
 	
-	# Lokalen Status zurücksetzen
+	# Lokalen Status sofort zurücksetzen, damit die UI schnell reagiert
+	if active_timer_state.has(emp_id):
+		active_timer_state.erase(emp_id)
+		
 	if current_user:
 		current_user["timer_running"] = false
 		current_user["timer_start"] = 0
