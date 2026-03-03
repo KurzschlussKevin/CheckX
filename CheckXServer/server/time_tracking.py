@@ -71,12 +71,13 @@ def stop_timer(data):
 # --- MANUELLE EINGABE ---
 
 # KORREKTUR: break_min als 5. Argument hinzugefügt
-def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0):
+def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, start_hour="08:00"):
     """Erlaubt das nachträgliche Eintragen von Arbeitszeit inkl. Pause."""
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 
-    start_ts_str = f"{date_str} 08:00:00"
+    # Wir nutzen den optionalen Parameter start_hour (kann später im Frontend in Store.gd nachgerüstet werden)
+    start_ts_str = f"{date_str} {start_hour}:00"
     
     with get_db_connection() as conn:
         cur = conn.cursor()
@@ -216,12 +217,13 @@ def request_correction(emp_id, date_str, note):
         cur = conn.cursor()
         try:
             cur.execute("""
-                UPDATE time_entries 
-                SET approval_status = 'correction_pending',
-                    notes = notes || ' [Korrektur-Anfrage: ' || %s || ']'
-                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-                AND start_time::date = %s::date
-            """, (note, emp_id, date_str))
+            UPDATE time_entries 
+            SET approval_status = 'correction_pending',
+                notes = notes || ' [Korrektur-Anfrage: ' || %s || ']'
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND start_time::date = %s::date
+            AND approval_status != 'approved'  # <--- NEUE ZEILE: Genehmigtes bleibt geschützt!
+        """, (note, emp_id, date_str))
             
             conn.commit()
             return {"status": "success", "message": "Anfrage an Admin gesendet."}
