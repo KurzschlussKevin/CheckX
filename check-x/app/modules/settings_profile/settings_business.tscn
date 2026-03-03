@@ -251,75 +251,79 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Layout" type="PanelContainer" parent="Dokumente/M/V" unique_id=309173479]
+[node name="Card_Templates" type="PanelContainer" parent="Dokumente/M/V" unique_id=1937035446]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Layout" unique_id=1425308037]
+[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Templates" unique_id=848093831]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dokumente/M/V/Card_Layout/V" unique_id=1283974845]
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Templates/V" unique_id=1851738645]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
-text = "PDF Layout"
+text = "PDF Vorlagen & Export"
 
-[node name="PageSizeOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=1099315427]
-layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "Format: A4"
-popup/item_0/id = 0
-popup/item_1/text = "Format: Letter"
-popup/item_1/id = 1
-
-[node name="OrientationOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=41482281]
-layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "Hochformat"
-popup/item_0/id = 0
-popup/item_1/text = "Querformat"
-popup/item_1/id = 1
-
-[node name="FontOption" type="OptionButton" parent="Dokumente/M/V/Card_Layout/V" unique_id=1586123330]
-layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "Schrift: Open Sans"
-popup/item_0/id = 0
-popup/item_1/text = "Schrift: Times"
-popup/item_1/id = 1
-
-[node name="Card_Content" type="PanelContainer" parent="Dokumente/M/V" unique_id=480554249]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
-
-[node name="V" type="VBoxContainer" parent="Dokumente/M/V/Card_Content" unique_id=1786622218]
+[node name="HBoxTimesheet" type="HBoxContainer" parent="Dokumente/M/V/Card_Templates/V" unique_id=829345135]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Dokumente/M/V/Card_Content/V" unique_id=528963482]
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Templates/V/HBoxTimesheet" unique_id=1819612349]
+custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.4, 0.9, 1)
-text = "Inhalt"
+text = "Stundenzettel-Vorlage:"
 
-[node name="CoverPageCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V" unique_id=299032467]
+[node name="TimesheetPathEdit" type="LineEdit" parent="Dokumente/M/V/Card_Templates/V/HBoxTimesheet" unique_id=325426433]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Deckblatt generieren"
+size_flags_horizontal = 3
+editable = false
 
-[node name="TocCheck" type="CheckBox" parent="Dokumente/M/V/Card_Content/V" unique_id=1147456374]
+[node name="TimesheetBtn" type="Button" parent="Dokumente/M/V/Card_Templates/V/HBoxTimesheet" unique_id=2114592293]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Inhaltsverzeichnis"
+text = "Auswählen..."
 
-[node name="WatermarkInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V" unique_id=363712922]
+[node name="HBoxInvoice" type="HBoxContainer" parent="Dokumente/M/V/Card_Templates/V" unique_id=1023646199]
 layout_mode = 2
-placeholder_text = "Wasserzeichen (Optional)"
+theme_override_constants/separation = 10
 
-[node name="FooterInput" type="LineEdit" parent="Dokumente/M/V/Card_Content/V" unique_id=901940553]
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Templates/V/HBoxInvoice" unique_id=955417365]
+custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
-placeholder_text = "Fußzeile"
+text = "Rechnungs-Vorlage:"
 
-[node name="LogoUploadBtn" type="Button" parent="Dokumente/M/V/Card_Content/V" unique_id=578427531]
+[node name="InvoicePathEdit" type="LineEdit" parent="Dokumente/M/V/Card_Templates/V/HBoxInvoice" unique_id=526305718]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Logo hochladen..."
+size_flags_horizontal = 3
+editable = false
+
+[node name="InvoiceBtn" type="Button" parent="Dokumente/M/V/Card_Templates/V/HBoxInvoice" unique_id=791120567]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Auswählen..."
+
+[node name="HBoxFormat" type="HBoxContainer" parent="Dokumente/M/V/Card_Templates/V" unique_id=690201631]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Dokumente/M/V/Card_Templates/V/HBoxFormat" unique_id=2089104647]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+text = "Dateiname-Format:"
+
+[node name="ExportNameEdit" type="LineEdit" parent="Dokumente/M/V/Card_Templates/V/HBoxFormat" unique_id=1206381846]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Stundenzettel_%Name%_%Monat%"
+
+[node name="PdfFileDialog" type="FileDialog" parent="." unique_id=1057827979]
+unique_name_in_owner = true
+title = "Open a File"
+size = Vector2i(600, 400)
+ok_button_text = "Öffnen"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.pdf ; PDF Dokumente")

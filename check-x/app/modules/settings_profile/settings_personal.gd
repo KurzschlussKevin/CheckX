@@ -35,6 +35,7 @@ extends Control
 @onready var col_option = $Dashboard/M/V/Card_Layout/V/ColOption
 @onready var refresh_spin = $Dashboard/M/V/Card_Layout/V/RefreshSpin
 
+
 func _ready() -> void:
 	print("🟢 SETTINGS_PERSONAL WURDE GELADEN!")
 	_load_settings()

@@ -11,6 +11,10 @@ extends Control
 var nav_button_scene = preload("res://app/modules/main/nav_button.tscn")
 var toast_scene = preload("res://app/core/notifications/toast.tscn") # NEU: Toast-Szene laden
 
+# NEU: HTTP-Requests für den Hintergrund-Download der PDF-Vorlagen
+var timesheet_http: HTTPRequest
+var invoice_http: HTTPRequest
+
 # Liste der Module und ihrer Pfade
 var modules = {
 	"Dashboard": "res://app/modules/dashboard/dashboard.tscn",
@@ -53,13 +57,16 @@ func _ready() -> void:
 		var tween = create_tween()
 		tween.tween_property(main_layout, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
 	
-	# --- NEU: SIGNALE VERBINDEN ---
+	# --- NEU: VORLAGEN IM HINTERGRUND HERUNTERLADEN ---
+	_download_latest_templates()
+	
+	# --- SIGNALE VERBINDEN ---
 	
 	# Benachrichtigungs-System vom Store verbinden
 	if Store.has_signal("notification_received"):
 		Store.notification_received.connect(_on_notification_received)
 	
-	# NEU: Notification Button (Glocke) verbinden
+	# Notification Button (Glocke) verbinden
 	if has_node("%NotificationBtn"):
 		%NotificationBtn.pressed.connect(_on_notification_list_requested)
 	
@@ -70,6 +77,44 @@ func _ready() -> void:
 	# Verbindung für den Bestätigungs-Button im Popup (%BugReportPopup)
 	if has_node("%BugReportPopup"):
 		%BugReportPopup.confirmed.connect(_on_send_bug_confirmed)
+
+
+# --- NEU: VORLAGEN DOWNLOAD ---
+func _download_latest_templates() -> void:
+	var token = Store.token if "token" in Store else ""
+	var headers = ["Authorization: Bearer " + token]
+	
+	# Stundenzettel Download
+	timesheet_http = HTTPRequest.new()
+	add_child(timesheet_http)
+	# Speichert die Datei direkt ins lokale user-Verzeichnis
+	timesheet_http.download_file = "user://timesheet_template.pdf"
+	timesheet_http.request_completed.connect(_on_timesheet_downloaded)
+	timesheet_http.request(Config.API_URL + "/templates/download_pdf/timesheet", headers, HTTPClient.METHOD_GET)
+	
+	# Rechnung Download
+	invoice_http = HTTPRequest.new()
+	add_child(invoice_http)
+	invoice_http.download_file = "user://invoice_template.pdf"
+	invoice_http.request_completed.connect(_on_invoice_downloaded)
+	invoice_http.request(Config.API_URL + "/templates/download_pdf/invoice", headers, HTTPClient.METHOD_GET)
+
+func _on_timesheet_downloaded(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code == 200:
+		print("✅ Aktuelle Stundenzettel-Vorlage vom Server geladen.")
+		Config.set_value("business", "timesheet_template", "user://timesheet_template.pdf")
+	else:
+		print("ℹ️ Keine Stundenzettel-Vorlage auf dem Server gefunden. (Code: ", response_code, ")")
+	timesheet_http.queue_free() # Aufräumen
+
+func _on_invoice_downloaded(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code == 200:
+		print("✅ Aktuelle Rechnungs-Vorlage vom Server geladen.")
+		Config.set_value("business", "invoice_template", "user://invoice_template.pdf")
+	else:
+		print("ℹ️ Keine Rechnungs-Vorlage auf dem Server gefunden. (Code: ", response_code, ")")
+	invoice_http.queue_free() # Aufräumen
+
 
 func _on_notification_received(data: Dictionary) -> void:
 	# Toast instanziieren
@@ -84,19 +129,17 @@ func _on_notification_received(data: Dictionary) -> void:
 	if toast.has_method("display"):
 		toast.display(data.get("message", ""), data.get("type", "info"))
 
-# NEU: Funktion zum Laden und Anzeigen der Historie
 func _on_notification_list_requested() -> void:
 	Store.fetch_notification_history(func(history):
 		_show_history_popup(history)
 	)
 
-# NEU: Verbessertes Popup Fenster mit Scroll-Ansicht für den Verlauf
+# Verbessertes Popup Fenster mit Scroll-Ansicht für den Verlauf
 func _show_history_popup(history: Array) -> void:
 	# 1. Haupt-Dialog erstellen
 	var dialog = AcceptDialog.new()
 	dialog.title = "BENACHRICHTIGUNGS-ZENTRALE"
 	
-	# KORREKTUR: Bei Dialogen/Windows nutzt man oft 'size' oder 'set_min_size'
 	dialog.size = Vector2(500, 400)
 	
 	# 2. Container-Struktur für Scrolling
