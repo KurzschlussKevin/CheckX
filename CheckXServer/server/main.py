@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, File, UploadFile, Form
 from fastapi.responses import FileResponse
 from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 import os
+import shutil
 import uvicorn
 
 # Module imports
@@ -152,6 +153,44 @@ def route_get_template_details(tid: int, current_user: dict = Depends(get_curren
 @app.post("/templates")
 def route_create_template(t: templates.TemplateCreate, admin: dict = Depends(require_admin)):
     return templates.create_template(t)
+
+# --- NEU: ROUTEN FÜR PDF VORLAGEN (UPLOAD / DOWNLOAD) ---
+
+@app.post("/templates/upload_pdf")
+async def route_upload_pdf(
+    template_type: str = Form(...), # "timesheet" oder "invoice"
+    file: UploadFile = File(...),
+    admin: dict = Depends(require_admin)
+):
+    """Admin lädt eine neue PDF-Vorlage hoch"""
+    if template_type not in ["timesheet", "invoice"]:
+        raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
+    
+    # Stelle sicher, dass der Ordner existiert
+    os.makedirs("pdf_templates", exist_ok=True)
+    
+    file_path = f"pdf_templates/{template_type}.pdf"
+    
+    # Speichere die hochgeladene Datei auf dem Server
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
+
+@app.get("/templates/download_pdf/{template_type}")
+async def route_download_pdf(template_type: str, current_user: dict = Depends(get_current_user)):
+    """Nutzer laden die aktuelle PDF-Vorlage herunter"""
+    if template_type not in ["timesheet", "invoice"]:
+        raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
+    
+    file_path = f"pdf_templates/{template_type}.pdf"
+    
+    # Prüfen, ob der Admin überhaupt schon eine Datei hochgeladen hat
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Noch keine Vorlage auf dem Server vorhanden")
+        
+    # Sende die Datei als Download an den Client
+    return FileResponse(file_path, filename=f"{template_type}.pdf", media_type="application/pdf")
 
 # --- ROUTEN: KUNDEN ---
 
