@@ -177,15 +177,23 @@ func _update_buttons(is_locked: bool):
 	%AddBtn.disabled = false
 	_disconnect_all(%AddBtn)
 	
+	# NEU: Wir greifen auf den großen Einreichen-Button zu, um ihn zu synchronisieren
+	var submit_btn = get_node_or_null("%SubmitDayBtn")
+	
 	if is_locked:
 		%AddBtn.text = "Korrektur beantragen"
 		%AddBtn.modulate = Color(1, 0.4, 0.4) 
 		%AddBtn.pressed.connect(_on_correction_pressed)
+		
+		if submit_btn: 
+			submit_btn.visible = false # <--- Verstecken, wenn Tag im Kalender rot/gesperrt ist
 	else:
 		%AddBtn.text = "+ Zeit manuell"
 		%AddBtn.modulate = Color(1, 1, 1) 
 		%AddBtn.pressed.connect(func(): emit_signal("request_manual", sel_date))
-
+		
+		if submit_btn: 
+			submit_btn.visible = true  # <--- Anzeigen, wenn Tag im Kalender offen ist
 func _paint_grid_cell_red(target_date_str):
 	var parts = target_date_str.split("-")
 	if parts.size() == 3:

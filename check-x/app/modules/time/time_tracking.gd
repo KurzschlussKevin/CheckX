@@ -258,6 +258,7 @@ func _update_stats():
 		btn.disabled = false
 		
 		if is_locked:
+			btn.visible = false  # <--- NEU: Button komplett verstecken!
 			btn.text = "Eingereicht"
 			btn.modulate = Color(0.7, 0.7, 0.7) 
 			card.modulate = Color(0.9, 0.9, 0.9) 
@@ -269,6 +270,7 @@ func _update_stats():
 			start_btn.text = "GESPERRT"
 			start_btn.modulate = Color(0.5, 0.5, 0.5)
 		else:
+			btn.visible = true   # <--- NEU: Button wieder anzeigen!
 			btn.text = "Tag einreichen"
 			btn.modulate = Color(1, 1, 1)
 			card.modulate = Color(1, 1, 1)
