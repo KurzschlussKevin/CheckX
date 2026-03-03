@@ -290,3 +290,22 @@ def get_entries_by_employee(emp_id):
             ORDER BY start_time DESC
         """, (emp_id,))
         return cur.fetchall()
+
+# =========================================================
+# NEU: DATEN FÜR PDF-EXPORT (Nach Monat & Jahr)
+# =========================================================
+def get_entries_by_employee_and_month(emp_id, year, month):
+    """Holt alle Einträge eines Mitarbeiters für einen bestimmten Monat und Jahr."""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT id, project, start_time, end_time, duration_minutes,
+                   notes, approval_status, status, is_locked, break_minutes,
+                   TO_CHAR(start_time, 'YYYY-MM-DD') as date
+            FROM time_entries
+            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+            AND EXTRACT(YEAR FROM start_time) = %s
+            AND EXTRACT(MONTH FROM start_time) = %s
+            ORDER BY start_time ASC
+        """, (emp_id, year, month))
+        return cur.fetchall()

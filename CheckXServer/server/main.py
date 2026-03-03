@@ -245,6 +245,38 @@ def route_export_pdf(pid: int, current_user: dict = Depends(get_current_user)):
     pdf_generator.create_performance_pdf(data, filepath)
     return FileResponse(filepath, filename=filename, media_type='application/pdf')
 
+@app.get("/export/pdf/timesheet")
+def route_export_timesheet(year: int, month: int, current_user: dict = Depends(get_current_user)):
+    emp_id = current_user["sub"]
+    
+    # 1. Hole den echten Vor- und Nachnamen aus der Datenbank
+    with database.get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT first_name, last_name FROM employees WHERE emp_id = %s", (emp_id,))
+        user_row = cur.fetchone()
+        if user_row:
+            emp_name = f"{user_row['first_name']} {user_row['last_name']}"
+        else:
+            emp_name = "Mitarbeiter"
+    
+    # 2. Hole die Einträge
+    entries = time_tracking.get_entries_by_employee_and_month(emp_id, year, month)
+    
+    # 3. Pfade definieren
+    template_path = "pdf_templates/timesheet.pdf"
+    if not os.path.exists(template_path):
+        raise HTTPException(status_code=404, detail="Keine Stundenzettel-Vorlage auf dem Server gefunden.")
+        
+    os.makedirs("temp", exist_ok=True)
+    filename = f"timesheet_temp_{emp_id}.pdf"
+    filepath = f"temp/{filename}"
+    
+    # 4. PDF generieren lassen (NEU: Wir übergeben emp_id als Personalnummer!)
+    pdf_generator.generate_timesheet_acroform(emp_name, emp_id, year, month, entries, template_path, filepath)
+    
+    # 5. An den Nutzer senden
+    return FileResponse(filepath, filename=filename, media_type='application/pdf')
+
 # --- ROUTEN: ZEITERFASSUNG ---
 
 @app.post("/time/start")

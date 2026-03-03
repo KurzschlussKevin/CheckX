@@ -9,3 +9,4 @@ python-multipart
 python-jose[cryptography]
 python-multipart
 fastapi-mail
+pypdf
