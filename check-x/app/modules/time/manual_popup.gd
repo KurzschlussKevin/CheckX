@@ -96,7 +96,6 @@ func _on_save():
 	
 	if auto_enabled and dur_hours >= 6.0:
 		break_min = int(standard_break)
-		total_mins -= break_min
 	
 	# Senden
 	Store.add_manual_entry(user_id, target_date, total_mins, proj, break_min)

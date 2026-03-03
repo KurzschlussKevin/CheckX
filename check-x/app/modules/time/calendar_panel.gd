@@ -20,28 +20,25 @@ func _ready():
 	%PrevBtn.pressed.connect(func(): _nav(-1))
 	%NextBtn.pressed.connect(func(): _nav(1))
 	
-	# WICHTIG: Den SubmitDayBtn (links) nur verbinden, NICHT optisch verändern
-	var submit_node = get_node_or_null("%SubmitDayBtn")
-	if submit_node and not submit_node.pressed.is_connected(_on_submit_pressed):
-		submit_node.pressed.connect(_on_submit_pressed)
-	
 	# --- NEU: GLOBALEN REFRESH VERBINDEN ---
 	if Store.has_signal("notification_received"):
 		Store.notification_received.connect(_on_global_notification)
 
 # --- NEU: LOGIK FÜR AUTOMATISCHEN REFRESH ---
 func _on_global_notification(data: Dictionary) -> void:
-	# Wenn eine Korrektur-Info oder ein Erfolg vom Server kommt, 
-	# müssen wir davon ausgehen, dass sich Status-Farben geändert haben.
 	var type = data.get("type", "")
-	if type == "correction" or type == "info" or type == "success":
-		print("[Kalender] Signal erhalten: Erzwinge Daten-Refresh...")
-		# Cache leeren, damit die Farben vom Server neu bestimmt werden
-		locked_days_cache.clear()
+	if type in ["correction", "info", "success"]:
+		print("[Kalender] Signal erhalten: Hole frische Sperr-Daten vom Server...")
 		
-		# Kurze Pause, damit Store.fetch_time_entries() im Hintergrund fertig wird
-		await get_tree().create_timer(0.5).timeout
-		refresh()
+		# Anstatt blind zu löschen, fragen wir den Server nach dem echten Zustand:
+		Store.get_locked_days_for_month(uid, date.month, date.year, func(server_locked_days):
+			if not is_instance_valid(self): return
+			locked_days_cache.clear()
+			for d_str in server_locked_days:
+				locked_days_cache.append(d_str)
+			# Erst wenn der Cache die ECHTEN Serverdaten hat, aktualisieren wir das UI
+			refresh()
+		)
 
 func _setup_styles():
 	style_normal.bg_color = Color(1, 1, 1, 0.05)
@@ -198,17 +195,6 @@ func _paint_grid_cell_red(target_date_str):
 		for btn in %Grid.get_children():
 			if btn is Button and btn.text == day_str:
 				btn.modulate = Color(1, 0.3, 0.3, 0.9) 
-
-func _on_submit_pressed():
-	if sel_date == "": return
-	
-	Store.submit_day(uid, sel_date, func(success):
-		if success:
-			if not (sel_date in locked_days_cache):
-				locked_days_cache.append(sel_date)
-			_click(sel_date) 
-			_update_cal() 
-	)
 
 func _on_correction_pressed():
 	%AddBtn.disabled = true

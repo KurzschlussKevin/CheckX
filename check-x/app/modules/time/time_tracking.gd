@@ -105,45 +105,36 @@ func _on_calendar_request_manual(target_date):
 # --- BUTTON LOGIK ---
 
 func _on_submit_day_pressed():
-	# Wir prüfen, ob im Kalender ein anderes Datum gewählt ist als 'heute'
-	var selected_date = ""
-	if has_node("%CalendarPanel"):
-		selected_date = %CalendarPanel.sel_date
-		
-	var date_today = Time.get_date_string_from_system()
-	
-	# Falls im Kalender nichts gewählt ist, nehmen wir heute
-	var target_date = selected_date if selected_date != "" else date_today
+	var selected_date = %CalendarPanel.sel_date if has_node("%CalendarPanel") and %CalendarPanel.sel_date != "" else Time.get_date_string_from_system()
 	
 	%SubmitDayBtn.disabled = true
 	%SubmitDayBtn.text = "..."
 	
-	if current_day_locked and target_date == date_today:
-		# FALL A: HEUTIGER Tag ist gesperrt -> Wir beantragen Korrektur
-		Store.request_correction(uid, target_date, "User Correction Request", func(success):
-			if success:
-				_update_stats() # UI für heute aktualisieren
-			else:
-				%SubmitDayBtn.text = "Fehler"
-				%SubmitDayBtn.disabled = false
-				ErrorHandler.report("TimeTracking", "Korrekturanfrage fehlgeschlagen für: " + target_date)
-		)
-	else:
-		# FALL B: Tag einreichen (Sperren)
-		Store.submit_day(uid, target_date, func(success):
-			if success:
-				# Nur wenn wir HEUTE eingereicht haben, updaten wir die Timer-Sperre
-				if target_date == date_today:
+	# NEU: Wir fragen den Server live, ob der ZIEL-Tag gesperrt ist (nicht nur "heute")
+	Store.is_day_locked(uid, selected_date, func(is_locked):
+		if is_locked:
+			# FALL A: Tag ist gesperrt -> Korrektur beantragen
+			Store.request_correction(uid, selected_date, "User Correction Request", func(success):
+				if success:
 					_update_stats()
-				
-				# Kalender-Panel immer aktualisieren (Zelle wird rot)
-				if has_node("%CalendarPanel"): 
-					%CalendarPanel.refresh()
-			else:
-				%SubmitDayBtn.text = "Fehler"
-				%SubmitDayBtn.disabled = false
-				ErrorHandler.report("TimeTracking", "Einreichen fehlgeschlagen für Datum: " + target_date)
-		)
+				else:
+					%SubmitDayBtn.text = "Fehler"
+					%SubmitDayBtn.disabled = false
+					ErrorHandler.report("TimeTracking", "Korrekturanfrage fehlgeschlagen: " + selected_date)
+			)
+		else:
+			# FALL B: Tag einreichen (Sperren)
+			Store.submit_day(uid, selected_date, func(success):
+				if success:
+					_update_stats()
+					if has_node("%CalendarPanel"): 
+						%CalendarPanel.refresh()
+				else:
+					%SubmitDayBtn.text = "Fehler"
+					%SubmitDayBtn.disabled = false
+					ErrorHandler.report("TimeTracking", "Einreichen fehlgeschlagen: " + selected_date)
+			)
+	)
 
 # ==========================================
 # NEU: PDF EXPORT LOGIK
@@ -326,8 +317,10 @@ func _toggle_timer():
 		var end_time = Time.get_unix_time_from_system()
 		var duration_seconds = end_time - start_time
 		
-		# Berechne Pause (Standardmäßig 0)
-		var break_min = _calculate_auto_break(duration_seconds)
+		# Gesamte Dauer (heute bereits gearbeitet + jetzige Sitzung)
+		var total_duration_today = daily_completed_seconds + duration_seconds
+		# Berechne Pause basierend auf dem GESAMTEN Tag
+		var break_min = _calculate_auto_break(total_duration_today)
 		
 		# Timer beim Server stoppen
 		Store.stop_timer("", notes, break_min)
