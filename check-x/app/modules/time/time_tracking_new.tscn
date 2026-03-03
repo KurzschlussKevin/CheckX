@@ -267,3 +267,12 @@ layout_mode = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
+
+[node name="SavePdfDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "PDF exportieren"
+size = Vector2i(600, 400)
+ok_button_text = "Speichern"
+file_mode = 4
+access = 2
+filters = PackedStringArray("*.pdf ; PDF Dokumente")
