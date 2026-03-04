@@ -129,10 +129,13 @@ func _on_forgot_password_pressed() -> void:
 	is_loading = true
 	_show_status("Sende Reset-Link...", false)
 	
-	# HTTP Request vorbereiten
 	var http = HTTPRequest.new()
 	add_child(http)
-	http.request_completed.connect(self._on_forgot_password_received)
+	# Nutze eine anonyme Funktion, um den Node sicher zu löschen
+	http.request_completed.connect(func(result, code, headers, body):
+		_on_forgot_password_received(result, code, headers, body)
+		http.queue_free()
+	)
 	
 	var url = Config.API_URL + "/auth/forgot-password"
 	var body = JSON.stringify({"email": email_input.text})
@@ -140,7 +143,6 @@ func _on_forgot_password_pressed() -> void:
 	
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
 	
-	# Zusätzlich: Öffne das Reset-Fenster, damit der User den Token eingeben kann
 	var reset_scene = load("res://app/modules/auth/password_reset_popup.tscn")
 	var popup = reset_scene.instantiate()
 	add_child(popup)
