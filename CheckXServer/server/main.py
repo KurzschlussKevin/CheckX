@@ -231,18 +231,20 @@ def route_get_progress(customer_id: int, current_user: dict = Depends(get_curren
 # --- ROUTEN: PDF EXPORT ---
 
 @app.get("/export/pdf/performance/{pid}")
-def route_export_pdf(pid: int, current_user: dict = Depends(get_current_user)):
+def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     data = performance.get_report_data(pid)
     if not data:
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
     
-    if not os.path.exists("temp"):
-        os.makedirs("temp")
-    
+    os.makedirs("temp", exist_ok=True)
     filename = f"Montagebericht_{pid}.pdf"
     filepath = f"temp/{filename}"
     
     pdf_generator.create_performance_pdf(data, filepath)
+    
+    # Datei nach dem Senden löschen
+    background_tasks.add_task(os.remove, filepath)
+    
     return FileResponse(filepath, filename=filename, media_type='application/pdf')
 
 @app.get("/export/pdf/timesheet")
@@ -383,6 +385,10 @@ async def route_admin_reject_day(data: CorrectionData, admin: dict = Depends(req
 
 @app.get("/time/entries")
 async def route_get_time_entries(emp_id: str, current_user: dict = Depends(get_current_user)):
+    # Sicherheitsscheck: Nur eigene Daten oder Admin darf zugreifen
+    if current_user.get("sub") != emp_id and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Daten")
+    
     return time_tracking.get_entries_by_employee(emp_id)
 
 @app.get("/admin/pending_corrections")

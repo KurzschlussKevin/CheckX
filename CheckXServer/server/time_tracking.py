@@ -279,17 +279,19 @@ def get_pending_corrections():
         return cur.fetchall()
     
 def get_entries_by_employee(emp_id):
-    """Holt alle Einträge eines Mitarbeiters aus der DB."""
+    """Holt alle Einträge eines Mitarbeiters aus der DB inkl. emp_id für Frontend-Filter."""
     with get_db_connection() as conn:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT id, project, start_time, end_time, duration_minutes as duration, 
-                   notes, approval_status, status, is_locked, 
-                   TO_CHAR(start_time, 'YYYY-MM-DD') as date,
-                   EXTRACT(EPOCH FROM start_time) as start_unix
-            FROM time_entries
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            ORDER BY start_time DESC
+            SELECT t.id, e.emp_id, t.project, t.start_time, t.end_time, 
+                   t.duration_minutes as duration, t.notes, t.approval_status, 
+                   t.status, t.is_locked, 
+                   TO_CHAR(t.start_time, 'YYYY-MM-DD') as date,
+                   EXTRACT(EPOCH FROM t.start_time) as start_unix
+            FROM time_entries t
+            JOIN employees e ON t.employee_id = e.id
+            WHERE e.emp_id = %s
+            ORDER BY t.start_time DESC
         """, (emp_id,))
         return cur.fetchall()
 

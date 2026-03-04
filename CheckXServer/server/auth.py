@@ -86,36 +86,34 @@ Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignoriere
 # --- BENUTZERVERWALTUNG ---
 
 def register_user(user_data):
-    """
-    Registriert einen neuen Mitarbeiter und legt automatisch Urlaubsquoten an.
-    """
     with get_db_connection() as conn:
         cur = conn.cursor()
         
-        # Prüfen, ob Email bereits existiert
         cur.execute("SELECT id FROM employees WHERE email = %s", (user_data.email,))
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Email bereits vergeben")
         
-        # Passwort hashen und Personal-Nummer generieren
         hashed_pw = bcrypt.hash(user_data.password)
-        new_emp_id = f"P-{random.randint(1000, 9999)}"
         
+        # Eindeutige ID generieren
+        while True:
+            new_emp_id = f"P-{random.randint(1000, 9999)}"
+            cur.execute("SELECT id FROM employees WHERE emp_id = %s", (new_emp_id,))
+            if not cur.fetchone():
+                break
+
         try:
-            # Mitarbeiter in die Datenbank schreiben
             cur.execute("""
                 INSERT INTO employees (emp_id, email, password_hash, first_name, last_name, role)
                 VALUES (%s, %s, %s, %s, %s, 'Prüfer') RETURNING id
             """, (new_emp_id, user_data.email, hashed_pw, user_data.first_name, user_data.last_name))
             
             new_id = cur.fetchone()['id']
-            
-            # Standard-Urlaubstage (30 Tage) für das aktuelle Jahr vergeben
             cur.execute("INSERT INTO quotas (employee_id, year, vacation_days_total) VALUES (%s, %s, 30)", 
                         (new_id, datetime.now().year))
             
             conn.commit()
-            return {"status": "success"}
+            return {"status": "success", "emp_id": new_emp_id}
         except Exception as e:
             conn.rollback()
             raise HTTPException(status_code=500, detail=str(e))
