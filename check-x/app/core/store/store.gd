@@ -71,25 +71,32 @@ func _mark_notification_as_read(notif_id: int) -> void:
 func save_token(new_token: String, user_info: Dictionary) -> void:
 	token = new_token
 	current_user = user_info
-	var file = FileAccess.open(TOKEN_PATH, FileAccess.WRITE)
+	
+	# Passwort für Verschlüsselung generieren (Geräte-ID nutzen)
+	var key = OS.get_unique_id()
+	var file = FileAccess.open_encrypted_with_pass(TOKEN_PATH, FileAccess.WRITE, key)
+	
 	if file:
 		var data_to_save = {
 			"token": token,
 			"user": current_user
 		}
 		file.store_var(data_to_save)
-		print(">>> [STORE] Sitzung permanent gespeichert.")
+		file.close() # Datei schließen nicht vergessen
+		print(">>> [STORE] Sitzung verschlüsselt gespeichert.")
 
 func load_token() -> void:
 	if FileAccess.file_exists(TOKEN_PATH):
-		var file = FileAccess.open(TOKEN_PATH, FileAccess.READ)
+		var key = OS.get_unique_id()
+		var file = FileAccess.open_encrypted_with_pass(TOKEN_PATH, FileAccess.READ, key)
 		if file:
 			var data = file.get_var()
+			file.close()
 			token = data.get("token", "")
 			current_user = data.get("user", {})
 			if not token.is_empty():
-				fetch_all_data() # Automatisches Laden beim Start
-			print(">>> [STORE] Sitzung geladen für: ", current_user.get("name", "Unbekannt"))
+				fetch_all_data()
+			print(">>> [STORE] Verschlüsselte Sitzung geladen.")
 
 func clear_session() -> void:
 	token = ""
