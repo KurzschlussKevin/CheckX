@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://settings_part_tech_full"]
+[gd_scene format=3 uid="uid://v2oujp0dmfyg"]
+
+[ext_resource type="Script" uid="uid://h8tvds1wt6yn" path="res://app/modules/settings_profile/settings_tech.gd" id="1_nh2b5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_panel"]
 bg_color = Color(0.1, 0.1, 0.12, 1)
@@ -16,7 +18,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="TechSettings" type="TabContainer"]
+[node name="TechSettings" type="TabContainer" unique_id=1584169332]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -24,12 +26,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
+script = ExtResource("1_nh2b5")
 
-[node name="System" type="ScrollContainer" parent="."]
+[node name="System" type="ScrollContainer" parent="." unique_id=2104768151]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="M" type="MarginContainer" parent="System"]
+[node name="M" type="MarginContainer" parent="System" unique_id=1650698178]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -38,138 +41,138 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="System/M"]
+[node name="V" type="VBoxContainer" parent="System/M" unique_id=697130909]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_App" type="PanelContainer" parent="System/M/V"]
+[node name="Card_App" type="PanelContainer" parent="System/M/V" unique_id=152366094]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="System/M/V/Card_App"]
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_App" unique_id=1366361831]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="System/M/V/Card_App/V"]
+[node name="Label" type="Label" parent="System/M/V/Card_App/V" unique_id=214183871]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
 text = "Anwendung"
 
-[node name="StartOnBootCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+[node name="StartOnBootCheck" type="CheckBox" parent="System/M/V/Card_App/V" unique_id=1721008027]
 layout_mode = 2
 text = "Autostart mit Windows"
 
-[node name="MinimizeToTrayCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+[node name="MinimizeToTrayCheck" type="CheckBox" parent="System/M/V/Card_App/V" unique_id=1264730173]
 layout_mode = 2
 text = "In Tray minimieren"
 
-[node name="AutoUpdateCheck" type="CheckBox" parent="System/M/V/Card_App/V"]
+[node name="AutoUpdateCheck" type="CheckBox" parent="System/M/V/Card_App/V" unique_id=1498518913]
 layout_mode = 2
 button_pressed = true
 text = "Auto-Updates"
 
-[node name="Card_Server" type="PanelContainer" parent="System/M/V"]
+[node name="Card_Server" type="PanelContainer" parent="System/M/V" unique_id=482129120]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="System/M/V/Card_Server"]
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Server" unique_id=1994692677]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="System/M/V/Card_Server/V"]
+[node name="Label" type="Label" parent="System/M/V/Card_Server/V" unique_id=990957869]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
 text = "Server & Verbindung"
 
-[node name="ServerHostInput" type="LineEdit" parent="System/M/V/Card_Server/V"]
+[node name="ServerHostInput" type="LineEdit" parent="System/M/V/Card_Server/V" unique_id=1589318446]
 layout_mode = 2
 placeholder_text = "https://api.checkx.com"
 
-[node name="ServerPortSpin" type="SpinBox" parent="System/M/V/Card_Server/V"]
+[node name="ServerPortSpin" type="SpinBox" parent="System/M/V/Card_Server/V" unique_id=218176553]
 layout_mode = 2
-prefix = "Port:"
 max_value = 65535.0
 value = 443.0
+prefix = "Port:"
 
-[node name="AuthProxyCheck" type="CheckBox" parent="System/M/V/Card_Server/V"]
+[node name="AuthProxyCheck" type="CheckBox" parent="System/M/V/Card_Server/V" unique_id=1286756497]
 layout_mode = 2
 text = "Proxy-Auth nutzen"
 
-[node name="TestConnectionBtn" type="Button" parent="System/M/V/Card_Server/V"]
+[node name="TestConnectionBtn" type="Button" parent="System/M/V/Card_Server/V" unique_id=608963352]
 layout_mode = 2
 text = "Verbindung testen"
 
-[node name="Card_Files" type="PanelContainer" parent="System/M/V"]
+[node name="Card_Files" type="PanelContainer" parent="System/M/V" unique_id=527413687]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="System/M/V/Card_Files"]
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Files" unique_id=1138807636]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="System/M/V/Card_Files/V"]
+[node name="Label" type="Label" parent="System/M/V/Card_Files/V" unique_id=533070634]
 layout_mode = 2
 text = "Dateien & Speicher"
 
-[node name="DownloadPathInput" type="LineEdit" parent="System/M/V/Card_Files/V"]
+[node name="DownloadPathInput" type="LineEdit" parent="System/M/V/Card_Files/V" unique_id=2026972841]
 layout_mode = 2
 placeholder_text = "Download-Pfad..."
 
-[node name="OfflineCacheCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+[node name="OfflineCacheCheck" type="CheckBox" parent="System/M/V/Card_Files/V" unique_id=66529118]
 layout_mode = 2
 text = "Offline-Cache aktiv"
 
-[node name="UploadLimitSpin" type="SpinBox" parent="System/M/V/Card_Files/V"]
+[node name="UploadLimitSpin" type="SpinBox" parent="System/M/V/Card_Files/V" unique_id=297374561]
 layout_mode = 2
-prefix = "Upload Limit (MB):"
 value = 10.0
+prefix = "Upload Limit (MB):"
 
-[node name="ImgCompressCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+[node name="ImgCompressCheck" type="CheckBox" parent="System/M/V/Card_Files/V" unique_id=1484577641]
 layout_mode = 2
 text = "Bilder komprimieren"
 
-[node name="TempCleanCheck" type="CheckBox" parent="System/M/V/Card_Files/V"]
+[node name="TempCleanCheck" type="CheckBox" parent="System/M/V/Card_Files/V" unique_id=1683542986]
 layout_mode = 2
 button_pressed = true
 text = "Temp-Dateien beim Beenden löschen"
 
-[node name="Card_Security" type="PanelContainer" parent="System/M/V"]
+[node name="Card_Security" type="PanelContainer" parent="System/M/V" unique_id=1347190438]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="System/M/V/Card_Security"]
+[node name="V" type="VBoxContainer" parent="System/M/V/Card_Security" unique_id=1775352483]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="System/M/V/Card_Security/V"]
+[node name="Label" type="Label" parent="System/M/V/Card_Security/V" unique_id=1079385696]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 text = "Sicherheit & DSGVO"
 
-[node name="TwoFactorCheck" type="CheckBox" parent="System/M/V/Card_Security/V"]
+[node name="TwoFactorCheck" type="CheckBox" parent="System/M/V/Card_Security/V" unique_id=1434658828]
 unique_name_in_owner = true
 layout_mode = 2
 text = "2FA Aktivieren"
 
-[node name="AppLockCheck" type="CheckBox" parent="System/M/V/Card_Security/V"]
+[node name="AppLockCheck" type="CheckBox" parent="System/M/V/Card_Security/V" unique_id=1019364689]
 layout_mode = 2
 text = "Auto-Lock bei Inaktivität"
 
-[node name="DataLimitSpin" type="SpinBox" parent="System/M/V/Card_Security/V"]
+[node name="DataLimitSpin" type="SpinBox" parent="System/M/V/Card_Security/V" unique_id=42315157]
 layout_mode = 2
-prefix = "Logs löschen nach (Tagen):"
 value = 30.0
+prefix = "Logs löschen nach (Tagen):"
 
-[node name="ClearCacheBtn" type="Button" parent="System/M/V/Card_Security/V"]
+[node name="ClearCacheBtn" type="Button" parent="System/M/V/Card_Security/V" unique_id=425556316]
 layout_mode = 2
 text = "Cache leeren & Neustart"
 
-[node name="Integration" type="ScrollContainer" parent="."]
+[node name="Integration" type="ScrollContainer" parent="." unique_id=215051406]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="M" type="MarginContainer" parent="Integration"]
+[node name="M" type="MarginContainer" parent="Integration" unique_id=1228634946]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -178,67 +181,67 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Integration/M"]
+[node name="V" type="VBoxContainer" parent="Integration/M" unique_id=1304425846]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Sync" type="PanelContainer" parent="Integration/M/V"]
+[node name="Card_Sync" type="PanelContainer" parent="Integration/M/V" unique_id=1216461385]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Sync"]
+[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Sync" unique_id=822806684]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Integration/M/V/Card_Sync/V"]
+[node name="Label" type="Label" parent="Integration/M/V/Card_Sync/V" unique_id=1585163258]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
 text = "Kalender Sync"
 
-[node name="OutlookSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+[node name="OutlookSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V" unique_id=1022313526]
 layout_mode = 2
 text = "Outlook synchronisieren"
 
-[node name="GoogleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+[node name="GoogleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V" unique_id=1495619709]
 layout_mode = 2
 text = "Google Calendar"
 
-[node name="AppleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V"]
+[node name="AppleSyncCheck" type="CheckBox" parent="Integration/M/V/Card_Sync/V" unique_id=928523767]
 layout_mode = 2
 text = "Apple iCloud"
 
-[node name="Card_Connect" type="PanelContainer" parent="Integration/M/V"]
+[node name="Card_Connect" type="PanelContainer" parent="Integration/M/V" unique_id=1331017386]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Connect"]
+[node name="V" type="VBoxContainer" parent="Integration/M/V/Card_Connect" unique_id=1626983609]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Integration/M/V/Card_Connect/V"]
+[node name="Label" type="Label" parent="Integration/M/V/Card_Connect/V" unique_id=2036565782]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 0.9, 1)
 text = "Webhooks & Messenger"
 
-[node name="SlackInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V"]
+[node name="SlackInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V" unique_id=168075987]
 layout_mode = 2
 placeholder_text = "Slack Webhook URL"
 
-[node name="TeamsCheck" type="CheckBox" parent="Integration/M/V/Card_Connect/V"]
+[node name="TeamsCheck" type="CheckBox" parent="Integration/M/V/Card_Connect/V" unique_id=1851533729]
 layout_mode = 2
 text = "Teams Status koppeln"
 
-[node name="ApiTokenInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V"]
+[node name="ApiTokenInput" type="LineEdit" parent="Integration/M/V/Card_Connect/V" unique_id=1316851895]
 layout_mode = 2
 placeholder_text = "API Personal Token"
 secret = true
 
-[node name="Automatisierung" type="ScrollContainer" parent="."]
+[node name="Automatisierung" type="ScrollContainer" parent="." unique_id=376179427]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="M" type="MarginContainer" parent="Automatisierung"]
+[node name="M" type="MarginContainer" parent="Automatisierung" unique_id=82885834]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -247,62 +250,62 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Automatisierung/M"]
+[node name="V" type="VBoxContainer" parent="Automatisierung/M" unique_id=1998886299]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Intel" type="PanelContainer" parent="Automatisierung/M/V"]
+[node name="Card_Intel" type="PanelContainer" parent="Automatisierung/M/V" unique_id=260810441]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Intel"]
+[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Intel" unique_id=19086770]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Intel/V"]
+[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Intel/V" unique_id=1283037270]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.4, 1, 1)
 text = "KI & Smart Features"
 
-[node name="OCRCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V"]
+[node name="OCRCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V" unique_id=1643739826]
 layout_mode = 2
 text = "OCR Beleg-Scan"
 
-[node name="KISuggestCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V"]
+[node name="KISuggestCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Intel/V" unique_id=1790149550]
 layout_mode = 2
 text = "KI-Projektvorschläge"
 
-[node name="Card_Work" type="PanelContainer" parent="Automatisierung/M/V"]
+[node name="Card_Work" type="PanelContainer" parent="Automatisierung/M/V" unique_id=1803894576]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Work"]
+[node name="V" type="VBoxContainer" parent="Automatisierung/M/V/Card_Work" unique_id=908116756]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Work/V"]
+[node name="Label" type="Label" parent="Automatisierung/M/V/Card_Work/V" unique_id=1041828673]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.3, 0.5, 1)
 text = "Workflows"
 
-[node name="AutoPauseCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+[node name="AutoPauseCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V" unique_id=1761488620]
 layout_mode = 2
 text = "Auto-Pause (6h)"
 
-[node name="FeierabendCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+[node name="FeierabendCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V" unique_id=603746763]
 layout_mode = 2
 text = "Feierabend-Warnung"
 
-[node name="ArchiveCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V"]
+[node name="ArchiveCheck" type="CheckBox" parent="Automatisierung/M/V/Card_Work/V" unique_id=946411492]
 layout_mode = 2
 text = "Auto-Archivierung (30 Tage)"
 
-[node name="Benachrichtigung" type="ScrollContainer" parent="."]
+[node name="Benachrichtigung" type="ScrollContainer" parent="." unique_id=740948713]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 3
 
-[node name="M" type="MarginContainer" parent="Benachrichtigung"]
+[node name="M" type="MarginContainer" parent="Benachrichtigung" unique_id=343856571]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -311,57 +314,57 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="V" type="VBoxContainer" parent="Benachrichtigung/M"]
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M" unique_id=291024612]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Card_Notify" type="PanelContainer" parent="Benachrichtigung/M/V"]
+[node name="Card_Notify" type="PanelContainer" parent="Benachrichtigung/M/V" unique_id=547073527]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Notify"]
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Notify" unique_id=1062835380]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Notify/V"]
+[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Notify/V" unique_id=1151895541]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
 text = "Kanäle & Sounds"
 
-[node name="DesktopNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+[node name="DesktopNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V" unique_id=1272366754]
 layout_mode = 2
 button_pressed = true
 text = "Desktop-Popups"
 
-[node name="SoundNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+[node name="SoundNotifyCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V" unique_id=783381194]
 layout_mode = 2
 text = "Sound-Feedback"
 
-[node name="EmailReportCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V"]
+[node name="EmailReportCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Notify/V" unique_id=609262618]
 layout_mode = 2
 text = "E-Mail Tagesbericht"
 
-[node name="Card_Events" type="PanelContainer" parent="Benachrichtigung/M/V"]
+[node name="Card_Events" type="PanelContainer" parent="Benachrichtigung/M/V" unique_id=2059395517]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Events"]
+[node name="V" type="VBoxContainer" parent="Benachrichtigung/M/V/Card_Events" unique_id=806733316]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Events/V"]
+[node name="Label" type="Label" parent="Benachrichtigung/M/V/Card_Events/V" unique_id=1055657248]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 text = "Auslöser"
 
-[node name="NotifyTimerCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+[node name="NotifyTimerCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V" unique_id=625054097]
 layout_mode = 2
 text = "Timer > 10 Std Warnung"
 
-[node name="NotifyVacationCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+[node name="NotifyVacationCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V" unique_id=1459218802]
 layout_mode = 2
 text = "Urlaubs-Status Updates"
 
-[node name="NotifyBreakCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V"]
+[node name="NotifyBreakCheck" type="CheckBox" parent="Benachrichtigung/M/V/Card_Events/V" unique_id=840241820]
 layout_mode = 2
 text = "Pausenerinnerung"
