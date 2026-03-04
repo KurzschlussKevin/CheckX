@@ -7,12 +7,12 @@ import psycopg2
 # --- TIMER FUNKTIONEN ---
 
 def start_timer(data):
-    """Startet einen neuen Timer für einen Mitarbeiter."""
+    """Startet einen neuen Timer. Server generiert die Zeit."""
     with get_db_connection() as conn:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
+        cur = conn.cursor()
+        # Prüfen, ob bereits ein Timer läuft
         cur.execute("""
-            SELECT id FROM time_entries 
+            SELECT 1 FROM time_entries 
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
             AND status = 'running'
         """, (data.emp_id,))
@@ -20,20 +20,17 @@ def start_timer(data):
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Timer läuft bereits!")
 
-    start_dt = datetime.fromtimestamp(data.start_time)
+    # NUTZE SERVER-ZEIT statt data.start_time
+    now = datetime.now()
     
     with get_db_connection() as conn:
         cur = conn.cursor()
-        try:
-            cur.execute("""
-                INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
-                VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running', 'open', FALSE)
-            """, (data.emp_id, data.project, start_dt))
-            conn.commit()
-            return {"status": "started"}
-        except psycopg2.IntegrityError:
-            conn.rollback()
-            raise HTTPException(status_code=400, detail="Sicherheitsstopp: Timer wurde bereits anderweitig gestartet.")
+        cur.execute("""
+            INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
+            VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running', 'open', FALSE)
+        """, (data.emp_id, data.project, now))
+        conn.commit()
+        return {"status": "started", "server_time": now.timestamp()}
 
 def stop_timer(data):
     """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer."""
@@ -76,7 +73,6 @@ def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, star
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 
-    # Wir nutzen den optionalen Parameter start_hour (kann später im Frontend in Store.gd nachgerüstet werden)
     start_ts_str = f"{date_str} {start_hour}:00"
     
     with get_db_connection() as conn:

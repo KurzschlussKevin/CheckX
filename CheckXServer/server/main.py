@@ -222,6 +222,9 @@ def route_add_performance(p: performance.DailyPerformance, current_user: dict = 
 
 @app.get("/performance/me")
 def route_get_my_performance(emp_id: str, current_user: dict = Depends(get_current_user)):
+    # SICHERHEITS-CHECK: Nur eigene Daten oder Admin
+    if current_user.get("sub") != emp_id and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Performance-Daten")
     return performance.get_performance_by_employee(emp_id)
 
 @app.get("/performance/progress")
@@ -340,6 +343,9 @@ def route_request_vacation(req: VacationRequest, current_user: dict = Depends(ge
 
 @app.get("/absences/me")
 def route_my_absences(emp_id: str, current_user: dict = Depends(get_current_user)):
+    # SICHERHEITS-CHECK: Nur eigene Daten oder Admin
+    if current_user.get("sub") != emp_id and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Abwesenheitsdaten")
     return absences.get_user_absences(emp_id)
 
 @app.get("/absences/calendar")
@@ -350,6 +356,9 @@ def route_team_calendar(year: int, month: int, current_user: dict = Depends(get_
 
 @app.get("/dashboard/stats")
 def route_get_dashboard_stats(emp_id: str, current_user: dict = Depends(get_current_user)):
+    # SICHERHEITS-CHECK: Nur eigene Daten oder Admin
+    if current_user.get("sub") != emp_id and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Statistiken")
     return dashboard.get_stats(emp_id)
 
 @app.post("/system/report_bug")
@@ -369,8 +378,10 @@ def route_mark_read(nid: int, current_user: dict = Depends(get_current_user)):
 
 @app.get("/notifications/history")
 def route_get_notification_history(current_user: dict = Depends(get_current_user)):
+    from psycopg2.extras import RealDictCursor
     with database.get_db_connection() as conn:
-        cur = conn.cursor()
+        # Cursor explizit als RealDictCursor für JSON-Kompatibilität
+        cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT id, message, type, is_read, created_at 
             FROM notifications 
