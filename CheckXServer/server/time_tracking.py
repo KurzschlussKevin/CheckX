@@ -7,30 +7,23 @@ import psycopg2
 # --- TIMER FUNKTIONEN ---
 
 def start_timer(data):
-    """Startet einen neuen Timer. Server generiert die Zeit."""
-    with get_db_connection() as conn:
-        cur = conn.cursor()
-        # Prüfen, ob bereits ein Timer läuft
-        cur.execute("""
-            SELECT 1 FROM time_entries 
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
-            AND status = 'running'
-        """, (data.emp_id,))
-        
-        if cur.fetchone():
-            raise HTTPException(status_code=400, detail="Timer läuft bereits!")
-
-    # NUTZE SERVER-ZEIT statt data.start_time
+    """Startet einen neuen Timer. Nutzt Unique Index in DB gegen Race Conditions."""
     now = datetime.now()
-    
     with get_db_connection() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
-            VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running', 'open', FALSE)
-        """, (data.emp_id, data.project, now))
-        conn.commit()
-        return {"status": "started", "server_time": now.timestamp()}
+        with conn.cursor() as cur:
+            try:
+                cur.execute("""
+                    INSERT INTO time_entries (employee_id, project, start_time, status, approval_status, is_locked)
+                    VALUES ((SELECT id FROM employees WHERE emp_id = %s), %s, %s, 'running', 'open', FALSE)
+                """, (data.emp_id, data.project, now))
+                conn.commit()
+                return {"status": "started", "server_time": now.timestamp()}
+            except psycopg2.IntegrityError:
+                conn.rollback()
+                raise HTTPException(status_code=400, detail="Es läuft bereits ein aktiver Timer!")
+            except Exception as e:
+                conn.rollback()
+                raise HTTPException(status_code=500, detail=str(e))
 
 def stop_timer(data):
     """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer."""

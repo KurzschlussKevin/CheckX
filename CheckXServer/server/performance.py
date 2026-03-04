@@ -106,59 +106,52 @@ def get_customer_progress(customer_id: int):
 # NEU: Daten für den PDF Bericht sammeln
 def get_report_data(performance_id: int):
     with get_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # 1. Kopfdaten
-        cur.execute("""
-            SELECT 
-                p.id, p.date_entry, p.notes,
-                c.company_name, c.street, c.house_number, c.zip_code, c.city,
-                e.first_name, e.last_name, e.emp_id, p.customer_id
-            FROM daily_performance p
-            JOIN customers c ON p.customer_id = c.id
-            JOIN employees e ON p.employee_id = e.id
-            WHERE p.id = %s
-        """, (performance_id,))
-        head = cur.fetchone()
-        
-        if not head:
-            return None
+        with conn.cursor() as cur:
+            # 1. Kopfdaten
+            cur.execute("""
+                SELECT 
+                    p.id, p.date_entry, p.notes,
+                    c.company_name, c.street, c.house_number, c.zip_code, c.city,
+                    e.first_name, e.last_name, e.emp_id, p.customer_id,
+                    c.cp1_firstname, c.cp1_lastname
+                FROM daily_performance p
+                JOIN customers c ON p.customer_id = c.id
+                JOIN employees e ON p.employee_id = e.id
+                WHERE p.id = %s
+            """, (performance_id,))
+            head = cur.fetchone()
+            
+            if not head:
+                return None
 
-        # 2. Positionen
-        cur.execute("""
-            SELECT pd.amount as current_amount, s.name, s.id as service_id
-            FROM performance_details pd
-            JOIN services s ON pd.service_id = s.id
-            WHERE pd.performance_id = %s
-        """, (performance_id,))
-        lines = cur.fetchall()
-        
-        positions = []
-        for i, line in enumerate(lines):
-            # Target holen
+            # 2. Alle Positionen inkl. Soll und Gesamt-Ist in EINER Abfrage
             cur.execute("""
-                SELECT target_amount FROM customer_targets 
-                WHERE customer_id = %s AND service_id = %s
-            """, (head['customer_id'], line['service_id']))
-            target_res = cur.fetchone()
-            target = target_res['target_amount'] if target_res else 0
-            
-            # Total Done bis heute
-            cur.execute("""
-                SELECT SUM(pd.amount) as total 
+                SELECT 
+                    pd.amount as current_amount, 
+                    s.name, 
+                    s.id as service_id,
+                    COALESCE(ct.target_amount, 0) as target,
+                    COALESCE((
+                        SELECT SUM(pd2.amount) 
+                        FROM performance_details pd2
+                        JOIN daily_performance dp2 ON pd2.performance_id = dp2.id
+                        WHERE dp2.customer_id = %s AND pd2.service_id = s.id
+                    ), 0) as total_done_so_far
                 FROM performance_details pd
-                JOIN daily_performance p ON pd.performance_id = p.id
-                WHERE p.customer_id = %s AND pd.service_id = %s
-            """, (head['customer_id'], line['service_id']))
-            done_res = cur.fetchone()
-            total_done = done_res['total'] if done_res and done_res['total'] else 0
+                JOIN services s ON pd.service_id = s.id
+                LEFT JOIN customer_targets ct ON (ct.customer_id = %s AND ct.service_id = s.id)
+                WHERE pd.performance_id = %s
+            """, (head['customer_id'], head['customer_id'], performance_id))
             
-            positions.append({
-                "pos": i + 1,
-                "name": line['name'],
-                "target": target,
-                "current": line['current_amount'],
-                "rest": target - total_done
-            })
-            
+            rows = cur.fetchall()
+            positions = []
+            for i, row in enumerate(rows):
+                positions.append({
+                    "pos": i + 1,
+                    "name": row['name'],
+                    "target": row['target'],
+                    "current": row['current_amount'],
+                    "rest": row['target'] - row['total_done_so_far']
+                })
+                
     return {"meta": head, "lines": positions}

@@ -87,36 +87,39 @@ Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignoriere
 
 def register_user(user_data):
     with get_db_connection() as conn:
-        cur = conn.cursor()
-        
-        cur.execute("SELECT id FROM employees WHERE email = %s", (user_data.email,))
-        if cur.fetchone():
-            raise HTTPException(status_code=400, detail="Email bereits vergeben")
-        
-        hashed_pw = bcrypt.hash(user_data.password)
-        
-        # Eindeutige ID generieren
-        while True:
-            new_emp_id = f"P-{random.randint(1000, 9999)}"
-            cur.execute("SELECT id FROM employees WHERE emp_id = %s", (new_emp_id,))
-            if not cur.fetchone():
-                break
+        with conn.cursor() as cur:  # Cursor wird hier sicher verwaltet
+            cur.execute("SELECT id FROM employees WHERE email = %s", (user_data.email,))
+            if cur.fetchone():
+                raise HTTPException(status_code=400, detail="Email bereits vergeben")
+            
+            hashed_pw = bcrypt.hash(user_data.password)
+            
+            # Eindeutige ID generieren (Optimierte Logik)
+            attempts = 0
+            while attempts < 10:
+                new_emp_id = f"P-{random.randint(1000, 9999)}"
+                cur.execute("SELECT id FROM employees WHERE emp_id = %s", (new_emp_id,))
+                if not cur.fetchone():
+                    break
+                attempts += 1
+            else:
+                raise HTTPException(status_code=500, detail="ID Generierung fehlgeschlagen")
 
-        try:
-            cur.execute("""
-                INSERT INTO employees (emp_id, email, password_hash, first_name, last_name, role)
-                VALUES (%s, %s, %s, %s, %s, 'Prüfer') RETURNING id
-            """, (new_emp_id, user_data.email, hashed_pw, user_data.first_name, user_data.last_name))
-            
-            new_id = cur.fetchone()['id']
-            cur.execute("INSERT INTO quotas (employee_id, year, vacation_days_total) VALUES (%s, %s, 30)", 
-                        (new_id, datetime.now().year))
-            
-            conn.commit()
-            return {"status": "success", "emp_id": new_emp_id}
-        except Exception as e:
-            conn.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            try:
+                cur.execute("""
+                    INSERT INTO employees (emp_id, email, password_hash, first_name, last_name, role)
+                    VALUES (%s, %s, %s, %s, %s, 'Prüfer') RETURNING id
+                """, (new_emp_id, user_data.email, hashed_pw, user_data.first_name, user_data.last_name))
+                
+                new_id = cur.fetchone()['id']
+                cur.execute("INSERT INTO quotas (employee_id, year, vacation_days_total) VALUES (%s, %s, 30)", 
+                            (new_id, datetime.now().year))
+                
+                conn.commit()
+                return {"status": "success", "emp_id": new_emp_id}
+            except Exception as e:
+                conn.rollback()
+                raise HTTPException(status_code=500, detail=str(e))
 
 def login_user(login_data):
     """
