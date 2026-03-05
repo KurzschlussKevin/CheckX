@@ -26,37 +26,35 @@ def start_timer(data):
                 raise HTTPException(status_code=500, detail=str(e))
 
 def stop_timer(data):
-    """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer."""
+    """Beendet den laufenden Timer mit der aktuellen Serverzeit gegen Manipulation."""
     with get_db_connection() as conn:
-        cur = conn.cursor()
-        end_dt = datetime.fromtimestamp(data.end_time)
-        
-        # Pause aus den Daten holen (Standard 0)
-        break_min = getattr(data, 'break_minutes', 0)
-        
-        # Notiz-Update falls Pause abgezogen wurde
-        final_notes = data.notes
-        if break_min > 0:
-            pause_info = f" [Auto-Pause: {break_min} Min abgezogen]"
-            final_notes = (final_notes + pause_info) if final_notes else pause_info
-
-        cur.execute("""
-            UPDATE time_entries 
-            SET end_time = %s, 
-                notes = %s, 
-                status = 'open',
-                duration_minutes = (EXTRACT(EPOCH FROM (%s - start_time))/60) - %s,
-                break_minutes = %s
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
-            AND status = 'running'
-        """, (end_dt, final_notes, end_dt, break_min, break_min, data.emp_id))
-        
-        if cur.rowcount == 0:
-            conn.rollback()
-            return {"status": "error", "message": "Kein aktiver Timer zum Stoppen gefunden."}
+        with conn.cursor() as cur:
+            # KORREKTUR: Nutze datetime.now() statt data.end_time vom Client
+            server_now = datetime.now()
             
-        conn.commit()
-        return {"status": "stopped", "applied_break": break_min}
+            break_min = getattr(data, 'break_minutes', 0)
+            final_notes = data.notes
+            if break_min > 0:
+                pause_info = f" [Auto-Pause: {break_min} Min abgezogen]"
+                final_notes = (final_notes + pause_info) if final_notes else pause_info
+
+            cur.execute("""
+                UPDATE time_entries 
+                SET end_time = %s, 
+                    notes = %s, 
+                    status = 'open',
+                    duration_minutes = (EXTRACT(EPOCH FROM (%s - start_time))/60) - %s,
+                    break_minutes = %s
+                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
+                AND status = 'running'
+            """, (server_now, final_notes, server_now, break_min, break_min, data.emp_id))
+            
+            if cur.rowcount == 0:
+                conn.rollback()
+                return {"status": "error", "message": "Kein aktiver Timer gefunden."}
+                
+            conn.commit()
+            return {"status": "stopped", "applied_break": break_min, "server_time": server_now.timestamp()}
 
 # --- MANUELLE EINGABE ---
 
@@ -99,20 +97,18 @@ def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, star
 # --- STATISTIKEN & CHECK ---
 
 def get_daily_stats(emp_id, date_str):
-    """Summiert die gearbeiteten Minuten eines Tages (Sekundengenau aus den Timestamps)."""
     with get_db_connection() as conn:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        # Wir berechnen die genaue Zeit aus Start- und End-Timestamp, statt die gerundete Spalte zu nutzen!
+        cur = conn.cursor()
+        # JOIN ist oft performanter als Subquery in der WHERE-Clause
         cur.execute("""
             SELECT COALESCE(SUM(
-                (EXTRACT(EPOCH FROM (end_time - start_time)) / 60.0) - break_minutes
+                (EXTRACT(EPOCH FROM (t.end_time - t.start_time)) / 60.0) - t.break_minutes
             ), 0) as total_mins
-            FROM time_entries 
-            WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
-            AND start_time::date = %s::date
-            AND status != 'running'
+            FROM time_entries t
+            JOIN employees e ON t.employee_id = e.id
+            WHERE e.emp_id = %s AND t.start_time::date = %s::date
+            AND t.status != 'running'
         """, (emp_id, date_str))
-        
         row = cur.fetchone()
         return {"total_minutes": float(row['total_mins']) if row else 0.0}
 

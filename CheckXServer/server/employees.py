@@ -29,24 +29,24 @@ async def list_employees():
 # --- PROFIL-UPDATE (Admin-Schutz + Dept + Phone) ---
 @router.put("/{emp_id}")
 async def update_employee_profile(emp_id: str, data: dict, current_user: dict = Depends(get_current_user)):
-    """Aktualisiert das Profil. Rolle nur änderbar durch Admins. Rest für alle frei."""
+    """Aktualisiert das Profil. Admins dürfen alles, Nutzer nur sich selbst."""
     
-    # 1. Sicherheitscheck: Darf der User das überhaupt? (Nur eigenes Profil)
-    # Wir nutzen 'sub', da dies die emp_id im JWT-Token ist
-    if str(current_user.get("sub")) != str(emp_id):
+    # KORREKTUR: Erlaube Zugriff, wenn es der eigene Account ist ODER der User Admin ist
+    is_admin = current_user.get("role") == "Admin"
+    is_self = str(current_user.get("sub")) == str(emp_id)
+
+    if not is_self and not is_admin:
         raise HTTPException(status_code=403, detail="Keine Berechtigung für dieses Profil.")
 
-    # 2. Daten aus dem Request extrahieren
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
-    job_title_input = data.get("job_title", "").strip() # Dies ist die 'role' (Admin/Prüfer)
-    department_input = data.get("dept", "").strip()    # Freitext Abteilung
-    phone_input = data.get("phone", "").strip()       # Mobilnummer
+    job_title_input = data.get("job_title", "").strip() 
+    department_input = data.get("dept", "").strip()    
+    phone_input = data.get("phone", "").strip()       
 
     if not name or not email:
         raise HTTPException(status_code=400, detail="Name und E-Mail sind Pflichtfelder.")
 
-    # Namen für die DB aufteilen (Vorname, Nachname)
     name_parts = name.split(" ", 1)
     f_name = name_parts[0]
     l_name = name_parts[1] if len(name_parts) > 1 else ""
@@ -54,27 +54,21 @@ async def update_employee_profile(emp_id: str, data: dict, current_user: dict = 
     with get_db_connection() as conn:
         cur = conn.cursor()
         
-        # 3. Rollen-Logik bestimmen
-        # Wir holen die aktuelle Rolle aus der DB, falls der User kein Admin ist
         cur.execute("SELECT role FROM employees WHERE emp_id = %s", (emp_id,))
         db_user = cur.fetchone()
-        current_db_role = db_user['role'] if db_user else "Prüfer"
-
-        # Nur Admins dürfen die Rolle (job_title_input) ändern
-        if current_user.get("role") == "Admin" and job_title_input:
-            # Liste der erlaubten ENUM-Werte in deiner DB
-            allowed_roles = ['Admin', 'Prüfer', 'Einkauf', 'Logistik'] 
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
             
-            if job_title_input in allowed_roles:
-                final_role = job_title_input
-            else:
-                final_role = current_db_role # Bei falscher Eingabe alte Rolle behalten
+        current_db_role = db_user['role']
+
+        # Nur Admins dürfen die Rolle ändern
+        if is_admin and job_title_input:
+            allowed_roles = ['Admin', 'Prüfer', 'Einkauf', 'Logistik'] 
+            final_role = job_title_input if job_title_input in allowed_roles else current_db_role
         else:
-            # Nicht-Admins behalten immer ihre aktuelle Rolle
             final_role = current_db_role
 
         try:
-            # 4. Datenbank Update ausführen
             cur.execute("""
                 UPDATE employees 
                 SET first_name = %s, 
@@ -85,19 +79,8 @@ async def update_employee_profile(emp_id: str, data: dict, current_user: dict = 
                     phone = %s
                 WHERE emp_id = %s
             """, (f_name, l_name, email, final_role, department_input, phone_input, emp_id))
-            
             conn.commit()
-            
-            # Debug-Ausgabe in der Konsole
-            print(f">>> Profil Update Erfolg für {emp_id}: Rolle={final_role}, Dept={department_input}")
-            
-            return {
-                "status": "success", 
-                "message": "Profil erfolgreich aktualisiert",
-                "role_saved": final_role
-            }
-            
+            return {"status": "success", "message": "Profil erfolgreich aktualisiert"}
         except Exception as e:
             conn.rollback()
-            print(f">>> DB-FEHLER beim Profil-Update: {e}")
-            raise HTTPException(status_code=500, detail="Datenbank-Fehler beim Speichern.")
+            raise HTTPException(status_code=500, detail=f"Datenbank-Fehler: {str(e)}")

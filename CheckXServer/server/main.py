@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
+from fastapi import Request
 import os
 import shutil
 import uvicorn
@@ -60,6 +61,8 @@ class UserUpdate(BaseModel):
     name: str
     email: EmailStr
     job_title: Optional[str] = ""
+    dept: Optional[str] = ""    # Neu hinzugefügt
+    phone: Optional[str] = ""   # Neu hinzugefügt
 
 class TimerData(BaseModel):
     emp_id: str
@@ -95,9 +98,32 @@ class CorrectionData(BaseModel):
 # --- ROUTEN: AUTHENTIFIZIERUNG ---
 
 @app.post("/auth/register")
-def route_register(user: UserRegister):
-    return auth.register_user(user)
-
+async def route_register(user: UserRegister, request: Request):
+    # 1. Prüfen, wie viele User existieren
+    with database.get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as count FROM employees")
+        user_count = cur.fetchone()['count']
+    
+    # 2. Wenn die DB leer ist -> Erster User wird Admin
+    if user_count == 0:
+        return auth.register_user(user, is_initial_setup=True)
+    
+    # 3. Wenn die DB NICHT leer ist -> Token manuell prüfen
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Login erforderlich, um weitere Nutzer anzulegen")
+    
+    # Token extrahieren (hinter dem Wort 'Bearer ')
+    token = auth_header.split(" ")[1]
+    
+    # Den User über die bestehende auth-Funktion prüfen
+    current_user = auth.get_current_user(token)
+    
+    if current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Nur Admins dürfen Nutzer registrieren")
+        
+    return auth.register_user(user, is_initial_setup=False)
 @app.post("/auth/login")
 def route_login(user: UserLogin):
     return auth.login_user(user)
