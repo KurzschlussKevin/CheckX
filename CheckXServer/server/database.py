@@ -28,7 +28,9 @@ try:
     )
     print("Datenbank-Pool erfolgreich initialisiert.")
 except Exception as e:
-    print(f"Fehler beim Initialisieren des DB-Pools: {e}")
+    print(f"FATALER FEHLER beim Initialisieren des DB-Pools: {e}")
+    # KORREKTUR: Hard-Crash erzwingen, da System ohne DB wertlos ist
+    raise RuntimeError(f"Datenbankverbindung fehlgeschlagen: {e}")
 
 @contextmanager
 def get_db_connection():

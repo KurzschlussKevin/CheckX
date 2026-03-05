@@ -7,7 +7,6 @@ import psycopg2
 # --- TIMER FUNKTIONEN ---
 
 def start_timer(data):
-    """Startet einen neuen Timer. Nutzt Unique Index in DB gegen Race Conditions."""
     now = datetime.now()
     with get_db_connection() as conn:
         with conn.cursor() as cur:
@@ -18,32 +17,38 @@ def start_timer(data):
                 """, (data.emp_id, data.project, now))
                 conn.commit()
                 return {"status": "started", "server_time": now.timestamp()}
-            except psycopg2.IntegrityError:
+            except psycopg2.IntegrityError as e:
                 conn.rollback()
-                raise HTTPException(status_code=400, detail="Es läuft bereits ein aktiver Timer!")
+                # KORREKTUR: Prüfe, ob es der Unique-Constraint (bereits laufender Timer) ist
+                if e.pgcode == '23505': 
+                    raise HTTPException(status_code=400, detail="Es läuft bereits ein aktiver Timer!")
+                else:
+                    # Andere Integrity-Fehler (wie fehlerhafte emp_id) abfangen
+                    raise HTTPException(status_code=400, detail="Ungültige Mitarbeiter-ID oder Datenbank-Konflikt.")
             except Exception as e:
                 conn.rollback()
                 raise HTTPException(status_code=500, detail=str(e))
 
 def stop_timer(data):
-    """Beendet den laufenden Timer mit der aktuellen Serverzeit gegen Manipulation."""
+    """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer (min. 0)."""
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            # KORREKTUR: Nutze datetime.now() statt data.end_time vom Client
             server_now = datetime.now()
             
             break_min = getattr(data, 'break_minutes', 0)
+            
             final_notes = data.notes
             if break_min > 0:
                 pause_info = f" [Auto-Pause: {break_min} Min abgezogen]"
                 final_notes = (final_notes + pause_info) if final_notes else pause_info
 
+            # KORREKTUR: GREATEST(0, ...) verhindert negative Zeiten
             cur.execute("""
                 UPDATE time_entries 
                 SET end_time = %s, 
                     notes = %s, 
                     status = 'open',
-                    duration_minutes = (EXTRACT(EPOCH FROM (%s - start_time))/60) - %s,
+                    duration_minutes = GREATEST(0, (EXTRACT(EPOCH FROM (%s - start_time))/60) - %s),
                     break_minutes = %s
                 WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s) 
                 AND status = 'running'
@@ -51,7 +56,7 @@ def stop_timer(data):
             
             if cur.rowcount == 0:
                 conn.rollback()
-                return {"status": "error", "message": "Kein aktiver Timer gefunden."}
+                return {"status": "error", "message": "Kein aktiver Timer zum Stoppen gefunden."}
                 
             conn.commit()
             return {"status": "stopped", "applied_break": break_min, "server_time": server_now.timestamp()}

@@ -4,6 +4,7 @@ from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from fastapi import Request
+import uuid
 import os
 import shutil
 import uvicorn
@@ -188,7 +189,7 @@ async def route_upload_pdf(
     file: UploadFile = File(...),
     admin: dict = Depends(require_admin)
 ):
-    """Admin lädt eine neue PDF-Vorlage hoch"""
+    """Admin lädt eine neue PDF-Vorlage hoch (mit Dateigrößen-Limit)"""
     if template_type not in ["timesheet", "invoice"]:
         raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
     
@@ -197,9 +198,20 @@ async def route_upload_pdf(
     
     file_path = f"pdf_templates/{template_type}.pdf"
     
-    # Speichere die hochgeladene Datei auf dem Server
+    # --- NEUER CODE: Dateigröße prüfen und speichern ---
+    MAX_FILE_SIZE = 5 * 1024 * 1024 # Limit auf 5 MB setzen
+    
+    # Datei in den Arbeitsspeicher lesen
+    file_content = await file.read() 
+    
+    # Größe prüfen
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="Datei zu groß (Max 5MB erlaubt)")
+        
+    # Wenn alles passt, die gelesenen Bytes in die Datei schreiben
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(file_content)
+    # ---------------------------------------------------
         
     return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
 
@@ -266,7 +278,10 @@ def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: 
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
     
     os.makedirs("temp", exist_ok=True)
-    filename = f"Montagebericht_{pid}.pdf"
+    
+    # KORREKTUR: Eindeutigen Dateinamen pro Request generieren
+    unique_id = uuid.uuid4().hex
+    filename = f"Montagebericht_{pid}_{unique_id}.pdf"
     filepath = f"temp/{filename}"
     
     pdf_generator.create_performance_pdf(data, filepath)
@@ -274,7 +289,8 @@ def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: 
     # Datei nach dem Senden löschen
     background_tasks.add_task(os.remove, filepath)
     
-    return FileResponse(filepath, filename=filename, media_type='application/pdf')
+    # Der Download-Name für den Nutzer bleibt sauber
+    return FileResponse(filepath, filename=f"Montagebericht_{pid}.pdf", media_type='application/pdf')
 
 @app.get("/export/pdf/timesheet")
 def route_export_timesheet(year: int, month: int, current_user: dict = Depends(get_current_user)):

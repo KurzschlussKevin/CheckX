@@ -120,7 +120,35 @@ def get_active_customers():
         return cur.fetchall()
 
 def update_customer(c: CustomerModel):
-    return {"status": "ok"} 
+    if not c.id:
+        raise HTTPException(status_code=400, detail="Kunden-ID fehlt")
+        
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                UPDATE customers SET 
+                    company_name = %s, street = %s, house_number = %s, zip_code = %s, city = %s, country = %s,
+                    has_billing_address = %s, billing_street = %s, billing_house_number = %s, billing_zip_code = %s, billing_city = %s,
+                    cp1_firstname = %s, cp1_lastname = %s, cp1_phone = %s, cp1_email = %s,
+                    cp2_firstname = %s, cp2_lastname = %s, cp2_phone = %s, cp2_email = %s
+                WHERE id = %s
+            """, (
+                c.company_name, c.street, c.house_number, c.zip_code, c.city, c.country,
+                c.has_billing_address, c.billing_street, c.billing_house_number, c.billing_zip_code, c.billing_city,
+                c.cp1_firstname, c.cp1_lastname, c.cp1_phone, c.cp1_email,
+                c.cp2_firstname, c.cp2_lastname, c.cp2_phone, c.cp2_email,
+                c.id
+            ))
+            
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
+                
+            conn.commit()
+            return {"status": "success", "message": "Kunde erfolgreich aktualisiert"}
+        except Exception as e:
+            conn.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
 
 # --- ZIELE VERWALTEN (MIT PREIS) ---
 def set_customer_targets(customer_id: int, targets: List[CustomerTarget]):
