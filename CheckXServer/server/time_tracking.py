@@ -66,6 +66,12 @@ def stop_timer(data):
 # KORREKTUR: break_min als 5. Argument hinzugefügt
 def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, start_hour="08:00"):
     """Erlaubt das nachträgliche Eintragen von Arbeitszeit inkl. Pause."""
+    # KORREKTUR: Exploit mit negativen Zeiten verhindern
+    if duration_mins <= 0:
+        return {"status": "error", "message": "Arbeitszeit muss größer als 0 sein."}
+    if break_min < 0:
+        return {"status": "error", "message": "Pausenzeit darf nicht negativ sein."}
+        
     if check_is_locked(emp_id, date_str)["is_locked"]:
         return {"status": "error", "message": "Dieser Tag ist bereits gesperrt."}
 

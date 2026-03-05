@@ -73,15 +73,27 @@ def update_absence_status(absence_id, new_status, admin_emp_id):
     with get_db_connection() as conn:
         cur = conn.cursor()
         try:
-            # 1. Mitarbeiter-ID für die Benachrichtigung finden
+            # 1. Mitarbeiter-ID und Dates für die Benachrichtigung finden
             cur.execute("""
-                SELECT e.emp_id 
+                SELECT e.emp_id, e.id as internal_id, a.start_date, a.end_date, a.type
                 FROM employees e 
                 JOIN absences a ON a.employee_id = e.id 
                 WHERE a.id = %s
             """, (absence_id,))
             target_emp = cur.fetchone()
             
+            # KORREKTUR/ARCHITEKTUR: Wenn Urlaub genehmigt wird, ziehen wir die Basis-Tage ab!
+            if new_status == "approved" and target_emp and target_emp['type'] == 'erholung':
+                # Eine simple Berechnung der Differenz in Tagen (Vorsicht: Wochenenden sind hier vorerst inkludiert)
+                delta_days = (target_emp['end_date'] - target_emp['start_date']).days + 1
+                
+                # Urlaubskonto aktualisieren
+                cur.execute("""
+                    UPDATE quotas 
+                    SET vacation_days_taken = vacation_days_taken + %s
+                    WHERE employee_id = %s AND year = %s
+                """, (delta_days, target_emp['internal_id'], datetime.now().year))
+
             # 2. Status Update
             cur.execute("""
                 UPDATE absences 
@@ -90,7 +102,7 @@ def update_absence_status(absence_id, new_status, admin_emp_id):
                 WHERE id = %s
             """, (new_status, admin_emp_id, absence_id))
             
-            # 3. Benachrichtigung senden (falls der Mitarbeiter gefunden wurde)
+            # 3. Benachrichtigung senden
             if target_emp:
                 status_text = "genehmigt" if new_status == "approved" else "abgelehnt"
                 add_notification(

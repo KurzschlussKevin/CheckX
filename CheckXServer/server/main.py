@@ -193,7 +193,6 @@ async def route_upload_pdf(
     if template_type not in ["timesheet", "invoice"]:
         raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
         
-    # KORREKTUR 1: MIME-Type Sicherheits-Check
     if file.content_type not in ["application/pdf", "application/x-pdf"]:
         raise HTTPException(status_code=415, detail="Nur PDF-Dateien sind erlaubt!")
     
@@ -206,16 +205,13 @@ async def route_upload_pdf(
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="Datei zu groß (Max 5MB erlaubt)")
         
-    # KORREKTUR 2: Überprüfung der Magic Bytes (PDFs starten auf Byte-Ebene zwingend mit %PDF)
     if not file_content.startswith(b"%PDF"):
         raise HTTPException(status_code=415, detail="Dateiinhalt ist kein gültiges PDF-Format!")
         
     with open(file_path, "wb") as buffer:
         buffer.write(file_content)
         
-    return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
-    # ---------------------------------------------------
-        
+    # KORREKTUR: Das doppelte Return wurde entfernt
     return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
 
 @app.get("/templates/download_pdf/{template_type}")
