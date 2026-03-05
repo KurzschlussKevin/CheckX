@@ -85,9 +85,12 @@ func _update_status(abs_id, status):
 			refresh_requests()
 		else:
 			ErrorHandler.report("Admin / Urlaub", "Status-Update fehlgeschlagen.")
+		http.queue_free() # FEHLER BEHOBEN: Node immer löschen!
 	)
-	http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST)
-
+	var err = http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST)
+	if err != OK:
+		ErrorHandler.report("Netzwerk", "Fehler beim Senden der Anfrage.")
+		http.queue_free()
 
 # --- TEIL 2: STUNDENFREIGABE ---
 
@@ -148,11 +151,15 @@ func _approve_work_day(emp_id: String, date_str: String):
 	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, _b):
 		if code == 200: 
-			refresh_all() # Aktualisiert alle Listen
+			refresh_all() 
 		else:
 			ErrorHandler.report("Admin / Freigabe", "Konnte Tag nicht freigeben.")
+		http.queue_free() # FEHLER BEHOBEN
 	)
-	http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST, body)
+	var err = http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST, body)
+	if err != OK:
+		ErrorHandler.report("Netzwerk", "Keine Verbindung zum Server.")
+		http.queue_free()
 
 # --- TEIL 3: KORREKTUR-ANFRAGEN ---
 
@@ -257,5 +264,9 @@ func _reject_work_day(emp_id: String, date_str: String, reason: String):
 				Store.emit_signal("notification_received", {"message": "Tag abgelehnt/entsperrt.", "type": "info"})
 		else:
 			ErrorHandler.report("Admin / Ablehnung", "Aktion fehlgeschlagen.")
+		http.queue_free() # FEHLER BEHOBEN
 	)
-	http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST, body)
+	var err = http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_POST, body)
+	if err != OK:
+		ErrorHandler.report("Netzwerk", "Keine Verbindung zum Server.")
+		http.queue_free()

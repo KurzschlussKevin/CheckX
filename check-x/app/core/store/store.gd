@@ -365,38 +365,48 @@ func is_day_locked(emp_id: String, date_str: String, callback: Callable) -> void
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, body):
-		var locked = false
+		# KORREKTUR: "Fail-Closed" Ansatz - Bei Fehler (nicht 200) ist der Tag sicherheitshalber gesperrt (true)
+		var locked = true 
 		if code == 200:
 			var json = JSON.parse_string(body.get_string_from_utf8())
-			if json is Dictionary: locked = json.get("is_locked", false)
+			if json is Dictionary: locked = json.get("is_locked", true)
 		callback.call(locked)
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers())
+	var err = http.request(url, _get_auth_headers())
+	if err != OK:
+		callback.call(true) # Bei Netzwerkfehler: Tag bleibt gesperrt!
+		http.queue_free()
 
 func submit_day(emp_id: String, date_str: String, callback: Callable) -> void:
 	var url = get_api_url() + "/time/submit_day"
 	var body = {"emp_id": emp_id, "date": date_str}
 	var http = HTTPRequest.new()
 	add_child(http)
-	http.request_completed.connect(func(_r, code, _h, body_bytes):
+	http.request_completed.connect(func(_r, code, _h, _body_bytes):
 		fetch_time_entries()
 		callback.call(code == 200)
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	var err = http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	if err != OK:
+		callback.call(false) # Callback sofort auflösen
+		http.queue_free()
 
 func request_correction(emp_id: String, date_str: String, note: String, callback: Callable) -> void:
 	var url = get_api_url() + "/time/request_correction"
 	var body = {"emp_id": emp_id, "date": date_str, "note": note}
 	var http = HTTPRequest.new()
 	add_child(http)
-	http.request_completed.connect(func(_r, code, _h, body_bytes):
+	http.request_completed.connect(func(_r, code, _h, _body_bytes):
 		fetch_time_entries()
 		callback.call(code == 200)
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	var err = http.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	if err != OK:
+		callback.call(false)
+		http.queue_free()
 
 func get_entries_by_employee(emp_id: String) -> Array:
 	return time_entries.filter(func(e): 
