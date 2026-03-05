@@ -49,13 +49,21 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 def create_password_reset_token(email: str):
-    """
-    Erstellt einen kurzlebigen Token (15 Min) speziell für den Passwort-Reset.
-    """
+    """Erstellt einen kurzlebigen Token speziell für den Passwort-Reset."""
+    # KORREKTUR: Aktuellen Passwort-Hash als Salt holen
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT password_hash FROM employees WHERE email = %s", (email,))
+        user = cur.fetchone()
+        if not user:
+            return None # Fail silently
+            
+    # Wir nehmen die ersten 10 Zeichen des Hashes als "Signatur"
+    current_hash = user['password_hash'][:10]
+            
     expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode = {"exp": expire, "sub": email, "type": "password_reset"}
+    to_encode = {"exp": expire, "sub": email, "type": "password_reset", "hash_salt": current_hash}
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
 # --- E-MAIL VERSAND ---
 
 async def send_reset_email(email: str, token: str):
@@ -148,27 +156,29 @@ def login_user(login_data):
     }
 
 def reset_password_in_db(token: str, new_password: str):
-    """
-    Validiert den Token und überschreibt das Passwort in der Datenbank.
-    """
+    """Validiert den Token und überschreibt das Passwort in der Datenbank."""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != "password_reset":
             raise HTTPException(status_code=400, detail="Ungültiger Token-Typ")
         
         email = payload.get("sub")
+        token_hash_salt = payload.get("hash_salt")
     except JWTError:
         raise HTTPException(status_code=401, detail="Token abgelaufen oder ungültig")
-    
-    hashed_pw = bcrypt.hash(new_password)
-    
+        
     with get_db_connection() as conn:
         cur = conn.cursor()
+        cur.execute("SELECT password_hash FROM employees WHERE email = %s", (email,))
+        user = cur.fetchone()
+        
+        # KORREKTUR: Prüfen, ob das Passwort in der Zwischenzeit schon geändert wurde
+        if not user or user['password_hash'][:10] != token_hash_salt:
+            raise HTTPException(status_code=401, detail="Token wurde bereits verwendet oder ist veraltet")
+            
+        hashed_pw = bcrypt.hash(new_password)
         cur.execute("UPDATE employees SET password_hash = %s WHERE email = %s", (hashed_pw, email))
         conn.commit()
-        
-        if cur.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
             
     return {"status": "success", "message": "Passwort wurde erfolgreich geändert"}
 

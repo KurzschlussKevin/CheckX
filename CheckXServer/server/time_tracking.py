@@ -105,9 +105,10 @@ def get_daily_stats(emp_id, date_str):
     with get_db_connection() as conn:
         cur = conn.cursor()
         # JOIN ist oft performanter als Subquery in der WHERE-Clause
+        # KORREKTUR: GREATEST(0, ...) hinzugefügt, um negative Tageszeiten zu verhindern
         cur.execute("""
             SELECT COALESCE(SUM(
-                (EXTRACT(EPOCH FROM (t.end_time - t.start_time)) / 60.0) - t.break_minutes
+                GREATEST(0, (EXTRACT(EPOCH FROM (t.end_time - t.start_time)) / 60.0) - t.break_minutes)
             ), 0) as total_mins
             FROM time_entries t
             JOIN employees e ON t.employee_id = e.id
@@ -163,6 +164,16 @@ def admin_approve_full_day(emp_id, date_str):
     with get_db_connection() as conn:
         cur = conn.cursor()
         try:
+            # KORREKTUR: Vorab prüfen, ob noch Timer laufen
+            cur.execute("""
+                SELECT 1 FROM time_entries 
+                WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
+                AND start_time::date = %s::date AND status = 'running'
+            """, (emp_id, date_str))
+            
+            if cur.fetchone():
+                return {"status": "error", "message": "Kann nicht genehmigt werden: Es läuft noch ein offener Timer an diesem Tag!"}
+
             cur.execute("""
                 UPDATE time_entries 
                 SET approval_status = 'approved', is_locked = TRUE 
@@ -187,7 +198,7 @@ def admin_reject_day(emp_id, date_str, reason):
             cur.execute("""
                 UPDATE time_entries 
                 SET approval_status = 'rejected', is_locked = FALSE,
-                    notes = notes || ' [Info: ' || %s || ']'
+                    notes = COALESCE(notes, '') || ' [Info: ' || %s || ']'
                 WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
                 AND start_time::date = %s::date
             """, (reason, emp_id, date_str))
@@ -209,10 +220,10 @@ def request_correction(emp_id, date_str, note):
             cur.execute("""
             UPDATE time_entries 
             SET approval_status = 'correction_pending',
-                notes = notes || ' [Korrektur-Anfrage: ' || %s || ']'
+                notes = COALESCE(notes, '') || ' [Korrektur-Anfrage: ' || %s || ']'
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             AND start_time::date = %s::date
-            AND approval_status != 'approved'  # <--- NEUE ZEILE: Genehmigtes bleibt geschützt!
+            AND approval_status != 'approved'
         """, (note, emp_id, date_str))
             
             conn.commit()
@@ -221,7 +232,7 @@ def request_correction(emp_id, date_str, note):
         except Exception as e:
             conn.rollback()
             return {"status": "error", "message": str(e)}
-
+        
 def get_locked_days_for_month(emp_id, month, year):
     """Liefert eine Liste aller gesperrten Tage eines Monats."""
     with get_db_connection() as conn:

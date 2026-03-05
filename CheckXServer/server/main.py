@@ -185,32 +185,35 @@ def route_create_template(t: templates.TemplateCreate, admin: dict = Depends(req
 
 @app.post("/templates/upload_pdf")
 async def route_upload_pdf(
-    template_type: str = Form(...), # "timesheet" oder "invoice"
+    template_type: str = Form(...),
     file: UploadFile = File(...),
     admin: dict = Depends(require_admin)
 ):
-    """Admin lädt eine neue PDF-Vorlage hoch (mit Dateigrößen-Limit)"""
+    """Admin lädt eine neue PDF-Vorlage hoch (mit strikten Sicherheitsprüfungen)"""
     if template_type not in ["timesheet", "invoice"]:
         raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
+        
+    # KORREKTUR 1: MIME-Type Sicherheits-Check
+    if file.content_type not in ["application/pdf", "application/x-pdf"]:
+        raise HTTPException(status_code=415, detail="Nur PDF-Dateien sind erlaubt!")
     
-    # Stelle sicher, dass der Ordner existiert
     os.makedirs("pdf_templates", exist_ok=True)
-    
     file_path = f"pdf_templates/{template_type}.pdf"
     
-    # --- NEUER CODE: Dateigröße prüfen und speichern ---
-    MAX_FILE_SIZE = 5 * 1024 * 1024 # Limit auf 5 MB setzen
-    
-    # Datei in den Arbeitsspeicher lesen
+    MAX_FILE_SIZE = 5 * 1024 * 1024
     file_content = await file.read() 
     
-    # Größe prüfen
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="Datei zu groß (Max 5MB erlaubt)")
         
-    # Wenn alles passt, die gelesenen Bytes in die Datei schreiben
+    # KORREKTUR 2: Überprüfung der Magic Bytes (PDFs starten auf Byte-Ebene zwingend mit %PDF)
+    if not file_content.startswith(b"%PDF"):
+        raise HTTPException(status_code=415, detail="Dateiinhalt ist kein gültiges PDF-Format!")
+        
     with open(file_path, "wb") as buffer:
         buffer.write(file_content)
+        
+    return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
     # ---------------------------------------------------
         
     return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
@@ -273,13 +276,32 @@ def route_get_progress(customer_id: int, current_user: dict = Depends(get_curren
 
 @app.get("/export/pdf/performance/{pid}")
 def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
+    # KORREKTUR NEU: Besitzer des Berichts ermitteln und Berechtigung prüfen (IDOR-Schutz)
+    with database.get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT e.emp_id FROM performance p
+            JOIN employees e ON p.employee_id = e.id
+            WHERE p.id = %s
+        """, (pid,))
+        owner = cur.fetchone()
+        
+    if not owner:
+        raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
+        
+    # Nur der Ersteller selbst oder ein Admin darf den Bericht als PDF laden
+    if owner['emp_id'] != current_user.get("sub") and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung, diesen Bericht zu exportieren.")
+
+    # Daten laden
     data = performance.get_report_data(pid)
     if not data:
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
     
     os.makedirs("temp", exist_ok=True)
     
-    # KORREKTUR: Eindeutigen Dateinamen pro Request generieren
+    # BEREITS BEHOBEN: Eindeutigen Dateinamen pro Request generieren
+    import uuid # Falls uuid oben im Dokument noch nicht importiert wurde
     unique_id = uuid.uuid4().hex
     filename = f"Montagebericht_{pid}_{unique_id}.pdf"
     filepath = f"temp/{filename}"

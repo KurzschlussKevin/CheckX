@@ -5,20 +5,36 @@ from notifications import add_notification
 
 def create_vacation_request(data):
     """Erstellt einen neuen Urlaubsantrag in der Datenbank."""
+    # KORREKTUR: Datum validieren
+    try:
+        start_dt = datetime.strptime(data.start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(data.end_date, "%Y-%m-%d")
+        if end_dt < start_dt:
+            raise HTTPException(status_code=400, detail="Enddatum darf nicht vor dem Startdatum liegen.")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Ungültiges Datumsformat.")
+
     with get_db_connection() as conn:
         cur = conn.cursor()
         
-        # 1. Interne ID des Mitarbeiters anhand der emp_id (P-XXXX) finden
         cur.execute("SELECT id FROM employees WHERE emp_id = %s", (data.emp_id,))
         emp_row = cur.fetchone()
         
         if not emp_row:
-            print(f"Fehler: Mitarbeiter {data.emp_id} nicht gefunden.")
             raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
         internal_id = emp_row['id']
         
-        # 2. Mapping für Datenbank-Enums (UI-Text -> DB-Wert)
+        # KORREKTUR: Überschneidungen prüfen (optional aber dringend empfohlen)
+        cur.execute("""
+            SELECT id FROM absences 
+            WHERE employee_id = %s AND status != 'rejected'
+            AND (start_date <= %s AND end_date >= %s)
+        """, (internal_id, data.end_date, data.start_date))
+        
+        if cur.fetchone():
+            raise HTTPException(status_code=400, detail="Es existiert bereits ein Antrag für diesen Zeitraum.")
+        
         type_mapping = {
             "erholungsurlaub": "erholung",
             "sonderurlaub": "sonderurlaub",
@@ -37,7 +53,6 @@ def create_vacation_request(data):
             return {"status": "success", "message": "Urlaubsantrag eingereicht."}
         except Exception as e:
             conn.rollback()
-            print(f"Datenbankfehler: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
 def get_pending_requests():
