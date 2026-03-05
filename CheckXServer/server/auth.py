@@ -93,39 +93,67 @@ Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignoriere
 
 # --- BENUTZERVERWALTUNG ---
 
-def register_user(user_data, is_initial_setup=False):
+def register_user(user_data):
+    import secrets
+    import psycopg2
+    from psycopg2 import errors
+    from datetime import datetime
+    from fastapi import HTTPException
+    from passlib.hash import bcrypt
+
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             # E-Mail Prüfung
             cur.execute("SELECT id FROM employees WHERE email = %s", (user_data.email,))
             if cur.fetchone():
                 raise HTTPException(status_code=400, detail="Email bereits vergeben")
-            
+
             hashed_pw = bcrypt.hash(user_data.password)
-            
-            # Rolle bestimmen: Wenn es der erste User ist (is_initial_setup), dann Admin
-            role = "Admin" if is_initial_setup else "Prüfer"
-            
-            # ID Generierung
-            new_emp_id = f"P-{random.randint(1000, 9999)}"
-            
-            try:
-                cur.execute("""
-                    INSERT INTO employees (emp_id, email, password_hash, first_name, last_name, role)
-                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
-                """, (new_emp_id, user_data.email, hashed_pw, user_data.first_name, user_data.last_name, role))
-                
-                new_id = cur.fetchone()['id']
-                # Standard-Urlaubsquiz (30 Tage)
-                cur.execute("INSERT INTO quotas (employee_id, year, vacation_days_total) VALUES (%s, %s, 30)", 
-                            (new_id, datetime.now().year))
-                
-                conn.commit()
-                return {"status": "success", "emp_id": new_emp_id, "role": role}
-            except Exception as e:
-                conn.rollback()
-                raise HTTPException(status_code=500, detail=str(e))
-            
+
+            # Rolle atomar in dieser Transaktion bestimmen
+            cur.execute("SELECT COUNT(*) as count FROM employees")
+            user_count = cur.fetchone()['count']
+            role = "Admin" if user_count == 0 else "Prüfer"
+
+            # Robust: emp_id in großem Raum + retry bei Unique-Kollision
+            for _ in range(10):
+                new_emp_id = f"P-{secrets.randbelow(10**8):08d}"  # z.B. P-00123456
+
+                try:
+                    cur.execute("""
+                        INSERT INTO employees (emp_id, email, password_hash, first_name, last_name, role)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, (new_emp_id, user_data.email, hashed_pw, user_data.first_name, user_data.last_name, role))
+
+                    new_id = cur.fetchone()['id']
+
+                    cur.execute(
+                        "INSERT INTO quotas (employee_id, year, vacation_days_total) VALUES (%s, %s, 30)",
+                        (new_id, datetime.now().year)
+                    )
+
+                    conn.commit()
+                    return {"status": "success", "emp_id": new_emp_id, "role": role}
+
+                except psycopg2.IntegrityError as e:
+                    # Wichtig: rollback, sonst ist die Transaktion "abgebrochen"
+                    conn.rollback()
+
+                    # Wenn es eine Unique-Kollision auf emp_id ist: retry
+                    # (je nach DB/Constraint-Namen kann die Prüfung variieren)
+                    if isinstance(e.__cause__, errors.UniqueViolation):
+                        continue
+
+                    # Sonst echter DB-Fehler
+                    raise HTTPException(status_code=500, detail="Datenbankfehler bei der Registrierung.")
+
+                except Exception:
+                    conn.rollback()
+                    raise HTTPException(status_code=500, detail="Datenbankfehler bei der Registrierung.")
+
+            raise HTTPException(status_code=500, detail="Konnte keine freie Personalnummer generieren.")
+
 def login_user(login_data):
     """
     Prüft die Anmeldedaten und gibt bei Erfolg den JWT-Token und die Nutzerdaten zurück.

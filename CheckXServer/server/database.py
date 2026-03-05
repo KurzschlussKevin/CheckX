@@ -5,10 +5,8 @@ from contextlib import contextmanager
 import os
 from dotenv import load_dotenv
 
-# Lädt .env Variablen
 load_dotenv()
 
-# Datenbank-Konfiguration aus Umgebungsvariablen laden
 DB_CONFIG = {
     "dbname": os.getenv("DB_NAME", "checkx_db"),
     "user": os.getenv("DB_USER", "postgres"),
@@ -17,11 +15,9 @@ DB_CONFIG = {
     "port": os.getenv("DB_PORT", "5432")
 }
 
-# Sicherheitscheck
 if not DB_CONFIG["password"]:
     raise RuntimeError("FEHLER: DB_PASSWORD ist nicht in der .env gesetzt!")
 
-# Initialisierung des Connection Pools (min 2, max 20 für bessere Skalierbarkeit)
 try:
     connection_pool = psycopg2.pool.ThreadedConnectionPool(
         2, 20, **DB_CONFIG, cursor_factory=RealDictCursor
@@ -29,7 +25,6 @@ try:
     print("Datenbank-Pool erfolgreich initialisiert.")
 except Exception as e:
     print(f"FATALER FEHLER beim Initialisieren des DB-Pools: {e}")
-    # KORREKTUR: Hard-Crash erzwingen, da System ohne DB wertlos ist
     raise RuntimeError(f"Datenbankverbindung fehlgeschlagen: {e}")
 
 @contextmanager
@@ -39,4 +34,11 @@ def get_db_connection():
     try:
         yield conn
     finally:
+        # KORREKTUR: Immer Rollback aufrufen, um offene (Lese-)Transaktionen 
+        # sicher zu beenden, bevor die Connection zurück in den Pool geht.
+        # Commit wurde ggf. schon im Erfolgsfall vom Nutzer aufgerufen.
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         connection_pool.putconn(conn)

@@ -8,6 +8,12 @@ import psycopg2
 
 def start_timer(data):
     now = datetime.now()
+    date_str = now.strftime('%Y-%m-%d')
+    
+    # KORREKTUR: Prüfen, ob der heutige Tag bereits eingereicht oder gesperrt wurde
+    if check_is_locked(data.emp_id, date_str)["is_locked"]:
+        raise HTTPException(status_code=400, detail="Der aktuelle Tag ist bereits abgerechnet oder gesperrt.")
+        
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             try:
@@ -19,15 +25,15 @@ def start_timer(data):
                 return {"status": "started", "server_time": now.timestamp()}
             except psycopg2.IntegrityError as e:
                 conn.rollback()
-                # KORREKTUR: Prüfe, ob es der Unique-Constraint (bereits laufender Timer) ist
                 if e.pgcode == '23505': 
                     raise HTTPException(status_code=400, detail="Es läuft bereits ein aktiver Timer!")
                 else:
-                    # Andere Integrity-Fehler (wie fehlerhafte emp_id) abfangen
                     raise HTTPException(status_code=400, detail="Ungültige Mitarbeiter-ID oder Datenbank-Konflikt.")
             except Exception as e:
                 conn.rollback()
-                raise HTTPException(status_code=500, detail=str(e))
+                # KORREKTUR: Internen Error nicht nach außen geben
+                print(f"Start Timer Error: {e}")
+                raise HTTPException(status_code=500, detail="Fehler beim Starten des Timers.")
 
 def stop_timer(data):
     """Beendet den laufenden Timer, zieht die Pause ab und berechnet die Netto-Dauer (min. 0)."""
@@ -65,8 +71,6 @@ def stop_timer(data):
 
 # KORREKTUR: break_min als 5. Argument hinzugefügt
 def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, start_hour="08:00"):
-    """Erlaubt das nachträgliche Eintragen von Arbeitszeit inkl. Pause."""
-    # KORREKTUR: Exploit mit negativen Zeiten verhindern
     if duration_mins <= 0:
         return {"status": "error", "message": "Arbeitszeit muss größer als 0 sein."}
     if break_min < 0:
@@ -103,7 +107,9 @@ def add_manual_entry(emp_id, date_str, duration_mins, project, break_min=0, star
             return {"status": "success"}
         except Exception as e:
             conn.rollback()
-            return {"status": "error", "message": str(e)}
+            # KORREKTUR: Logging des Fehlers auf dem Server, aber dem Client nichts verraten!
+            print(f"Manual Entry Error: {e}") 
+            return {"status": "error", "message": "Interner Serverfehler bei der Buchung."}
 
 # --- STATISTIKEN & CHECK ---
 
@@ -194,7 +200,9 @@ def admin_approve_full_day(emp_id, date_str):
             return {"status": "success"}
         except Exception as e:
             conn.rollback()
-            return {"status": "error", "message": str(e)}
+            # KORREKTUR: Information Disclosure verhindern
+            print(f"Admin Approve Day Error: {e}")
+            return {"status": "error", "message": "Interner Serverfehler bei der Genehmigung."}
 
 def admin_reject_day(emp_id, date_str, reason):
     """Admin lehnt den Tag ab oder gibt Korrektur frei."""
@@ -216,7 +224,9 @@ def admin_reject_day(emp_id, date_str, reason):
             return {"status": "success"}
         except Exception as e:
             conn.rollback()
-            return {"status": "error", "message": str(e)}
+            # KORREKTUR: Information Disclosure verhindern
+            print(f"Admin Reject Day Error: {e}")
+            return {"status": "error", "message": "Interner Serverfehler bei der Ablehnung."}
 
 def request_correction(emp_id, date_str, note):
     """Techniker beantragt Korrektur. Status wird auf 'correction_pending' gesetzt."""
@@ -237,7 +247,9 @@ def request_correction(emp_id, date_str, note):
             
         except Exception as e:
             conn.rollback()
-            return {"status": "error", "message": str(e)}
+            # KORREKTUR: Information Disclosure verhindern
+            print(f"Request Correction Error: {e}")
+            return {"status": "error", "message": "Interner Serverfehler bei der Korrekturanfrage."}
         
 def get_locked_days_for_month(emp_id, month, year):
     """Liefert eine Liste aller gesperrten Tage eines Monats."""

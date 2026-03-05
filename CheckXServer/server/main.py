@@ -12,10 +12,10 @@ import uvicorn
 # Module imports
 import auth
 import employees
-import absences 
+import absences
 import database
-import customers 
-import performance 
+import customers
+import performance
 import time_tracking
 import services
 import templates
@@ -38,6 +38,19 @@ def require_admin(current_user: dict = Depends(get_current_user)):
     if current_user.get("role") != "Admin":
         raise HTTPException(status_code=403, detail="Admin-Rechte erforderlich")
     return current_user
+
+def _assert_self_or_admin(current_user: dict, target_emp_id: str) -> None:
+    """Erlaubt Zugriff nur auf eigene Daten oder als Admin."""
+    if current_user.get("sub") != target_emp_id and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Mitarbeiter-ID")
+
+def _safe_unlink(path: str) -> None:
+    """Löscht eine Datei defensiv (Cleanup darf Response nicht crashen)."""
+    try:
+        if path and os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        pass
 
 # --- DATENMODELLE ---
 
@@ -100,31 +113,26 @@ class CorrectionData(BaseModel):
 
 @app.post("/auth/register")
 async def route_register(user: UserRegister, request: Request):
-    # 1. Prüfen, wie viele User existieren
     with database.get_db_connection() as conn:
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) as count FROM employees")
         user_count = cur.fetchone()['count']
-    
-    # 2. Wenn die DB leer ist -> Erster User wird Admin
-    if user_count == 0:
-        return auth.register_user(user, is_initial_setup=True)
-    
-    # 3. Wenn die DB NICHT leer ist -> Token manuell prüfen
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Login erforderlich, um weitere Nutzer anzulegen")
-    
-    # Token extrahieren (hinter dem Wort 'Bearer ')
-    token = auth_header.split(" ")[1]
-    
-    # Den User über die bestehende auth-Funktion prüfen
-    current_user = auth.get_current_user(token)
-    
-    if current_user.get("role") != "Admin":
-        raise HTTPException(status_code=403, detail="Nur Admins dürfen Nutzer registrieren")
-        
-    return auth.register_user(user, is_initial_setup=False)
+
+    # Wenn User existieren, MUSS der Ersteller eingeloggt und Admin sein
+    if user_count > 0:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.lower().startswith("bearer "):
+            raise HTTPException(status_code=401, detail="Login erforderlich, um weitere Nutzer anzulegen")
+
+        # Sicherer Split
+        token = auth_header[7:]
+        current_user = auth.get_current_user(token)
+
+        if current_user.get("role") != "Admin":
+            raise HTTPException(status_code=403, detail="Nur Admins dürfen Nutzer registrieren")
+
+    return auth.register_user(user) # is_initial_setup Flag ist nicht mehr nötig
+
 @app.post("/auth/login")
 def route_login(user: UserLogin):
     return auth.login_user(user)
@@ -135,7 +143,7 @@ async def route_forgot_password(request: ForgotPasswordRequest, background_tasks
         cur = conn.cursor()
         cur.execute("SELECT email FROM employees WHERE email = %s", (request.email,))
         user = cur.fetchone()
-    
+
     if not user:
         return {"status": "success", "message": "Falls die Email existiert, wurde ein Link versendet."}
 
@@ -192,26 +200,25 @@ async def route_upload_pdf(
     """Admin lädt eine neue PDF-Vorlage hoch (mit strikten Sicherheitsprüfungen)"""
     if template_type not in ["timesheet", "invoice"]:
         raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
-        
+
     if file.content_type not in ["application/pdf", "application/x-pdf"]:
         raise HTTPException(status_code=415, detail="Nur PDF-Dateien sind erlaubt!")
-    
+
     os.makedirs("pdf_templates", exist_ok=True)
     file_path = f"pdf_templates/{template_type}.pdf"
-    
+
     MAX_FILE_SIZE = 5 * 1024 * 1024
-    file_content = await file.read() 
-    
+    file_content = await file.read()
+
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="Datei zu groß (Max 5MB erlaubt)")
-        
+
     if not file_content.startswith(b"%PDF"):
         raise HTTPException(status_code=415, detail="Dateiinhalt ist kein gültiges PDF-Format!")
-        
+
     with open(file_path, "wb") as buffer:
         buffer.write(file_content)
-        
-    # KORREKTUR: Das doppelte Return wurde entfernt
+
     return {"status": "success", "message": f"{template_type} erfolgreich hochgeladen"}
 
 @app.get("/templates/download_pdf/{template_type}")
@@ -219,13 +226,13 @@ async def route_download_pdf(template_type: str, current_user: dict = Depends(ge
     """Nutzer laden die aktuelle PDF-Vorlage herunter"""
     if template_type not in ["timesheet", "invoice"]:
         raise HTTPException(status_code=400, detail="Ungültiger Vorlagen-Typ")
-    
+
     file_path = f"pdf_templates/{template_type}.pdf"
-    
+
     # Prüfen, ob der Admin überhaupt schon eine Datei hochgeladen hat
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Noch keine Vorlage auf dem Server vorhanden")
-        
+
     # Sende die Datei als Download an den Client
     return FileResponse(file_path, filename=f"{template_type}.pdf", media_type="application/pdf")
 
@@ -281,10 +288,10 @@ def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: 
             WHERE p.id = %s
         """, (pid,))
         owner = cur.fetchone()
-        
+
     if not owner:
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
-        
+
     # Nur der Ersteller selbst oder ein Admin darf den Bericht als PDF laden
     if owner['emp_id'] != current_user.get("sub") and current_user.get("role") != "Admin":
         raise HTTPException(status_code=403, detail="Keine Berechtigung, diesen Bericht zu exportieren.")
@@ -293,27 +300,26 @@ def route_export_pdf(pid: int, background_tasks: BackgroundTasks, current_user: 
     data = performance.get_report_data(pid)
     if not data:
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden")
-    
+
     os.makedirs("temp", exist_ok=True)
-    
+
     # BEREITS BEHOBEN: Eindeutigen Dateinamen pro Request generieren
-    import uuid # Falls uuid oben im Dokument noch nicht importiert wurde
     unique_id = uuid.uuid4().hex
     filename = f"Montagebericht_{pid}_{unique_id}.pdf"
     filepath = f"temp/{filename}"
-    
+
     pdf_generator.create_performance_pdf(data, filepath)
-    
+
     # Datei nach dem Senden löschen
-    background_tasks.add_task(os.remove, filepath)
-    
+    background_tasks.add_task(_safe_unlink, filepath)
+
     # Der Download-Name für den Nutzer bleibt sauber
     return FileResponse(filepath, filename=f"Montagebericht_{pid}.pdf", media_type='application/pdf')
 
 @app.get("/export/pdf/timesheet")
-def route_export_timesheet(year: int, month: int, current_user: dict = Depends(get_current_user)):
+def route_export_timesheet(year: int, month: int, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     emp_id = current_user["sub"]
-    
+
     # 1. Hole den echten Vor- und Nachnamen aus der Datenbank
     with database.get_db_connection() as conn:
         cur = conn.cursor()
@@ -323,59 +329,107 @@ def route_export_timesheet(year: int, month: int, current_user: dict = Depends(g
             emp_name = f"{user_row['first_name']} {user_row['last_name']}"
         else:
             emp_name = "Mitarbeiter"
-    
+
     # 2. Hole die Einträge
     entries = time_tracking.get_entries_by_employee_and_month(emp_id, year, month)
-    
+
     # 3. Pfade definieren
     template_path = "pdf_templates/timesheet.pdf"
     if not os.path.exists(template_path):
         raise HTTPException(status_code=404, detail="Keine Stundenzettel-Vorlage auf dem Server gefunden.")
-        
+
     os.makedirs("temp", exist_ok=True)
-    filename = f"timesheet_temp_{emp_id}.pdf"
+
+    # FIX: eindeutiger Dateiname + Cleanup
+    unique_id = uuid.uuid4().hex
+    filename = f"timesheet_{emp_id}_{year:04d}-{month:02d}_{unique_id}.pdf"
     filepath = f"temp/{filename}"
-    
+
     # 4. PDF generieren lassen (NEU: Wir übergeben emp_id als Personalnummer!)
     pdf_generator.generate_timesheet_acroform(emp_name, emp_id, year, month, entries, template_path, filepath)
-    
-    # 5. An den Nutzer senden
+
+    # 5. nach dem Senden löschen (verhindert Disk-Leak)
+    background_tasks.add_task(_safe_unlink, filepath)
+
+    # 6. An den Nutzer senden
     return FileResponse(filepath, filename=filename, media_type='application/pdf')
 
 # --- ROUTEN: ZEITERFASSUNG ---
 
 @app.post("/time/start")
 async def route_time_start(entry: TimerData, current_user: dict = Depends(get_current_user)):
+    # FIX: Nur eigene Daten (oder Admin)
+    if current_user.get("role") != "Admin":
+        entry.emp_id = current_user.get("sub")
+    else:
+        _assert_self_or_admin(current_user, entry.emp_id)
     return time_tracking.start_timer(entry)
 
 @app.post("/time/stop")
 async def route_time_stop(entry: TimerData, current_user: dict = Depends(get_current_user)):
+    # FIX: Nur eigene Daten (oder Admin)
+    if current_user.get("role") != "Admin":
+        entry.emp_id = current_user.get("sub")
+    else:
+        _assert_self_or_admin(current_user, entry.emp_id)
     return time_tracking.stop_timer(entry)
 
 @app.post("/time/manual")
 async def route_add_manual(data: ManualEntryData, current_user: dict = Depends(get_current_user)):
+    # FIX: Client-emp_id nicht vertrauen (IDOR)
+    target_emp_id = data.emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+
+    _assert_self_or_admin(current_user, target_emp_id)
+
     # KORREKTUR: Nutze duration_minutes und break_minutes passend zum neuen ManualEntryData Modell
-    return time_tracking.add_manual_entry(data.emp_id, data.date, data.duration_minutes, data.project, data.break_minutes)
+    return time_tracking.add_manual_entry(target_emp_id, data.date, data.duration_minutes, data.project, data.break_minutes)
 
 @app.get("/time/stats/daily")
 async def route_daily_stats(emp_id: str, date: str, current_user: dict = Depends(get_current_user)):
-    return time_tracking.get_daily_stats(emp_id, date)
+    # FIX: Nur eigene Daten (oder Admin)
+    target_emp_id = emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+    _assert_self_or_admin(current_user, target_emp_id)
+    return time_tracking.get_daily_stats(target_emp_id, date)
 
 @app.get("/time/is_locked")
 async def route_check_locked(emp_id: str, date: str, current_user: dict = Depends(get_current_user)):
-    return time_tracking.check_is_locked(emp_id, date)
+    # FIX: Nur eigene Daten (oder Admin)
+    target_emp_id = emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+    _assert_self_or_admin(current_user, target_emp_id)
+    return time_tracking.check_is_locked(target_emp_id, date)
 
 @app.post("/time/submit_day")
 async def route_submit_day(data: SubmitDayData, current_user: dict = Depends(get_current_user)):
-    return time_tracking.submit_day(data.emp_id, data.date)
+    # FIX: Nur eigene Daten (oder Admin)
+    target_emp_id = data.emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+    _assert_self_or_admin(current_user, target_emp_id)
+    return time_tracking.submit_day(target_emp_id, data.date)
 
 @app.post("/time/request_correction")
 async def route_request_correction(data: CorrectionData, current_user: dict = Depends(get_current_user)):
-    return time_tracking.request_correction(data.emp_id, data.date, data.note)
+    # FIX: Nur eigene Daten (oder Admin)
+    target_emp_id = data.emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+    _assert_self_or_admin(current_user, target_emp_id)
+    return time_tracking.request_correction(target_emp_id, data.date, data.note)
 
 @app.get("/time/locked_days")
 def locked_days(emp_id: str, month: int, year: int, current_user: dict = Depends(get_current_user)):
-    return get_locked_days_for_month(emp_id, month, year)
+    # FIX: Nur eigene Daten (oder Admin)
+    target_emp_id = emp_id
+    if current_user.get("role") != "Admin":
+        target_emp_id = current_user.get("sub")
+    _assert_self_or_admin(current_user, target_emp_id)
+    return get_locked_days_for_month(target_emp_id, month, year)
 
 # --- ADMIN-PANEL ROUTEN (GESCHÜTZT) ---
 
@@ -422,7 +476,21 @@ def route_get_dashboard_stats(emp_id: str, current_user: dict = Depends(get_curr
     return dashboard.get_stats(emp_id)
 
 @app.post("/system/report_bug")
-async def route_report_bug(data: bug_system.BugReportData):
+async def route_report_bug(data: bug_system.BugReportData, current_user: dict = Depends(get_current_user)):
+    # FIX: emp_id aus Token erzwingen (Spoofing verhindern)
+    data.emp_id = current_user.get("sub")
+
+    # Optional: grobe Feldlängenbegrenzung (zusätzlich zu DB Constraints)
+    # (Falls deine BugReportData-Felder anders heißen, diese 4 Zeilen anpassen/entfernen)
+    if hasattr(data, "module") and data.module is not None:
+        data.module = str(data.module)[:120]
+    if hasattr(data, "error_message") and data.error_message is not None:
+        data.error_message = str(data.error_message)[:2000]
+    if hasattr(data, "stack_trace") and data.stack_trace is not None:
+        data.stack_trace = str(data.stack_trace)[:8000]
+    if hasattr(data, "device_info") and data.device_info is not None:
+        data.device_info = str(data.device_info)[:2000]
+
     return bug_system.save_bug_report(data)
 
 # --- NOTIFICATIONS ---
@@ -443,8 +511,8 @@ def route_get_notification_history(current_user: dict = Depends(get_current_user
         # Cursor explizit als RealDictCursor für JSON-Kompatibilität
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT id, message, type, is_read, created_at 
-            FROM notifications 
+            SELECT id, message, type, is_read, created_at
+            FROM notifications
             WHERE employee_id = (SELECT id FROM employees WHERE emp_id = %s)
             ORDER BY created_at DESC LIMIT 20
         """, (current_user["sub"],))
@@ -459,7 +527,7 @@ async def route_get_time_entries(emp_id: str, current_user: dict = Depends(get_c
     # Sicherheitsscheck: Nur eigene Daten oder Admin darf zugreifen
     if current_user.get("sub") != emp_id and current_user.get("role") != "Admin":
         raise HTTPException(status_code=403, detail="Keine Berechtigung für diese Daten")
-    
+
     return time_tracking.get_entries_by_employee(emp_id)
 
 @app.get("/admin/pending_corrections")
