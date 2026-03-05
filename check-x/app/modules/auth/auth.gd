@@ -131,7 +131,6 @@ func _on_forgot_password_pressed() -> void:
 	
 	var http = HTTPRequest.new()
 	add_child(http)
-	# Nutze eine anonyme Funktion, um den Node sicher zu löschen
 	http.request_completed.connect(func(result, code, headers, body):
 		_on_forgot_password_received(result, code, headers, body)
 		http.queue_free()
@@ -142,10 +141,6 @@ func _on_forgot_password_pressed() -> void:
 	var headers = ["Content-Type: application/json"]
 	
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
-	
-	var reset_scene = load("res://app/modules/auth/password_reset_popup.tscn")
-	var popup = reset_scene.instantiate()
-	add_child(popup)
 
 func _on_forgot_password_received(_result, response_code, _headers, body) -> void:
 	is_loading = false
@@ -153,9 +148,13 @@ func _on_forgot_password_received(_result, response_code, _headers, body) -> voi
 	
 	if response_code == 200:
 		_show_status("E-Mail versendet! Bitte Postfach prüfen.", false)
+		# KORREKTUR: Popup erst hier öffnen, wenn der Server 200 OK meldet
+		var reset_scene = load("res://app/modules/auth/password_reset_popup.tscn")
+		var popup = reset_scene.instantiate()
+		add_child(popup)
 	else:
 		var error_msg = "Fehler beim Senden."
-		if response and response.has("detail"):
+		if response is Dictionary and response.has("detail"):
 			error_msg = response.detail
 		_perform_error_shake(error_msg)
 

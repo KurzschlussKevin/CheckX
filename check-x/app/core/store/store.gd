@@ -44,19 +44,21 @@ func _ready() -> void:
 # --- NOTIFICATION MANAGEMENT ---
 
 func _check_for_notifications() -> void:
-	if token.is_empty(): return # Nur prüfen, wenn eingeloggt
+	if token.is_empty(): return
 	
 	var url = get_api_url() + "/notifications/me"
 	var http = HTTPRequest.new()
 	add_child(http)
 	
+	# KORREKTUR: Timeout setzen! Wenn der Server nach 10s nicht antwortet, abbrechen.
+	http.timeout = 10.0
+	
 	http.request_completed.connect(func(_r, code, _h, body):
-		if code == 200:
+		if code == 200 and body.size() > 0:
 			var notes = JSON.parse_string(body.get_string_from_utf8())
 			if notes is Array:
 				for n in notes:
 					emit_signal("notification_received", n)
-					# Nachricht direkt als gelesen markieren
 					_mark_notification_as_read(n.id)
 		http.queue_free()
 	)
@@ -102,9 +104,14 @@ func clear_session() -> void:
 	token = ""
 	current_user = {}
 	time_entries = []
+	# KORREKTUR: Alle verbleibenden State-Variablen leeren!
+	employees = []
+	active_timer_state.clear()
+	current_user_data.clear()
+	
 	if FileAccess.file_exists(TOKEN_PATH):
 		DirAccess.remove_absolute(TOKEN_PATH)
-	print(">>> [STORE] Sitzung gelöscht.")
+	print(">>> [STORE] Sitzung komplett gelöscht.")
 
 # Hilfsfunktion für Header inkl. JWT Token
 func _get_auth_headers() -> Array:
@@ -126,7 +133,11 @@ func login(email: String, password: String) -> void:
 	var url = get_api_url() + "/auth/login"
 	var body = JSON.stringify({"email": email, "password": password})
 	var headers = ["Content-Type: application/json"]
-	login_http.request(url, headers, HTTPClient.METHOD_POST, body)
+	
+	var err = login_http.request(url, headers, HTTPClient.METHOD_POST, body)
+	# KORREKTUR: Bei sofortigem Netzwerkfehler manuell den Vorgang abbrechen
+	if err != OK:
+		emit_signal("login_completed", false, "Netzwerkfehler. Bitte Internetverbindung prüfen.", {})
 
 func register(first_name: String, last_name: String, email: String, password: String) -> void:
 	var url = get_api_url() + "/auth/register"
@@ -137,18 +148,22 @@ func register(first_name: String, last_name: String, email: String, password: St
 		"password": password
 	})
 	var headers = ["Content-Type: application/json"]
-	login_http.request(url, headers, HTTPClient.METHOD_POST, body)
+	
+	var err = login_http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if err != OK:
+		emit_signal("login_completed", false, "Netzwerkfehler. Bitte Internetverbindung prüfen.", {})
 
 func _on_login_request_completed(_result, response_code, _headers, body):
 	var body_str = body.get_string_from_utf8()
 	var json = JSON.parse_string(body_str)
 	
 	if response_code == 200:
-		if json and json.has("access_token"):
+		# KORREKTUR: Typen-Check verhindert Crash bei fehlerhaftem JSON
+		if json is Dictionary and json.has("access_token"):
 			token = json.get("access_token", "")
 			current_user = json.get("user", {})
 			save_token(token, current_user)
-			fetch_all_data() # Lädt Mitarbeiter UND Zeiteinträge
+			fetch_all_data()
 			emit_signal("login_completed", true, "Willkommen " + current_user.get("name", ""), json)
 		else:
 			emit_signal("login_completed", true, "Konto erfolgreich erstellt! Bitte einloggen.", {})
@@ -220,32 +235,30 @@ func _on_data_request_completed(_result, response_code, _headers, body):
 # --- PROFIL & EINSTELLUNGEN ---
 
 func update_profile(updated_data: Dictionary) -> void:
-	"""
-	Sendet Profil-Updates an das Backend und aktualisiert den lokalen Cache.
-	"""
 	var emp_id = get_current_user_id()
 	if emp_id.is_empty(): return
 	
-	# Hier gehen wir davon aus, dass es einen Endpunkt /employees/update gibt
-	# Falls dieser noch nicht existiert, aktualisieren wir vorerst nur lokal
 	var url = get_api_url() + "/employees/" + str(emp_id)
 	
-	# Lokale Aktualisierung im Store
-	for key in updated_data:
-		current_user[key] = updated_data[key]
-	
-	# Update permanent speichern
-	save_token(token, current_user)
-	
-	# API Call vorbereiten (PUT Methode für Updates)
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(func(_r, code, _h, _b):
+		# KORREKTUR: Lokale Speicherung NUR, wenn der Server 200 OK meldet!
 		if code == 200:
+			for key in updated_data:
+				current_user[key] = updated_data[key]
+			save_token(token, current_user)
 			print("Profil-Update auf Server erfolgreich.")
+			emit_signal("data_updated")
+		else:
+			print("Profil-Update fehlgeschlagen. Lokale Daten bleiben unverändert.")
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers(), HTTPClient.METHOD_PUT, JSON.stringify(updated_data))
+	
+	var err = http.request(url, _get_auth_headers(), HTTPClient.METHOD_PUT, JSON.stringify(updated_data))
+	if err != OK:
+		print("Netzwerkfehler beim Profil-Update.")
+		http.queue_free()
 
 func update_employee(emp_dict: Dictionary, new_values: Dictionary) -> void:
 	"""
@@ -301,12 +314,19 @@ func _send_post(url: String, data: Dictionary) -> void:
 	var json_str = JSON.stringify(data)
 	var temp_client = HTTPRequest.new()
 	add_child(temp_client)
+	
 	temp_client.request_completed.connect(func(_r, code, _h, body_bytes):
 		fetch_time_entries() # Daten nach Änderungen neu laden
 		temp_client.queue_free()
 	)
-	temp_client.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, json_str)
-
+	
+	var err = temp_client.request(url, _get_auth_headers(), HTTPClient.METHOD_POST, json_str)
+	
+	# KORREKTUR: Memory-Leak verhindern, wenn Request gar nicht erst raus geht
+	if err != OK:
+		print("Netzwerkfehler in _send_post: ", err)
+		temp_client.queue_free()
+		emit_signal("notification_received", {"message": "Netzwerkfehler. Aktion fehlgeschlagen.", "type": "error"})
 # --- UI HELPER & ABFRAGEN ---
 
 func get_all_employees() -> Array: return employees
