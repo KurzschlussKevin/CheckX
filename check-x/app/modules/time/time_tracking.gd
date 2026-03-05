@@ -176,7 +176,6 @@ func _on_save_path_selected(save_path: String) -> void:
 		%PdfBtn.disabled = true
 		%PdfBtn.text = "Exportiere..."
 		
-	# Jahr und Monat erneut holen (gleicher Fix wie oben)
 	var target_year = Time.get_date_dict_from_system().year
 	var target_month = Time.get_date_dict_from_system().month
 	
@@ -184,10 +183,16 @@ func _on_save_path_selected(save_path: String) -> void:
 		target_year = %CalendarPanel.date.year
 		target_month = %CalendarPanel.date.month
 	
-	# Download Request starten
 	var url = Store.get_api_url() + "/export/pdf/timesheet?year=%d&month=%d" % [target_year, target_month]
 	export_http.download_file = save_path
-	export_http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_GET)
+	
+	# KORREKTUR: Error Handling für Download
+	var err = export_http.request(url, Store._get_auth_headers(), HTTPClient.METHOD_GET)
+	if err != OK:
+		if has_node("%PdfBtn"):
+			%PdfBtn.disabled = false
+			%PdfBtn.text = "Export PDF"
+		ErrorHandler.report("PDF Export", "Netzwerkfehler beim Starten des Downloads.")
 
 func _on_export_downloaded(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	# Buttons wieder freigeben

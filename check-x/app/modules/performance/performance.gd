@@ -79,7 +79,8 @@ func _fetch_services():
 		if c == 200: all_services_cache = JSON.parse_string(b.get_string_from_utf8())
 		http.queue_free()
 	)
-	http.request(url)
+	var err = http.request(url, Store._get_auth_headers())
+	if err != OK: http.queue_free()
 
 func _fetch_customers():
 	customer_opt.clear()
@@ -95,7 +96,8 @@ func _fetch_customers():
 				customer_opt.add_item(lbl, cust.get("id"))
 		http.queue_free()
 	)
-	http.request(url)
+	var err = http.request(url, Store._get_auth_headers())
+	if err != OK: http.queue_free()
 
 # --- INTELLIGENTE SUCHE & FILTER ---
 func _on_search_text_changed(txt):
@@ -310,7 +312,8 @@ func _fetch_templates():
 			for t in data: template_opt.add_item(t.name, t.id)
 		http.queue_free()
 	)
-	http.request(url)
+	var err = http.request(url, Store._get_auth_headers())
+	if err != OK: http.queue_free()
 
 func _on_save_template():
 	var t_name = template_name_inp.text
@@ -490,4 +493,5 @@ func _fetch_history():
 				var s = HSeparator.new(); s.modulate.a = 0.1; history_list.add_child(s)
 		http.queue_free()
 	)
-	http.request(url)
+	var err = http.request(url, Store._get_auth_headers())
+	if err != OK: http.queue_free()

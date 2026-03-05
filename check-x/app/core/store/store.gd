@@ -194,7 +194,8 @@ func fetch_employees() -> void:
 				emit_signal("data_updated")
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers())
+	var err = http.request(url, _get_auth_headers())
+	if err != OK: http.queue_free() # NEU HINZUGEFÜGT
 
 func fetch_time_entries() -> void:
 	var emp_id = get_current_user_id()
@@ -208,8 +209,6 @@ func fetch_time_entries() -> void:
 			var json = JSON.parse_string(body.get_string_from_utf8())
 			if json is Array:
 				time_entries = json
-				
-				# --- NEU: Prüfen, ob ein Timer serverseitig noch läuft ---
 				var found_running = false
 				for entry in time_entries:
 					if entry.get("status") == "running":
@@ -218,15 +217,13 @@ func fetch_time_entries() -> void:
 							active_timer_state[emp_id] = start_unix
 							found_running = true
 							break
-							
-				# Wenn lokal einer lief, aber auf dem Server nicht mehr:
 				if not found_running and active_timer_state.has(emp_id):
 					active_timer_state.erase(emp_id)
-					
 				emit_signal("data_updated")
 		http.queue_free()
 	)
-	http.request(url, _get_auth_headers())
+	var err = http.request(url, _get_auth_headers())
+	if err != OK: http.queue_free() # NEU HINZUGEFÜGT
 
 func _on_data_request_completed(_result, response_code, _headers, body):
 	# Fallback für http_client falls nötig
