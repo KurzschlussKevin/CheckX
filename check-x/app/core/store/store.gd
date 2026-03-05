@@ -122,10 +122,24 @@ func _get_auth_headers() -> Array:
 
 # --- URL MANAGEMENT ---
 func get_api_url() -> String:
-	# Nutzt die neue API_URL Konstante aus Config, falls vorhanden, sonst Fallback
-	if "API_URL" in Config:
-		return Config.API_URL
-	return Config.get_value("network", "api_url", "http://127.0.0.1:8000").trim_suffix("/")
+	# Wenn Config ein Autoload ist, ist der Zugriff auf Konstanten direkt möglich.
+	# Fallback: gespeicherte Einstellung.
+	var url := ""
+
+	# Sicherer Zugriff (kein "in" auf Object)
+	# Godot erlaubt has_meta/has_method; für Konstanten ist try/catch am robustesten.
+	# (Godot hat kein echtes try/catch in GDScript 4? -> daher defensiv über get()).
+	if Config != null and Config.has_method("get"):
+		# falls Config ein Dictionary-ähnliches API hätte
+		pass
+
+	# Direkter Zugriff – wenn nicht vorhanden, fällt es in den Fallback
+	if Config != null and "API_URL" in Config.get_property_list().map(func(p): return p.name):
+		url = str(Config.API_URL)
+	else:
+		url = str(Config.get_value("network", "api_url", "http://127.0.0.1:8000")).trim_suffix("/")
+
+	return url.trim_suffix("/")
 
 # --- AUTHENTIFIZIERUNG ---
 
