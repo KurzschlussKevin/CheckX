@@ -40,6 +40,15 @@ def init_performance_table():
         conn.commit()
 
 def add_performance_entry(data: DailyPerformance):
+    # KORREKTUR: Validierung gegen leere Berichte hinzugefügt
+    if not data.details or len(data.details) == 0:
+        raise HTTPException(status_code=400, detail="Es müssen Materialien angegeben werden!")
+
+    # Prüfen ob überhaupt >0 Einträge dabei sind (falls alles auf 0 steht)
+    valid_items = [d for d in data.details if d.amount > 0]
+    if not valid_items:
+        raise HTTPException(status_code=400, detail="Die Menge aller Materialien ist 0. Bericht wird nicht gespeichert.")
+
     with get_db_connection() as conn:
         cur = conn.cursor()
         
@@ -55,12 +64,11 @@ def add_performance_entry(data: DailyPerformance):
             """, (emp['id'], data.customer_id, data.date_entry, data.notes))
             perf_id = cur.fetchone()['id']
             
-            for d in data.details:
-                if d.amount > 0:
-                    cur.execute("""
-                        INSERT INTO performance_details (performance_id, service_id, amount)
-                        VALUES (%s, %s, %s)
-                    """, (perf_id, d.service_id, d.amount))
+            for d in valid_items:
+                cur.execute("""
+                    INSERT INTO performance_details (performance_id, service_id, amount)
+                    VALUES (%s, %s, %s)
+                """, (perf_id, d.service_id, d.amount))
             
             conn.commit()
             return {"status": "success", "id": perf_id}
