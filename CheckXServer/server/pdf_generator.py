@@ -95,7 +95,8 @@ def create_performance_pdf(data, output_path):
             
         date_str = dt.strftime("%d.%m.%Y")
         kw_str = str(dt.isocalendar()[1])
-    except:
+    except (ValueError, TypeError):
+        # Keep defaults if parsing fails
         pass
         
     c.drawString(15.5*cm, y_info, date_str)

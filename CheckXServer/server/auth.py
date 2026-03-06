@@ -4,7 +4,6 @@ from database import get_db_connection
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import os
-import random
 from dotenv import load_dotenv
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from fastapi.security import OAuth2PasswordBearer

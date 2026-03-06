@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, File, UploadFile, Form
 from fastapi.responses import FileResponse
-from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from fastapi import Request
 import uuid
 import os
-import shutil
 import uvicorn
 
 # Module imports
