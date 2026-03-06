@@ -26,6 +26,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tab_panel")
 current_tab = 0
+tab_0/disabled = true
+tab_1/disabled = true
+tab_2/disabled = true
+tab_3/disabled = true
 script = ExtResource("1_nh2b5")
 
 [node name="System" type="ScrollContainer" parent="." unique_id=2104768151]
